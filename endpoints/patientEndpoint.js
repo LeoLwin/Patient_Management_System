@@ -24,7 +24,6 @@ router.get("/patientList/:page", async (req, res) => {
       return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
     }
     const result = await Patient.patientList(req.params.page);
-    console.log(result);
     res.json(result);
   } catch (error) {
     res.status(error);

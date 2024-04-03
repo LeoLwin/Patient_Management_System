@@ -1,7 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const bcrypt = require("bcrypt");
 const Admin = require("../models/adminModel");
-const { get } = require("lodash");
 const comparePassword = require("../utils/comparePassword");
 
 const adminCreate = async (data) => {

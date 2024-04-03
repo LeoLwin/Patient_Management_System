@@ -10,10 +10,12 @@ app.use(express.json());
 const patient = require("./endpoints/patientEndpoint");
 const login = require("./endpoints/googleLogin");
 const admin = require("./endpoints/adminEndpoint");
+const mainForm = require("./endpoints/mainFormEndpoint");
 
 app.use("/patient", patient);
 app.use("/login", login);
 app.use("/admin", admin);
+app.use("/mainForm", mainForm);
 
 app.get("/", (req, res) => {
   res.json({ message: "Patient Management System" });
