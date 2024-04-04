@@ -1,10 +1,10 @@
 require("dotenv").config();
 const router = require("express").Router();
-const { googleCallBack } = require("../controllers/googleController");
+const GoogleHelper = require("../helper/googleHelper");
 
-router.get("/googleLogin", (req, res) => {
+router.get("/googleLogin", async (req, res) => {
   try {
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.Google_Client_Id}&redirect_uri=${process.env.REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email`;
+    const url = await GoogleHelper.getURL();
     res.json(url);
   } catch (error) {
     console.error("Error in Google login:", error);
@@ -14,7 +14,7 @@ router.get("/googleLogin", (req, res) => {
 
 router.get("/auth/google/callback", async (req, res) => {
   try {
-    const result = await googleCallBack(req.query.code);
+    const result = await GoogleHelper.getGoogleProfile(req.query.code);
     res.json(result);
   } catch (error) {
     console.error("Error in Google login:", error);

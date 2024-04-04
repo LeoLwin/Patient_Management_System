@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Patient = require("../controllers/patientController");
+const Patient = require("../models/patientModel");
 
 router.post("/patientCreate", async (req, res) => {
   try {
@@ -14,7 +14,7 @@ router.post("/patientCreate", async (req, res) => {
     if (!DOB.match(/^\d{8}$/)) {
       return res.status(400).json("Date must be in YYYYMMDD format");
     }
-    const result = await Patient.patientCreate({ Name, DOB });
+    const result = await Patient.patientCreate(Name, DOB);
     res.json(result);
   } catch (error) {
     res.status(error);
@@ -52,12 +52,12 @@ router.put("/patientUpdate/:id", async (req, res) => {
     if (!DOB.match(/^\d{8}$/)) {
       return res.status(400).json("Date must be in YYYYMMDD format");
     }
-    
+
     if (!req.params.id.match(/^\d+$/)) {
       return res.status(400).json("Invalid id format");
     }
 
-    const result = await Patient.patientUpdate({ Name, DOB, id });
+    const result = await Patient.patientUpdate(Name, DOB, id);
     res.json(result);
   } catch (error) {
     res.status(error);

@@ -1,4 +1,4 @@
-const Mainform = require("../controllers/mainFormController");
+const Mainform = require("../models/mainFormModel");
 
 const router = require("express").Router();
 
@@ -12,11 +12,11 @@ router.post("/mainFormCreate", async (req, res) => {
     if (specialCharsRegex.test(title) || specialCharsRegex.test(description)) {
       return res.status(400).json("Name cannot contain special characters");
     }
-    const result = await Mainform.mainFormCreate({
+    const result = await Mainform.mainFormCreate(
       title,
       multiple_Entry,
-      description,
-    });
+      description
+    );
     res.json(result);
   } catch (error) {
     res.status(error);
@@ -53,12 +53,12 @@ router.put("/mainFormUpdate/:id", async (req, res) => {
     if (!req.params.id.match(/^\d+$/)) {
       return res.status(400).json("Invalid id format");
     }
-    const result = await Mainform.mainFormUpdate({
+    const result = await Mainform.mainFormUpdate(
       title,
       multiple_Entry,
       description,
-      id,
-    });
+      id
+    );
     res.json(result);
   } catch (error) {
     res.status(error);

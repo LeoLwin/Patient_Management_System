@@ -1,9 +1,12 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../dbConnectioon/dbConnection");
 
-const patientCreate = async (data) => {
+// TODO: to follow coding standard
+
+const patientCreate = async (Name, DOB) => {
   try {
-    const { Name, DOB } = data;
+    // TODO: duplicate entry checking?
+    console.log(Name, DOB);
     const sql = "INSERT INTO patients (Name, DOB) VALUES(?,?)";
     await DB.query(sql, [Name, DOB]);
     return new StatusCode.OK("New patient registration successful.");
@@ -14,10 +17,11 @@ const patientCreate = async (data) => {
 
 const patientList = async (page) => {
   try {
+    // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
-    const list = await DB.query(sql);
+    const list = await DB.query(sql); // TODO: check value of this
 
     // Query to count total number of bundles
     const countSql = "SELECT COUNT(*) AS total FROM patients";
@@ -30,9 +34,9 @@ const patientList = async (page) => {
   }
 };
 
-const patientUpdate = async (data) => {
+// TODO: use individual parameters
+const patientUpdate = async (Name, DOB, id) => {
   try {
-    const { Name, DOB, id } = data;
     const sql = `UPDATE patients SET Name=?, DOB=? WHERE id=?`;
     const result = await DB.query(sql, [Name, DOB, id]);
     return new StatusCode.OK(result);
