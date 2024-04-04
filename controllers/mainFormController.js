@@ -1,15 +1,16 @@
+const e = require("express");
 const StatusCode = require("../helper/status_code_helper");
 const MainForm = require("../models/mainFormModel");
 
 const mainFormCreate = async (data) => {
   try {
-    const { title, multipleEntry, description } = data;
+    const { title, multiple_Entry, description } = data;
     const result = await MainForm.mainFormCreate({
       title,
-      multipleEntry,
+      multiple_Entry,
       description,
     });
-    return new StatusCode.OK(result);
+    return result;
   } catch (error) {
     return new StatusCode.UNKNOWN(error);
   }
@@ -18,10 +19,39 @@ const mainFormCreate = async (data) => {
 const mainFormList = async (page) => {
   try {
     const result = await MainForm.mainFormList(page);
-    return new StatusCode.OK(result);
+    return result;
   } catch (error) {
     return new StatusCode.UNKNOWN(error);
   }
 };
 
-module.exports = { mainFormCreate, mainFormList };
+const mainFormUpdate = async (data) => {
+  try {
+    const { id, title, multiple_Entry, description } = data;
+    const result = await MainForm.mainFormUpdate({
+      id,
+      title,
+      multiple_Entry,
+      description,
+    });
+    return result;
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error);
+  }
+};
+
+const mainFormDelete = async (id) => {
+  try {
+    const result = await MainForm.mainFormDelete(id);
+    return result;
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error);
+  }
+};
+
+module.exports = {
+  mainFormCreate,
+  mainFormList,
+  mainFormUpdate,
+  mainFormDelete,
+};

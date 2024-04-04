@@ -14,7 +14,6 @@ router.get("/googleLogin", (req, res) => {
 
 router.get("/auth/google/callback", async (req, res) => {
   try {
-    console.log();
     const result = await googleCallBack(req.query.code);
     res.json(result);
   } catch (error) {

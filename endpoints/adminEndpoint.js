@@ -20,6 +20,9 @@ router.post("/adminCreate", async (req, res) => {
 router.delete("/adminDelete/:id", async (req, res) => {
   try {
     const result = await Admin.adminDelete(req.params.id);
+    if (!req.params.id.match(/^\d+$/)) {
+      return res.status(400).json("Invalid id format");
+    }
     res.json(result);
   } catch (error) {
     res.status(error);
