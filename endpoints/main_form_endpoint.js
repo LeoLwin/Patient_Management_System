@@ -1,70 +1,71 @@
-const router = require("express").Router();
-const Patient = require("../models/patientModel");
+const Mainform = require("../models/main_form_model");
 
-router.post("/patientCreate", async (req, res) => {
+const router = require("express").Router();
+
+router.post("/mainFormCreate", async (req, res) => {
   try {
-    const { Name, DOB } = req.body;
-    if (Name == "" || DOB == "") {
+    const { title, multiple_Entry, description } = req.body;
+    if (title == "" || multiple_Entry == "" || description == "") {
       return res.status(400).json("Please provide all required fields");
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
+    if (specialCharsRegex.test(title) || specialCharsRegex.test(description)) {
       return res.status(400).json("Name cannot contain special characters");
     }
-    if (!DOB.match(/^\d{8}$/)) {
-      return res.status(400).json("Date must be in YYYYMMDD format");
-    }
-    const result = await Patient.patientCreate(Name, DOB);
+    const result = await Mainform.mainFormCreate(
+      title,
+      multiple_Entry,
+      description
+    );
     res.json(result);
   } catch (error) {
     res.status(error);
   }
 });
 
-router.get("/patientList/:page", async (req, res) => {
+router.get("/mainFormList/:page", async (req, res) => {
   try {
     if (!req.params) {
       return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
     }
     if (!req.params.page.match(/^\d+$/)) {
-      return res.status(400).json("Invalid id format");
+      return res.status(400).json("Invalid page format");
     }
-    const result = await Patient.patientList(req.params.page);
+    const result = await Mainform.mainFormList(req.params.page);
     res.json(result);
   } catch (error) {
     res.status(error);
   }
 });
 
-router.put("/patientUpdate/:id", async (req, res) => {
+router.put("/mainFormUpdate/:id", async (req, res) => {
   try {
-    const { Name, DOB } = req.body;
+    const { title, multiple_Entry, description } = req.body;
     const { id } = req.params;
-    if (Name == "" || DOB == "") {
+    if (title == "" || multiple_Entry == "" || description == "") {
       return res.status(400).json("Please provide all required fields");
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-
-    if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
-      return res.status(400).json("Name cannot contain special characters");
-    }
-
-    if (!DOB.match(/^\d{8}$/)) {
-      return res.status(400).json("Date must be in YYYYMMDD format");
+    if (specialCharsRegex.test(title) || specialCharsRegex.test(description)) {
+      return res.status(400).json("Data cannot contain special characters");
     }
 
     if (!req.params.id.match(/^\d+$/)) {
       return res.status(400).json("Invalid id format");
     }
-
-    const result = await Patient.patientUpdate(Name, DOB, id);
+    const result = await Mainform.mainFormUpdate(
+      title,
+      multiple_Entry,
+      description,
+      id
+    );
     res.json(result);
   } catch (error) {
     res.status(error);
   }
 });
 
-router.delete("/patientDelete/:id", async (req, res) => {
+router.delete("/mainFormDelete/:id", async (req, res) => {
   try {
     if (!req.params) {
       return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
@@ -72,11 +73,10 @@ router.delete("/patientDelete/:id", async (req, res) => {
     if (!req.params.id.match(/^\d+$/)) {
       return res.status(400).json("Invalid id format");
     }
-    const result = await Patient.patientDelete(req.params.id);
+    const result = await Mainform.mainFormDelete(req.params.id);
     res.json(result);
   } catch (error) {
     res.status(error);
   }
 });
-
 module.exports = router;

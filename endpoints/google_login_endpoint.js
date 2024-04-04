@@ -1,6 +1,6 @@
 require("dotenv").config();
 const router = require("express").Router();
-const GoogleHelper = require("../helper/googleHelper");
+const GoogleHelper = require("../helper/google_helper");
 
 router.get("/googleLogin", async (req, res) => {
   try {

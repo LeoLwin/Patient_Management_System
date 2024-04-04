@@ -1,10 +1,10 @@
-const StatusCode = require("../helper/status_code_helper");
+const StatusCode = require("./status_code_helper");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const config = require("../configurations/config");
 
-const comparePassword = async (data) => {
+const loginHelper = async (getUser, password) => {
   try {
-    const { getUser, password } = data;
     if (await bcrypt.compareSync(password, getUser.data[0].password)) {
       const accessToken = jwt.sign(
         {
@@ -14,7 +14,7 @@ const comparePassword = async (data) => {
             id: getUser.data[0].id,
           },
         },
-        process.env.JWT_SECRET,
+        config.JWT_SECRET,
         { expiresIn: "2h" }
       );
       return new StatusCode.OK(accessToken);
@@ -26,4 +26,4 @@ const comparePassword = async (data) => {
   }
 };
 
-module.exports = comparePassword;
+module.exports = loginHelper;

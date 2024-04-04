@@ -1,5 +1,5 @@
 const StatusCode = require("../helper/status_code_helper");
-const DB = require("../dbConnectioon/dbConnection");
+const DB = require("../helper/database_helper");
 
 const mainFormCreate = async (title, multiple_Entry, description) => {
   try {

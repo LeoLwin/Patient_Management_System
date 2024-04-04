@@ -1,5 +1,7 @@
 const router = require("express").Router();
-const Admin = require("../controllers/adminController");
+const Admin = require("../models/admin_model");
+const LoginHelper = require("../helper/login_helper");
+const { password } = require("../configurations/config");
 
 router.post("/adminCreate", async (req, res) => {
   try {
@@ -10,7 +12,22 @@ router.post("/adminCreate", async (req, res) => {
     if (!email.endsWith("@gmail.com")) {
       return res.status(400).json("Email must end with @gmail.com");
     }
-    const result = await Admin.adminCreate({ email, name, password });
+    const result = await Admin.adminCreate(email, name, password);
+    res.json(result);
+  } catch (error) {
+    res.status(error);
+  }
+});
+
+router.get("/adminList/:page", async (req, res) => {
+  try {
+    if (!req.params) {
+      return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
+    }
+    if (!req.params.page.match(/^\d+$/)) {
+      return res.status(400).json("Invalid id format");
+    }
+    const result = await Admin.adminList(req.params.page);
     res.json(result);
   } catch (error) {
     res.status(error);
@@ -38,14 +55,15 @@ router.post("/adminLogin", async (req, res) => {
     if (!email.endsWith("@gmail.com")) {
       return res.status(400).json("Email must end with @gmail.com");
     }
-    const result = await Admin.adminLogin({ email, password });
+    const getUser = await Admin.isAdminExist(email);
+    const result = await LoginHelper(getUser, password);
     res.json(result);
   } catch (error) {
     res.status(error);
   }
 });
 
-router.post("/isAdminExit", async (req, res) => {
+router.post("/isAdminExist", async (req, res) => {
   try {
     const { email } = req.body;
     if (email == "") {
@@ -54,7 +72,7 @@ router.post("/isAdminExit", async (req, res) => {
     if (!email.endsWith("@gmail.com")) {
       return res.status(400).json("Email must end with @gmail.com");
     }
-    const result = await Admin.isAdminExit({ email });
+    const result = await Admin.isAdminExist(email);
     res.json(result.data[0].email);
   } catch (error) {
     res.status(error);

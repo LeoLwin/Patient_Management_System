@@ -2,15 +2,16 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-PORT = process.env.PORT || 2000;
+const config = require("./configurations/config");
+PORT = config.PORT || 2000;
 
 app.use(cors());
 app.use(express.json());
 
-const patient = require("./endpoints/patientEndpoint");
-const login = require("./endpoints/googleLogin");
-const admin = require("./endpoints/adminEndpoint");
-const mainForm = require("./endpoints/mainFormEndpoint");
+const patient = require("./endpoints/patient_endpoint");
+const login = require("./endpoints/google_login_endpoint");
+const admin = require("./endpoints/admin_endpoint");
+const mainForm = require("./endpoints/main_form_endpoint");
 
 app.use("/patient", patient);
 app.use("/login", login);

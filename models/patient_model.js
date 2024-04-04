@@ -1,12 +1,11 @@
 const StatusCode = require("../helper/status_code_helper");
-const DB = require("../dbConnectioon/dbConnection");
+const DB = require("../helper/database_helper");
 
 // TODO: to follow coding standard
 
 const patientCreate = async (Name, DOB) => {
   try {
     // TODO: duplicate entry checking?
-    console.log(Name, DOB);
     const sql = "INSERT INTO patients (Name, DOB) VALUES(?,?)";
     await DB.query(sql, [Name, DOB]);
     return new StatusCode.OK("New patient registration successful.");
@@ -21,15 +20,16 @@ const patientList = async (page) => {
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
-    const list = await DB.query(sql); // TODO: check value of this
+    // const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ?,?`;
+    const list = await DB.query(sql, [page_size, offset]); // TODO: check value of this
 
     // Query to count total number of bundles
     const countSql = "SELECT COUNT(*) AS total FROM patients";
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
-    console.log(list, total);
     return new StatusCode.OK({ list, total });
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
