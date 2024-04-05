@@ -1,15 +1,17 @@
 const router = require("express").Router();
 const Admin = require("../models/admin_model");
 const LoginHelper = require("../helper/login_helper");
-
+const StatusCode = require("../helper/status_code_helper");
 router.post("/adminCreate", async (req, res) => {
   try {
     const { email, name, password } = req.body;
     if (email == "" || name == "" || password == "") {
-      return res.status(400).json("Please provide all required fields");
+      return new StatusCode.INVALID_ARGUMENT(
+        "Please provide all required fields"
+      );
     }
     if (!email.endsWith("@gmail.com")) {
-      return res.status(400).json("Email must end with @gmail.com");
+      return new StatusCode.UNAVAILABLE("Email must end with @gmail.com");
     }
     const result = await Admin.adminCreate(email, name, password);
     res.json(result);

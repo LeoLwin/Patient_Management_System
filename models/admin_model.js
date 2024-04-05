@@ -1,6 +1,7 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
 
+
 const adminCreate = async (email, name, password) => {
   try {
     const sql = `INSERT INTO users (email, name , password) VALUES(?,?,?)`;

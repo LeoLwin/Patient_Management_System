@@ -1,4 +1,5 @@
 const Mainform = require("../models/main_form_model");
+const StatusCode = require("../helper/status_code_helper");
 
 const router = require("express").Router();
 
@@ -6,11 +7,15 @@ router.post("/mainFormCreate", async (req, res) => {
   try {
     const { title, multiple_Entry, description } = req.body;
     if (title == "" || multiple_Entry == "" || description == "") {
-      return res.status(400).json("Please provide all required fields");
+      return new StatusCode.INVALID_ARGUMENT(
+        "Please provide all required fields"
+      );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
     if (specialCharsRegex.test(title) || specialCharsRegex.test(description)) {
-      return res.status(400).json("Name cannot contain special characters");
+      return new StatusCode.INVALID_ARGUMENT(
+        "Name cannot contain special characters"
+      );
     }
     const result = await Mainform.mainFormCreate(
       title,
@@ -29,7 +34,7 @@ router.get("/mainFormList/:page", async (req, res) => {
       return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
     }
     if (!req.params.page.match(/^\d+$/)) {
-      return res.status(400).json("Invalid page format");
+      return new StatusCode.INVALID_ARGUMENT("Invalid page format");
     }
     const result = await Mainform.mainFormList(req.params.page);
     res.json(result);
@@ -43,15 +48,19 @@ router.put("/mainFormUpdate/:id", async (req, res) => {
     const { title, multiple_Entry, description } = req.body;
     const { id } = req.params;
     if (title == "" || multiple_Entry == "" || description == "") {
-      return res.status(400).json("Please provide all required fields");
+      return new StatusCode.INVALID_ARGUMENT(
+        "Please provide all required fields"
+      );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
     if (specialCharsRegex.test(title) || specialCharsRegex.test(description)) {
-      return res.status(400).json("Data cannot contain special characters");
+      return new StatusCode.INVALID_ARGUMENT(
+        "Data cannot contain special characters"
+      );
     }
 
     if (!req.params.id.match(/^\d+$/)) {
-      return res.status(400).json("Invalid id format");
+      return new StatusCode.INVALID_ARGUMENT("Invalid id format");
     }
     const result = await Mainform.mainFormUpdate(
       title,
@@ -71,7 +80,7 @@ router.delete("/mainFormDelete/:id", async (req, res) => {
       return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
     }
     if (!req.params.id.match(/^\d+$/)) {
-      return res.status(400).json("Invalid id format");
+      return new StatusCode.INVALID_ARGUMENT("Invalid id format");
     }
     const result = await Mainform.mainFormDelete(req.params.id);
     res.json(result);

@@ -47,7 +47,7 @@ const patientUpdate = async (Name, DOB, id) => {
 
 const patientDelete = async (id) => {
   try {
-    const sql = ` DELETE FROM patients WHERE id=?`;
+    const sql = `DELETE FROM patients WHERE id=?`;
     await DB.query(sql, [id]);
     return new StatusCode.OK(`${id} id deleted.`);
   } catch (error) {
@@ -55,4 +55,21 @@ const patientDelete = async (id) => {
   }
 };
 
-module.exports = { patientCreate, patientList, patientUpdate, patientDelete };
+const patientNameSearch = async (Name) => {
+  
+  try {
+    const sql = `SELECT * FROM patients WHERE MATCH(Name) AGAINST (?);`;
+    const result = await DB.query(sql, [Name]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = {
+  patientCreate,
+  patientList,
+  patientUpdate,
+  patientDelete,
+  patientNameSearch,
+};
