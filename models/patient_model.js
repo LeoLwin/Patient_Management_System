@@ -3,11 +3,12 @@ const DB = require("../helper/database_helper");
 
 // TODO: to follow coding standard
 
-const patientCreate = async (Name, DOB) => {
+const patientCreate = async (name, dob, nrc) => {
   try {
     // TODO: duplicate entry checking?
-    const sql = "INSERT INTO patients (Name, DOB) VALUES(?,?)";
-    await DB.query(sql, [Name, DOB]);
+    console.log(name, dob, nrc);
+    const sql = "INSERT INTO patients (name, dob, nrc) VALUES(?,?,?)";
+    await DB.query(sql, [name, dob, nrc]);
     return new StatusCode.OK("New patient registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -35,10 +36,10 @@ const patientList = async (page) => {
 };
 
 // TODO: use individual parameters
-const patientUpdate = async (Name, DOB, id) => {
+const patientUpdate = async (name, dob, nrc, id) => {
   try {
-    const sql = `UPDATE patients SET Name=?, DOB=? WHERE id=?`;
-    const result = await DB.query(sql, [Name, DOB, id]);
+    const sql = `UPDATE patients SET name=?, dob=? ,nrc=? WHERE id=?`;
+    const result = await DB.query(sql, [name, dob, nrc, id]);
     return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -56,7 +57,6 @@ const patientDelete = async (id) => {
 };
 
 const patientNameSearch = async (Name) => {
-  
   try {
     const sql = `SELECT * FROM patients WHERE MATCH(Name) AGAINST (?);`;
     const result = await DB.query(sql, [Name]);

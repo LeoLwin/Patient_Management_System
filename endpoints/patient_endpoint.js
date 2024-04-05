@@ -4,26 +4,34 @@ const StatusCode = require("../helper/status_code_helper");
 
 router.post("/patientCreate", async (req, res) => {
   try {
-    const { Name, DOB } = req.body;
-    if (Name == "" || DOB == "") {
+    const { name, dob, nrc } = req.body;
+    if (name == "" || dob == "" || nrc == "") {
       return res.json(
         new StatusCode.INVALID_ARGUMENT("Please provide all required fields")
       );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
+    if (specialCharsRegex.test(name) || specialCharsRegex.test(dob)) {
       return res.json(
         new StatusCode.INVALID_ARGUMENT(
           "Name cannot contain special characters"
         )
       );
     }
-    if (!DOB.match(/^\d{8}$/)) {
+    if (!/^..\/......\(.\)......$/.test(nrc)) {
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT(
+          "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        )
+      );
+    }
+
+    if (!dob.match(/^\d{8}$/)) {
       return res.json(
         new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format")
       );
     }
-    const result = await Patient.patientCreate(Name, DOB);
+    const result = await Patient.patientCreate(name, dob, nrc);
     res.json(result);
   } catch (error) {
     res.status(error);
@@ -49,26 +57,26 @@ router.get("/patientList/:page", async (req, res) => {
 
 router.put("/patientUpdate/:id", async (req, res) => {
   try {
-    const { Name, DOB } = req.body;
+    const { name, dob, nrc } = req.body;
     const { id } = req.params;
-    if (Name == "" || DOB == "") {
+    if (name == "" || dob == "" || nrc == "") {
       return res.json(
         new StatusCode.INVALID_ARGUMENT("Please provide all required fields")
       );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-
-    if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
+    if (specialCharsRegex.test(name) || specialCharsRegex.test(dob)) {
       return res.json(
         new StatusCode.INVALID_ARGUMENT(
           "Name cannot contain special characters"
         )
       );
     }
-
-    if (!DOB.match(/^\d{8}$/)) {
+    if (!/^..\/......\(.\)......$/.test(nrc)) {
       return res.json(
-        new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format")
+        new StatusCode.INVALID_ARGUMENT(
+          "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        )
       );
     }
 
@@ -76,7 +84,7 @@ router.put("/patientUpdate/:id", async (req, res) => {
       return res.json(new StatusCode.INVALID_ARGUMENT("Invalid id format"));
     }
 
-    const result = await Patient.patientUpdate(Name, DOB, id);
+    const result = await Patient.patientUpdate(name, dob, nrc, id);
     res.json(result);
   } catch (error) {
     res.status(error);
