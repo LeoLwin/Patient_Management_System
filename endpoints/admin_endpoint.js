@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const Admin = require("../models/admin_model");
 const LoginHelper = require("../helper/login_helper");
-const { password } = require("../configurations/config");
 
 router.post("/adminCreate", async (req, res) => {
   try {

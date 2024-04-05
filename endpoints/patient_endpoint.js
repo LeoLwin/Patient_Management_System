@@ -78,5 +78,5 @@ router.delete("/patientDelete/:id", async (req, res) => {
     res.status(error);
   }
 });
-
+  
 module.exports = router;
