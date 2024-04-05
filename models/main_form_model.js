@@ -3,10 +3,12 @@ const DB = require("../helper/database_helper");
 
 const mainFormCreate = async (title, multiple_Entry, description) => {
   try {
+    console.log(title, multiple_Entry, description);
     const sql = `INSERT INTO main_form (title, multiple_Entry, description) VALUES (?,?,?)`;
     await DB.query(sql, [title, multiple_Entry, description]);
     return new StatusCode.OK("New Main Form is created.");
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -30,10 +32,12 @@ const mainFormList = async (page) => {
 
 const mainFormUpdate = async (title, multiple_Entry, description, id) => {
   try {
+    console.log(title, multiple_Entry, description, id);
     const sql = `UPDATE main_form SET title=?, multiple_Entry=?, description=? WHERE id=?;`;
     await DB.query(sql, [title, multiple_Entry, description, id]);
     return new StatusCode.OK(`Main-Form ${id} is updated.`);
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };

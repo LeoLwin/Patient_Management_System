@@ -6,18 +6,22 @@ router.post("/patientCreate", async (req, res) => {
   try {
     const { Name, DOB } = req.body;
     if (Name == "" || DOB == "") {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Please provide all required fields"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Please provide all required fields")
       );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
     if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Name cannot contain special characters"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT(
+          "Name cannot contain special characters"
+        )
       );
     }
     if (!DOB.match(/^\d{8}$/)) {
-      return new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format");
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format")
+      );
     }
     const result = await Patient.patientCreate(Name, DOB);
     res.json(result);
@@ -29,10 +33,12 @@ router.post("/patientCreate", async (req, res) => {
 router.get("/patientList/:page", async (req, res) => {
   try {
     if (!req.params) {
-      return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Request Params is empty!")
+      );
     }
     if (!req.params.page.match(/^\d+$/)) {
-      return new StatusCode.INVALID_ARGUMENT("Invalid id format");
+      return res.json(new StatusCode.INVALID_ARGUMENT("Invalid id format"));
     }
     const result = await Patient.patientList(req.params.page);
     res.json(result);
@@ -46,24 +52,28 @@ router.put("/patientUpdate/:id", async (req, res) => {
     const { Name, DOB } = req.body;
     const { id } = req.params;
     if (Name == "" || DOB == "") {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Please provide all required fields"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Please provide all required fields")
       );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
 
     if (specialCharsRegex.test(Name) || specialCharsRegex.test(DOB)) {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Name cannot contain special characters"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT(
+          "Name cannot contain special characters"
+        )
       );
     }
 
     if (!DOB.match(/^\d{8}$/)) {
-      return new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format");
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Date must be in YYYYMMDD format")
+      );
     }
 
     if (!req.params.id.match(/^\d+$/)) {
-      return new StatusCode.INVALID_ARGUMENT("Invalid id format");
+      return res.json(new StatusCode.INVALID_ARGUMENT("Invalid id format"));
     }
 
     const result = await Patient.patientUpdate(Name, DOB, id);
@@ -76,10 +86,12 @@ router.put("/patientUpdate/:id", async (req, res) => {
 router.delete("/patientDelete/:id", async (req, res) => {
   try {
     if (!req.params) {
-      return new StatusCode.INVALID_ARGUMENT("Request Params is empty!");
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Request Params is empty!")
+      );
     }
     if (!req.params.id.match(/^\d+$/)) {
-      return new StatusCode.INVALID_ARGUMENT("Invalid id format");
+      return res.json(new StatusCode.INVALID_ARGUMENT("Invalid id format"));
     }
     const result = await Patient.patientDelete(req.params.id);
     res.json(result);
@@ -92,14 +104,16 @@ router.post("/patientNameSearch", async (req, res) => {
   try {
     const { Name } = req.body;
     if (Name == "") {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Please provide all required fields"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT("Please provide all required fields")
       );
     }
     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
     if (specialCharsRegex.test(Name)) {
-      return new StatusCode.INVALID_ARGUMENT(
-        "Name cannot contain special characters"
+      return res.json(
+        new StatusCode.INVALID_ARGUMENT(
+          "Name cannot contain special characters"
+        )
       );
     }
     const result = await Patient.patientNameSearch(Name);
