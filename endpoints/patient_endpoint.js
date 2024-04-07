@@ -2,6 +2,7 @@ const router = require("express").Router();
 const Patient = require("../models/patient_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
+const { values } = require("lodash");
 
 router.post(
   "/patientCreate",
@@ -30,6 +31,17 @@ router.post(
       .withMessage(
         "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
       ),
+    body("gender")
+      .notEmpty()
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
   ],
   async (req, res) => {
     try {
@@ -39,8 +51,8 @@ router.post(
           new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
         );
       }
-      const { name, dob, nrc } = req.body;
-      const result = await Patient.patientCreate(name, dob, nrc);
+      const { name, dob, nrc, gender } = req.body;
+      const result = await Patient.patientCreate(name, dob, nrc, gender);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -97,6 +109,17 @@ router.put(
       .withMessage(
         "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
       ),
+    body("gender")
+      .notEmpty()
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
     param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
@@ -108,10 +131,10 @@ router.put(
         );
       }
 
-      const { name, dob, nrc } = req.body;
+      const { name, dob, nrc, gender } = req.body;
       const { id } = req.params;
 
-      const result = await Patient.patientUpdate(name, dob, nrc, id);
+      const result = await Patient.patientUpdate(name, dob, nrc, gender, id);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -167,7 +190,7 @@ router.post(
       }
 
       const { name } = req.body;
-
+      console.log(name);
       const result = await Patient.patientNameSearch(name);
       res.json(result);
     } catch (error) {

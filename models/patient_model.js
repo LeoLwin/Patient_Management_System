@@ -3,12 +3,11 @@ const DB = require("../helper/database_helper");
 
 // TODO: to follow coding standard
 
-const patientCreate = async (name, dob, nrc) => {
+const patientCreate = async (name, dob, nrc, gender) => {
   try {
     // TODO: duplicate entry checking?
-    console.log(name, dob, nrc);
-    const sql = "INSERT INTO patients (name, dob, nrc) VALUES(?,?,?)";
-    await DB.query(sql, [name, dob, nrc]);
+    const sql = "INSERT INTO patients (name, dob, nrc, gender) VALUES(?,?,?,?)";
+    await DB.query(sql, [name, dob, nrc, gender]);
     return new StatusCode.OK("New patient registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -17,12 +16,14 @@ const patientCreate = async (name, dob, nrc) => {
 
 const patientList = async (page) => {
   try {
+    console.log("model");
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     // const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ?,?`;
     const list = await DB.query(sql, [page_size, offset]); // TODO: check value of this
+    console.log(list);
 
     // Query to count total number of bundles
     const countSql = "SELECT COUNT(*) AS total FROM patients";
@@ -36,10 +37,10 @@ const patientList = async (page) => {
 };
 
 // TODO: use individual parameters
-const patientUpdate = async (name, dob, nrc, id) => {
+const patientUpdate = async (name, dob, nrc, gender, id) => {
   try {
-    const sql = `UPDATE patients SET name=?, dob=? ,nrc=? WHERE id=?`;
-    const result = await DB.query(sql, [name, dob, nrc, id]);
+    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?,gender=? WHERE id=?`;
+    const result = await DB.query(sql, [name, dob, nrc, gender, id]);
     return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -56,10 +57,10 @@ const patientDelete = async (id) => {
   }
 };
 
-const patientNameSearch = async (Name) => {
+const patientNameSearch = async (name) => {
   try {
-    const sql = `SELECT * FROM patients WHERE MATCH(Name) AGAINST (?);`;
-    const result = await DB.query(sql, [Name]);
+    const sql = `SELECT * FROM patients WHERE MATCH(name) AGAINST (?);`;
+    const result = await DB.query(sql, [name]);
     return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);

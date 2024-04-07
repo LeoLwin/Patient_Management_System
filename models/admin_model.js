@@ -1,7 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
 
-
 const adminCreate = async (email, name, password) => {
   try {
     const sql = `INSERT INTO users (email, name , password) VALUES(?,?,?)`;
@@ -41,8 +40,10 @@ const adminDelete = async (id) => {
 
 const isAdminExist = async (email) => {
   try {
+    console.log(email);
     const sql = `SELECT * FROM users WHERE email=?`;
     const result = await DB.query(sql, [email]);
+    console.log(result);
     return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
