@@ -29,7 +29,12 @@ router.post(
       }
 
       const { data, patient_id } = req.body;
-      const result = await FormData.fromDataCreate(data, patient_id);
+      // console.log(req.body);
+      console.log(data[0].value1);
+      const result = await FormData.fromDataCreate(
+        JSON.stringify(data),
+        patient_id
+      );
       res.json(result);
     } catch (error) {
       res.status(error);
