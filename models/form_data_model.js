@@ -51,9 +51,21 @@ const formDataDelete = async (id) => {
   }
 };
 
+const formDataPatientSearch = async (patient_id) => {
+  try {
+    console.log(patient_id);
+    const sql = `SELECT * FROM form_data WHERE patient_id=?`;
+    const result = await DB.query(sql, [patient_id]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   fromDataCreate,
   formDataList,
   formDataUpdate,
   formDataDelete,
+  formDataPatientSearch,
 };
