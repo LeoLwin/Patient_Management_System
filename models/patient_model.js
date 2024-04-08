@@ -67,10 +67,33 @@ const patientNameSearch = async (name) => {
   }
 };
 
+const patientNrcSearch = async (nrc) => {
+  try {
+    const sql = `SELECT * FROM patients WHERE MATCH(nrc) AGAINST (?);`;
+    const result = await DB.query(sql, [nrc]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+const patientIdSearch = async (id) => {
+  try {
+    console.log(id);
+    const sql = `SELECT * FROM patients WHERE id=?;`;
+    const result = await DB.query(sql, [id]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   patientCreate,
   patientList,
   patientUpdate,
   patientDelete,
   patientNameSearch,
+  patientNrcSearch,
+  patientIdSearch,
 };

@@ -198,6 +198,53 @@ router.post(
     }
   }
 );
+
+router.post(
+  "/patientNrcSearch",
+  [
+    body("nrc")
+      .notEmpty()
+      .matches(/^..\/......\(.\)......$/)
+      .withMessage(
+        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+      ),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
+        );
+      }
+      const { nrc } = req.body;
+      const result = await Patient.patientNrcSearch(nrc);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.post(
+  "/patientIdSearch/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
+        );
+      }
+      const result = await Patient.patientIdSearch(req.params.id);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 module.exports = router;
 
 // router.post("/patientCreate", async (req, res) => {
