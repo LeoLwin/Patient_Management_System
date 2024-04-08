@@ -16,14 +16,12 @@ const patientCreate = async (name, dob, nrc, gender) => {
 
 const patientList = async (page) => {
   try {
-    console.log("model");
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     // const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ?,?`;
     const list = await DB.query(sql, [page_size, offset]); // TODO: check value of this
-    console.log(list);
 
     // Query to count total number of bundles
     const countSql = "SELECT COUNT(*) AS total FROM patients";
@@ -82,7 +80,7 @@ const patientIdSearch = async (id) => {
     console.log(id);
     const sql = `SELECT * FROM patients WHERE id=?;`;
     const result = await DB.query(sql, [id]);
-    return new StatusCode.OK(result);
+    return new StatusCode.OK(result[0]);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
