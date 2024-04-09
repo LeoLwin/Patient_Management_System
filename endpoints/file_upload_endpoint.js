@@ -26,9 +26,12 @@ router.post(
 
 router.delete("/delete", async (req, res) => {
   try {
+    const path = req.body;
+    const result = await fileUpload.fileDelete(path.filePath);
+    return res.json(result);
   } catch (error) {
     console.error(error);
-    return res.json(new StatusCode.UNKNOWN(error.message));
+    return res.status(new StatusCode.UNKNOWN(error.message));
   }
 });
 

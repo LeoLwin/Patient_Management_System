@@ -85,7 +85,11 @@ router.put(
       }
       const { data, patient_id } = req.body;
       const { id } = req.params;
-      const result = await FormData.formDataUpdate(data, patient_id, id);
+      const result = await FormData.formDataUpdate(
+        JSON.stringify(data),
+        patient_id,
+        id
+      );
       res.json(result);
     } catch (error) {
       res.status(error);

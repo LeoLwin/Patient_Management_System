@@ -1,6 +1,8 @@
 const multer = require("multer");
 const path = require("path");
 const StatusCode = require("../helper/status_code_helper");
+const fs = require("fs-extra");
+const { stat } = require("fs");
 
 // Define storage for uploaded files
 const storage = multer.diskStorage({
@@ -47,8 +49,20 @@ const progress = async (uploadedFiles, res) => {
     res.end();
   } catch (error) {
     console.error(error);
-    return res.status(500).json(new StatusCode.UNKNOWN(error.message));
+    return res.json(new StatusCode.UNKNOWN(error.message));
   }
 };
 
-module.exports = { upload, progress };
+const fileDelete = async (filePath) => {
+  try {
+    await fs.remove(filePath, (err) => {
+      if (err) return new StatusCode.UNKNOWN(err);
+    });
+    return new StatusCode.OK("File is deleted");
+  } catch (error) {
+    console.error(error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = { upload, progress, fileDelete };

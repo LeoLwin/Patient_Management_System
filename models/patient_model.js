@@ -19,9 +19,8 @@ const patientList = async (page) => {
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
-    // const sql = `SELECT * FROM patients ORDER BY id DESC LIMIT ?,?`;
-    const list = await DB.query(sql, [page_size, offset]); // TODO: check value of this
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const list = await DB.query(sql, [page_size, offset]);
 
     // Query to count total number of bundles
     const countSql = "SELECT COUNT(*) AS total FROM patients";
