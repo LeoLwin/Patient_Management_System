@@ -1,7 +1,7 @@
 const FormData = require("../models/form_data_model");
 const StatusCode = require("../helper/status_code_helper");
+const Search = require("../helper/search_helper");
 const { param, body, validationResult } = require("express-validator");
-const { route } = require("./patient_endpoint");
 
 const router = require("express").Router();
 
@@ -12,7 +12,7 @@ router.post(
       .notEmpty()
       .withMessage("data is required")
       .isObject()
-      .withMessage("Data must be an array"),
+      .withMessage("Data must be an Object"),
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_ID is required")
@@ -29,7 +29,7 @@ router.post(
       }
 
       const { data, patient_id } = req.body;
-
+      console.log(req.body);
       const result = await FormData.fromDataCreate(
         JSON.stringify(data),
         patient_id
@@ -129,6 +129,20 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
+    body("history")
+      .notEmpty()
+      .withMessage("Histories is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
   ],
   async (req, res) => {
     try {
@@ -139,14 +153,35 @@ router.post(
         );
       }
 
-      const { patient_id } = req.body;
-      console.log(patient_id);
-      const result = await FormData.formDataPatientSearch(patient_id);
+      const { patient_id, history } = req.body;
+      console.log(req.body);
+      const getData = await FormData.formDataPatientSearch(patient_id);
+      const result = await Search.getHistory(getData, history);
       res.json(result);
     } catch (error) {
       res.status(error);
     }
   }
 );
+
+// router.post(
+//   "/formDataDetail/:id",
+//   [param("id").notEmpty().isInt().toInt()],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(
+//           new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
+//         );
+//       }
+//       const { id } = req.params;
+//       const result = await FormData.formDataDetail(id);
+//       res.json(result);
+//     } catch (error) {
+//       res.status(error);
+//     }
+//   }
+// );
 
 module.exports = router;

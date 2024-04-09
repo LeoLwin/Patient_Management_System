@@ -3,7 +3,7 @@ const DB = require("../helper/database_helper");
 
 const fromDataCreate = async (data, patient_id) => {
   try {
-    console.log(data, patient_id);
+    // console.log(data, patient_id);
     const sql = `INSERT INTO form_data (data, patient_id) VALUES (?,?)`;
     await DB.query(sql, [data, patient_id]);
     return new StatusCode.OK("New Form_data is created.");

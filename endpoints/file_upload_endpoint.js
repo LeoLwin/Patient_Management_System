@@ -15,6 +15,7 @@ router.post(
       // Access the uploaded files via req.files array
       const uploadedFiles = req.files;
       const result = fileUpload.progress(uploadedFiles, res);
+      console.log(`this is result : ${result}`);
       return new StatusCode.OK(result);
     } catch (error) {
       console.error(error);
@@ -25,7 +26,6 @@ router.post(
 
 router.delete("/delete", async (req, res) => {
   try {
-    
   } catch (error) {
     console.error(error);
     return res.json(new StatusCode.UNKNOWN(error.message));
