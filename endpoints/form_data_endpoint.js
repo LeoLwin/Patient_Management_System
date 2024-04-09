@@ -66,7 +66,7 @@ router.put(
     body("data")
       .notEmpty()
       .withMessage("data is required")
-      .isArray()
+      .isObject()
       .withMessage("Data must be an object"),
     body("patient_id")
       .notEmpty()

@@ -23,6 +23,13 @@ router.post(
   }
 );
 
-router.delete("/delete");
+router.delete("/delete", async (req, res) => {
+  try {
+    
+  } catch (error) {
+    console.error(error);
+    return res.json(new StatusCode.UNKNOWN(error.message));
+  }
+});
 
 module.exports = router;
