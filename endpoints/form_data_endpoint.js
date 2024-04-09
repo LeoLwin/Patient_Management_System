@@ -11,7 +11,7 @@ router.post(
     body("data")
       .notEmpty()
       .withMessage("data is required")
-      .isArray()
+      .isObject()
       .withMessage("Data must be an array"),
     body("patient_id")
       .notEmpty()
@@ -29,8 +29,7 @@ router.post(
       }
 
       const { data, patient_id } = req.body;
-      // console.log(req.body);
-      console.log(data[0].value1);
+
       const result = await FormData.fromDataCreate(
         JSON.stringify(data),
         patient_id

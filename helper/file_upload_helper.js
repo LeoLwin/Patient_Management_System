@@ -1,6 +1,6 @@
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs-extra");
+const StatusCode = require("../helper/status_code_helper");
 
 // Define storage for uploaded files
 const storage = multer.diskStorage({
@@ -11,7 +11,44 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname); // Rename the file to include the timestamp
   },
 });
+
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
 
-module.exports = { upload };
+const progress = async (uploadedFiles, res) => {
+  try {
+    // Start tracking progress
+    let filesUploaded = 0;
+
+    // Iterate over uploaded files
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      filesUploaded++;
+      const showProgress = (filesUploaded / uploadedFiles.length) * 100;
+
+      // Send progress update to the client for each file
+      res.write(
+        `data: ${JSON.stringify({
+          showProgress,
+          filePath: uploadedFiles[i].path,
+        })}\n\n`
+      );
+
+      // // Simulate delay (you can remove this in production)
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    // Send final response indicating completion
+    res.write(
+      `data: ${JSON.stringify({
+        progress: 100,
+        message: "Upload completed",
+      })}\n\n`
+    );
+    res.end();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json(new StatusCode.UNKNOWN(error.message));
+  }
+};
+
+module.exports = { upload, progress };
