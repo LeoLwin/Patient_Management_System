@@ -8,7 +8,7 @@ const patientCreate = async (name, dob, nrc, gender) => {
     // TODO: duplicate entry checking?
     const sql = "INSERT INTO patients (name, dob, nrc, gender) VALUES(?,?,?,?)";
     await DB.query(sql, [name, dob, nrc, gender]);
-    return new StatusCode.OK("New patient registration successful.");
+    return new StatusCode.OK(null, "New patient registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -26,9 +26,13 @@ const patientList = async (page) => {
     const countSql = "SELECT COUNT(*) AS total FROM patients";
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
-    return new StatusCode.OK({ list, total });
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
-    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -38,7 +42,7 @@ const patientUpdate = async (name, dob, nrc, gender, id) => {
   try {
     const sql = `UPDATE patients SET name=?, dob=? ,nrc=?,gender=? WHERE id=?`;
     const result = await DB.query(sql, [name, dob, nrc, gender, id]);
-    return new StatusCode.OK(result);
+    return new StatusCode.OK(null, "Pateint Data is updated");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -48,7 +52,7 @@ const patientDelete = async (id) => {
   try {
     const sql = `DELETE FROM patients WHERE id=?`;
     await DB.query(sql, [id]);
-    return new StatusCode.OK(`${id} id deleted.`);
+    return new StatusCode.OK(null, `${id} id deleted.`);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -56,9 +60,13 @@ const patientDelete = async (id) => {
 
 const patientNameSearch = async (name) => {
   try {
-    const sql = `SELECT * FROM patients WHERE MATCH(name) AGAINST (?);`;
+    const sql = `SELECT *, DATE_FORMAT(dob, '%Y%m%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
     const result = await DB.query(sql, [name]);
-    return new StatusCode.OK(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -66,9 +74,13 @@ const patientNameSearch = async (name) => {
 
 const patientNrcSearch = async (nrc) => {
   try {
-    const sql = `SELECT * FROM patients WHERE MATCH(nrc) AGAINST (?);`;
+    const sql = `SELECT *, DATE_FORMAT(dob, '%Y%m%d') AS dob FROM patients WHERE nrc=?;`;
     const result = await DB.query(sql, [nrc]);
-    return new StatusCode.OK(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -76,10 +88,13 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    console.log(id);
-    const sql = `SELECT * FROM patients WHERE id=?;`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y%m%d') AS dob, nrc, gender FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
-    return new StatusCode.OK(result[0]);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

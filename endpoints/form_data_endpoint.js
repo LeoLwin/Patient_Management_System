@@ -29,7 +29,6 @@ router.post(
       }
 
       const { data, patient_id } = req.body;
-      console.log(req.body);
       const result = await FormData.fromDataCreate(
         JSON.stringify(data),
         patient_id
@@ -158,34 +157,17 @@ router.post(
       }
 
       const { patient_id, history } = req.body;
-      console.log(req.body);
       const getData = await FormData.formDataPatientSearch(patient_id);
-      const result = await Search.getHistory(getData, history);
-      res.json(result);
+      if (getData.code == 200) {
+        const result = await Search.getHistory(getData, history);
+        res.json(result);
+      } else {
+        res.json(getData);
+      }
     } catch (error) {
       res.status(error);
     }
   }
 );
-
-// router.post(
-//   "/formDataDetail/:id",
-//   [param("id").notEmpty().isInt().toInt()],
-//   async (req, res) => {
-//     try {
-//       const errors = validationResult(req);
-//       if (!errors.isEmpty()) {
-//         return res.json(
-//           new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-//         );
-//       }
-//       const { id } = req.params;
-//       const result = await FormData.formDataDetail(id);
-//       res.json(result);
-//     } catch (error) {
-//       res.status(error);
-//     }
-//   }
-// );
 
 module.exports = router;

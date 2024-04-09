@@ -5,7 +5,7 @@ const adminCreate = async (email, name, password) => {
   try {
     const sql = `INSERT INTO users (email, name , password) VALUES(?,?,?)`;
     await DB.query(sql, [email, name, password]);
-    return new StatusCode.OK("New user registration successful.");
+    return new StatusCode.OK(null, "New user registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -22,7 +22,13 @@ const adminList = async (page) => {
     const countSql = "SELECT COUNT(*) AS total FROM users";
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
-    return new StatusCode.OK({ list, total });
+
+    if (list.length > 0) {
+      return new StatusCode.OK(list, total);
+    } else {
+      // console.log("Admin does not exist");
+      return new StatusCode.NOT_FOUND(null, "Admin does not exist");
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -40,11 +46,14 @@ const adminDelete = async (id) => {
 
 const isAdminExist = async (email) => {
   try {
-    console.log(email);
     const sql = `SELECT * FROM users WHERE email=?`;
     const result = await DB.query(sql, [email]);
-    console.log(result);
-    return new StatusCode.OK(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      // console.log("Admin does not exist");
+      return new StatusCode.NOT_FOUND(null, "Admin does not exist");
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

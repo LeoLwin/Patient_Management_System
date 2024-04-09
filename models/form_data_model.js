@@ -3,12 +3,10 @@ const DB = require("../helper/database_helper");
 
 const fromDataCreate = async (data, patient_id) => {
   try {
-    // console.log(data, patient_id);
     const sql = `INSERT INTO form_data (data, patient_id) VALUES (?,?)`;
     await DB.query(sql, [data, patient_id]);
-    return new StatusCode.OK("New Form_data is created.");
+    return new StatusCode.OK(null, "New Form_data is created.");
   } catch (error) {
-    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -24,7 +22,11 @@ const formDataList = async (page) => {
     const countSql = "SELECT COUNT(*) AS total FROM form_data";
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
-    return new StatusCode.OK({ list, total });
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -32,10 +34,9 @@ const formDataList = async (page) => {
 
 const formDataUpdate = async (data, patient_id, id) => {
   try {
-    console.log(data, patient_id, id);
     const sql = `UPDATE form_data SET data=?, patient_id=? WHERE id=?`;
-    const result = await DB.query(sql, [data, patient_id, id]);
-    return new StatusCode.OK(result);
+    await DB.query(sql, [data, patient_id, id]);
+    return new StatusCode.OK(null, "Update Successfully");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -53,10 +54,14 @@ const formDataDelete = async (id) => {
 
 const formDataPatientSearch = async (patient_id) => {
   try {
-    console.log(patient_id);
     const sql = `SELECT * FROM form_data WHERE patient_id=?`;
     const result = await DB.query(sql, [patient_id]);
-    return new StatusCode.OK(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      console.log("Admin does not exist");
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

@@ -3,12 +3,10 @@ const DB = require("../helper/database_helper");
 
 const mainFormCreate = async (title, multiple_Entry, description) => {
   try {
-    console.log(title, multiple_Entry, description);
     const sql = `INSERT INTO main_form (title, multiple_Entry, description) VALUES (?,?,?)`;
     await DB.query(sql, [title, multiple_Entry, description]);
-    return new StatusCode.OK("New Main Form is created.");
+    return new StatusCode.OK(null, "New Main Form is created.");
   } catch (error) {
-    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -24,7 +22,12 @@ const mainFormList = async (page) => {
     const countSql = "SELECT COUNT(*) AS total FROM main_form";
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
-    return new StatusCode.OK({ list, total });
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -32,12 +35,10 @@ const mainFormList = async (page) => {
 
 const mainFormUpdate = async (title, multiple_Entry, description, id) => {
   try {
-    console.log(title, multiple_Entry, description, id);
     const sql = `UPDATE main_form SET title=?, multiple_Entry=?, description=? WHERE id=?;`;
     await DB.query(sql, [title, multiple_Entry, description, id]);
-    return new StatusCode.OK(`Main-Form ${id} is updated.`);
+    return new StatusCode.OK(null, `Main-Form ${id} is updated.`);
   } catch (error) {
-    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -46,7 +47,7 @@ const mainFormDelete = async (id) => {
   try {
     const sql = `DELETE FROM main_form WHERE id=?`;
     await DB.query(sql, [id]);
-    return new StatusCode.OK(`Form id-${id} is deleted.`);
+    return new StatusCode.OK(null, `Form id-${id} is deleted.`);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

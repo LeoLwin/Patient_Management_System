@@ -36,7 +36,7 @@ const progress = async (uploadedFiles, res) => {
       );
 
       // // Simulate delay (you can remove this in production)
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     // Send final response indicating completion
@@ -58,7 +58,7 @@ const fileDelete = async (filePath) => {
     await fs.remove(filePath, (err) => {
       if (err) return new StatusCode.UNKNOWN(err);
     });
-    return new StatusCode.OK("File is deleted");
+    return new StatusCode.OK(null, "File is deleted");
   } catch (error) {
     console.error(error);
     return new StatusCode.UNKNOWN(error.message);

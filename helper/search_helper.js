@@ -5,12 +5,15 @@ const getHistory = async (getData, history) => {
     let resultData = [];
     for (let i = 0; i < getData.data.length; i++) {
       const obj = getData.data[i];
-      console.log(obj.data);
       if (history in obj.data) {
         resultData.push(obj.data);
       }
     }
-    return new StatusCode.OK(resultData);
+    if (resultData.length > 0) {
+      return new StatusCode.OK(resultData);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
