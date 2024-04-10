@@ -60,7 +60,7 @@ const patientDelete = async (id) => {
 
 const patientNameSearch = async (name) => {
   try {
-    const sql = `SELECT *, DATE_FORMAT(dob, '%Y%m%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
+    const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
     const result = await DB.query(sql, [name]);
     if (result.length > 0) {
       return new StatusCode.OK(result);
@@ -74,7 +74,7 @@ const patientNameSearch = async (name) => {
 
 const patientNrcSearch = async (nrc) => {
   try {
-    const sql = `SELECT *, DATE_FORMAT(dob, '%Y%m%d') AS dob FROM patients WHERE nrc=?;`;
+    const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE nrc=?;`;
     const result = await DB.query(sql, [nrc]);
     if (result.length > 0) {
       return new StatusCode.OK(result);
@@ -88,7 +88,7 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y%m%d') AS dob, nrc, gender FROM patients WHERE id=?`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
       return new StatusCode.OK(result);
