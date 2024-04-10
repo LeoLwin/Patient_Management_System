@@ -6,7 +6,7 @@ const getHistory = async (getData, history) => {
     for (let i = 0; i < getData.data.length; i++) {
       const obj = getData.data[i];
       if (history in obj.data) {
-        resultData.push(obj.data);
+        resultData.push(obj);
       }
     }
     if (resultData.length > 0) {
