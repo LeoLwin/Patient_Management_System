@@ -91,7 +91,8 @@ const patientIdSearch = async (id) => {
     const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
-      return new StatusCode.OK(result);
+      const patient = result[0];
+      return new StatusCode.OK({ patient });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }

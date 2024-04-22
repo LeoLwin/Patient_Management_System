@@ -108,7 +108,6 @@ router.post(
       const { email, password } = req.body;
 
       const getUser = await Admin.isAdminExist(email);
-      console.log(getUser);
       const result = await LoginHelper(getUser, password);
       res.json(result);
     } catch (error) {

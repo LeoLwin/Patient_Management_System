@@ -59,7 +59,6 @@ const formDataPatientSearch = async (patient_id) => {
     if (result.length > 0) {
       return new StatusCode.OK(result);
     } else {
-      console.log("Admin does not exist");
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {

@@ -158,10 +158,9 @@ router.post(
 
       const { patient_id, history } = req.body;
       const getData = await FormData.formDataPatientSearch(patient_id);
-      console.log(getData.data);
       if (getData.code == 200) {
         const result = await Search.getHistory(getData, history);
-        res.json({ result });
+        res.json(result);
       } else {
         res.json(getData);
       }

@@ -26,7 +26,6 @@ const adminList = async (page) => {
     if (list.length > 0) {
       return new StatusCode.OK(list, total);
     } else {
-      // console.log("Admin does not exist");
       return new StatusCode.NOT_FOUND(null, "Admin does not exist");
     }
   } catch (error) {
@@ -51,7 +50,6 @@ const isAdminExist = async (email) => {
     if (result.length > 0) {
       return new StatusCode.OK(result);
     } else {
-      // console.log("Admin does not exist");
       return new StatusCode.NOT_FOUND(null, "Admin does not exist");
     }
   } catch (error) {
