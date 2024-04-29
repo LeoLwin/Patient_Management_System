@@ -8,7 +8,7 @@ const app = express();
 PORT = config.PORT || 2000;
 
 app.use(cors());
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({ limit: "500mb" }));
 
 app.use("/", index_endpoint);
 

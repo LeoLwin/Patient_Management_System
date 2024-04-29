@@ -17,42 +17,6 @@ const storage = multer.diskStorage({
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
 
-const progress = async (uploadedFiles, res) => {
-  try {
-    // Start tracking progress
-    let filesUploaded = 0;
-
-    // Iterate over uploaded files
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      filesUploaded++;
-      const showProgress = (filesUploaded / uploadedFiles.length) * 100;
-
-      // Send progress update to the client for each file
-      res.write(
-        `data: ${JSON.stringify({
-          showProgress,
-          filePath: uploadedFiles[i].path,
-        })}\n\n`
-      );
-
-      // // Simulate delay (you can remove this in production)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    // Send final response indicating completion
-    res.write(
-      `data: ${JSON.stringify({
-        progress: 100,
-        message: "Upload completed",
-      })}\n\n`
-    );
-    res.end();
-  } catch (error) {
-    console.error(error);
-    return res.json(new StatusCode.UNKNOWN(error.message));
-  }
-};
-
 const fileDelete = async (filePath) => {
   try {
     await fs.remove(filePath, (err) => {
@@ -65,4 +29,4 @@ const fileDelete = async (filePath) => {
   }
 };
 
-module.exports = { upload, progress, fileDelete };
+module.exports = { upload, fileDelete };

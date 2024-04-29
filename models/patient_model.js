@@ -58,9 +58,10 @@ const patientDelete = async (id) => {
   }
 };
 
-const patientNameSearch = async (name) => {
+const patientNameSearch = async (name, page) => {
   try {
-    // const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
+    const page_size = 10;
+    const offset = (page - 1) * page_size;
     const sql = `
       SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, 
       MATCH(name) AGAINST (?) AS relevance 
@@ -68,12 +69,14 @@ const patientNameSearch = async (name) => {
       WHERE MATCH(name) AGAINST (?) 
       ORDER BY 
         CASE WHEN name = ? THEN 1 ELSE 0 END DESC, 
-        relevance DESC;
+        relevance DESC LIMIT ?, ?; 
     `;
-    const result = await DB.query(sql, [name, name, name]);
+    const result = await DB.query(sql, [name, name, name, offset, page_size]);
     // const result = await DB.query(sql, [name]);
     if (result.length > 0) {
-      const total = result.length;
+      // const total = result.length;
+      const sql = `SELECT COUNT(*) AS total FROM patients WHERE MATCH(name) AGAINST (?)`;
+      const total = await DB.query(sql, [name]);
       return new StatusCode.OK({ result, total });
     } else {
       return new StatusCode.NOT_FOUND(null);

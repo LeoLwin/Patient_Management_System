@@ -21,7 +21,7 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("dob")     
+    body("dob")
       .notEmpty()
       .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
       .withMessage("Date of birth must be in yyyymmdd format"),
@@ -163,7 +163,7 @@ router.delete(
 );
 
 router.post(
-  "/patientNameSearch",
+  "/patientNameSearch/:page",
   [
     body("name")
       .notEmpty()
@@ -179,6 +179,7 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
+    param("page").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
     try {
@@ -190,7 +191,9 @@ router.post(
       }
 
       const { name } = req.body;
-      const result = await Patient.patientNameSearch(name);
+      const page = req.params.page;
+      console.log(name, page);
+      const result = await Patient.patientNameSearch(name, page);
       res.json(result);
     } catch (error) {
       res.status(error);
