@@ -60,14 +60,26 @@ const patientDelete = async (id) => {
 
 const patientNameSearch = async (name) => {
   try {
-    const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
-    const result = await DB.query(sql, [name]);
+    // const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE MATCH(name) AGAINST (?);`;
+    const sql = `
+      SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, 
+      MATCH(name) AGAINST (?) AS relevance 
+      FROM patients 
+      WHERE MATCH(name) AGAINST (?) 
+      ORDER BY 
+        CASE WHEN name = ? THEN 1 ELSE 0 END DESC, 
+        relevance DESC;
+    `;
+    const result = await DB.query(sql, [name, name, name]);
+    // const result = await DB.query(sql, [name]);
     if (result.length > 0) {
-      return new StatusCode.OK(result);
+      const total = result.length;
+      return new StatusCode.OK({ result, total });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };

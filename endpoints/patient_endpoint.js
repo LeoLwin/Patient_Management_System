@@ -21,7 +21,7 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("dob")
+    body("dob")     
       .notEmpty()
       .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
       .withMessage("Date of birth must be in yyyymmdd format"),
