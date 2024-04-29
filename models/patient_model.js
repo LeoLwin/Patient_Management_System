@@ -7,8 +7,8 @@ const patientCreate = async (name, dob, nrc, gender) => {
   try {
     // TODO: duplicate entry checking?
     const sql = "INSERT INTO patients (name, dob, nrc, gender) VALUES(?,?,?,?)";
-    await DB.query(sql, [name, dob, nrc, gender]);
-    return new StatusCode.OK(null, "New patient registration successful.");
+    const result = await DB.query(sql, [name, dob, nrc, gender]);
+    return new StatusCode.OK(result, "New patient registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

@@ -24,9 +24,64 @@ router.delete("/delete", async (req, res) => {
     const result = await fileUpload.fileDelete(path.filePath);
     return res.json(result);
   } catch (error) {
-    console.error(error);
     return res.status(new StatusCode.UNKNOWN(error.message));
   }
 });
+
+// router.post(
+//   "/fileSave",
+//   [
+//     body("patient_id")
+//       .notEmpty()
+//       .withMessage("ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("ID must be an integer");
+//         }
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("file_name")
+//       .notEmpty()
+//       .withMessage("ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("ID must be an integer");
+//         }
+
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body().custom((value, { req }) => {
+//       if (req.body.patient_id_1 === req.body.patient_id_2) {
+//         throw new Error("Patient IDs must be different");
+//       }
+//       return true;
+//     }),
+//   ],
+//   async (req, res) => {
+//     try {
+//     } catch (error) {
+//       return res.status(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
 module.exports = router;

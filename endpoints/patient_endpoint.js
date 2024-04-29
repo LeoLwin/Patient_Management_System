@@ -192,7 +192,6 @@ router.post(
 
       const { name } = req.body;
       const page = req.params.page;
-      console.log(name, page);
       const result = await Patient.patientNameSearch(name, page);
       res.json(result);
     } catch (error) {

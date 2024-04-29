@@ -2,8 +2,10 @@ const router = require("express").Router();
 const { result } = require("lodash");
 const StatusCode = require("../helper/status_code_helper");
 const Partner = require("../models/partner_model");
+const Patient = require("../models/patient_model");
 const { param, body, validationResult } = require("express-validator");
 
+//if partner is already exist , we use this endpoint
 router.post(
   "/partnerCreate",
   [
@@ -68,6 +70,93 @@ router.post(
         : res.json(await Partner.partnerCreate(patient_id_1, patient_id_2));
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+//if we need to create new patient , we use this endpoint .
+// And to create new patient , we use createPatient model from Patient model
+
+router.post(
+  "/patientCreate",
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("dob")
+      .notEmpty()
+      .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
+      .withMessage("Date of birth must be in yyyymmdd format"),
+    body("nrc")
+      .notEmpty()
+      .matches(/^..\/......\(.\)......$/)
+      .withMessage(
+        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+      ),
+    body("gender")
+      .notEmpty()
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
+    body("partner_id")
+      .notEmpty()
+      .withMessage("Name is required")
+      .isInt()
+      .withMessage("id must be int")
+      .toInt()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
+        );
+      }
+      const { name, dob, nrc, gender, partner_id } = req.body;
+      const newPatient = await Patient.patientCreate(name, dob, nrc, gender);
+      if (newPatient.code != 200) {
+        res.json(newPatient);
+      }
+      const isExist = await Partner.partnerCheck(
+        newPatient.data.insertId,
+        partner_id
+      );
+
+      //if data is exit and we have created new patient Reisteration and how to handle that new data , delete or not
+      isExist.data.data
+        ? res.json(isExist)
+        : res.json(
+            await Partner.partnerCreate(newPatient.data.insertId, partner_id)
+          );
+    } catch (error) {
+      res.status(error);
     }
   }
 );
