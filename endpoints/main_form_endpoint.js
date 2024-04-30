@@ -33,9 +33,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const { title, multiple_Entry, description } = req.body;
@@ -59,9 +57,7 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await Mainform.mainFormList(req.params.page);
       res.json(result);
@@ -101,9 +97,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { title, multiple_Entry, description } = req.body;
       const { id } = req.params;
@@ -127,9 +121,7 @@ router.delete(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await Mainform.mainFormDelete(req.params.id);
       res.json(result);

@@ -58,9 +58,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { patient_id_1, patient_id_2 } = req.body;
       const isExist = await Partner.partnerCheck(patient_id_1, patient_id_2);
@@ -76,7 +74,6 @@ router.post(
 
 //if we need to create new patient , we use this endpoint .
 // And to create new patient , we use createPatient model from Patient model
-
 router.post(
   "/patientCreate",
   [
@@ -135,9 +132,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { name, dob, nrc, gender, partner_id } = req.body;
       const newPatient = await Patient.patientCreate(name, dob, nrc, gender);
@@ -168,9 +163,7 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const page = req.params.page;
@@ -230,9 +223,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { patient_id_1, patient_id_2 } = req.body;
       const { id } = req.params;
@@ -255,9 +246,7 @@ router.delete(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const result = await Partner.partnerDelete(req.params.id);
@@ -294,9 +283,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { patient_id } = req.body;
       const result = await Partner.partnerSearch(patient_id);
@@ -358,9 +345,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
         `http://localhost:3000/patient/patientIdSearch/${id}`;
       }
       const { patient_id, partner_id } = req.body;

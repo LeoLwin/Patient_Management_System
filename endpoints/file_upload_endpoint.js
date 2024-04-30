@@ -1,7 +1,9 @@
 const router = require("express").Router();
 const fileUpload = require("../helper/file_upload_helper");
+const File = require("../models/file_model");
 const StatusCode = require("../helper/status_code_helper");
 const fs = require("fs-extra");
+const { param, body, validationResult } = require("express-validator");
 
 router.post("/upload", fileUpload.upload.array("file"), async (req, res) => {
   try {
@@ -28,60 +30,127 @@ router.delete("/delete", async (req, res) => {
   }
 });
 
-// router.post(
-//   "/fileSave",
-//   [
-//     body("patient_id")
-//       .notEmpty()
-//       .withMessage("ID is required")
-//       .trim()
-//       .escape()
-//       .custom((value) => {
-//         // Check if the value is an integer
-//         if (!Number.isInteger(Number(value))) {
-//           throw new Error("ID must be an integer");
-//         }
-//         // Check if the name contains special characters
-//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//         if (specialCharsRegex.test(value)) {
-//           throw new Error("Name cannot contain special characters");
-//         }
-//         // Return true to indicate validation passed
-//         return true;
-//       }),
-//     body("file_name")
-//       .notEmpty()
-//       .withMessage("ID is required")
-//       .trim()
-//       .escape()
-//       .custom((value) => {
-//         // Check if the value is an integer
-//         if (!Number.isInteger(Number(value))) {
-//           throw new Error("ID must be an integer");
-//         }
+router.post(
+  "/fileCreate",
+  [
+    body("patient_id")
+      .notEmpty()
+      .withMessage("ID is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the value is an integer
+        if (!Number.isInteger(Number(value))) {
+          throw new Error("ID must be an integer");
+        }
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("file_name")
+      .notEmpty()
+      .withMessage("file_name is required")
+      .trim()
+      .escape(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { patient_id, file_name } = req.body;
+      const result = await File.fileCreate(patient_id, file_name);
+      return res.json(result);
+    } catch (error) {
+      console.log(error);
+      res.status(error);
+    }
+  }
+);
 
-//         // Check if the name contains special characters
-//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//         if (specialCharsRegex.test(value)) {
-//           throw new Error("Name cannot contain special characters");
-//         }
+router.get(
+  "/fileList/:page",
+  [param("page").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { page } = req.params;
+      const result = await File.fileList(page);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
 
-//         // Return true to indicate validation passed
-//         return true;
-//       }),
-//     body().custom((value, { req }) => {
-//       if (req.body.patient_id_1 === req.body.patient_id_2) {
-//         throw new Error("Patient IDs must be different");
-//       }
-//       return true;
-//     }),
-//   ],
-//   async (req, res) => {
-//     try {
-//     } catch (error) {
-//       return res.status(new StatusCode.UNKNOWN(error.message));
-//     }
-//   }
-// );
+router.put(
+  "/fileUpdate/:id",
+  [
+    body("patient_id")
+      .notEmpty()
+      .withMessage("ID is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the value is an integer
+        if (!Number.isInteger(Number(value))) {
+          throw new Error("ID must be an integer");
+        }
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("file_name")
+      .notEmpty()
+      .withMessage("file_name is required")
+      .trim()
+      .escape(),
+    param("id").notEmpty().isInt().toInt(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { patient_id, file_name } = req.body;
+      const { id } = req.params;
+      const result = await File.fileUpdate(patient_id, file_name, id);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.delete(
+  "/fileDelete/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+    }
+    const { id } = req.params;
+    const result = await File.fileDelete(id);
+    res.json(result);
+    try {
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
 
 module.exports = router;

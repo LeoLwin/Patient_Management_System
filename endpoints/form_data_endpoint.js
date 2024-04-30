@@ -23,9 +23,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const { data, patient_id } = req.body;
@@ -47,9 +45,7 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await FormData.formDataList(req.params.page);
       res.json(result);
@@ -78,9 +74,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { data, patient_id } = req.body;
       const { id } = req.params;
@@ -103,9 +97,7 @@ router.delete(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await FormData.formDataDelete(req.params.id);
       res.json(result);
@@ -151,9 +143,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const { patient_id, history } = req.body;

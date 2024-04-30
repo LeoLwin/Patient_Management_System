@@ -29,9 +29,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { email, name, password } = req.body;
 
@@ -50,9 +48,7 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await Admin.adminList(req.params.page);
       res.json(result);
@@ -69,9 +65,7 @@ router.delete(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await Admin.adminDelete(req.params.id);
       res.json(result);
@@ -101,9 +95,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { email, password } = req.body;
 
@@ -135,9 +127,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { email } = req.body;
       const result = await Admin.isAdminExist(email);

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const Patient = require("../models/patient_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
-const { values } = require("lodash");
 
 router.post(
   "/patientCreate",
@@ -33,6 +32,9 @@ router.post(
       ),
     body("gender")
       .notEmpty()
+      .withMessage(
+        "Gender is required."
+      )
       .custom((value) => {
         const validGenders = ["male", "female"];
         if (!validGenders.includes(value.toLowerCase())) {
@@ -47,9 +49,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { name, dob, nrc, gender } = req.body;
       const result = await Patient.patientCreate(name, dob, nrc, gender);
@@ -67,9 +67,7 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const page = req.params.page;
@@ -126,9 +124,7 @@ router.put(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const { name, dob, nrc, gender } = req.body;
@@ -149,9 +145,7 @@ router.delete(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const result = await Patient.patientDelete(req.params.id);
@@ -185,9 +179,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       const { name } = req.body;
@@ -214,9 +206,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { nrc } = req.body;
       const result = await Patient.patientNrcSearch(nrc);
@@ -234,9 +224,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(
-          new StatusCode.INVALID_ARGUMENT({ errors: errors.array() })
-        );
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const result = await Patient.patientIdSearch(req.params.id);
       res.json(result);
