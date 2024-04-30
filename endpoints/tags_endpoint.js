@@ -1,47 +1,18 @@
 const router = require("express").Router();
-const fileUpload = require("../helper/file_upload_helper");
-const File = require("../models/file_model");
-const StatusCode = require("../helper/status_code_helper");
+const Tag = require("../models/tags_model");
 const { param, body, validationResult } = require("express-validator");
-
-router.post("/upload", fileUpload.upload.array("file"), async (req, res) => {
-  try {
-    // Check if files were uploaded successfully
-    if (!req.files || req.files.length === 0) {
-      return res.json(new StatusCode.UNKNOWN("No files uploaded"));
-    }
-    const filePaths = req.files.map((file) => file.path);
-    // Send the paths of the uploaded files as a response
-    return res.json(new StatusCode.OK(filePaths));
-  } catch (error) {
-    console.error(error);
-    return res.json(new StatusCode.UNKNOWN(error.message));
-  }
-});
-
-router.delete("/delete", async (req, res) => {
-  try {
-    const path = req.body;
-    const result = await fileUpload.fileDelete(path.filePath);
-    return res.json(result);
-  } catch (error) {
-    return res.status(new StatusCode.UNKNOWN(error.message));
-  }
-});
+const StatusCode = require("../helper/status_code_helper");
+const { route } = require("./file_upload_endpoint");
 
 router.post(
-  "/fileCreate",
+  "/tagCreate",
   [
-    body("patient_id")
+    body("tag_name")
       .notEmpty()
-      .withMessage("ID is required")
+      .withMessage("Tag-Name is required")
       .trim()
       .escape()
       .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
@@ -50,11 +21,6 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("file_name")
-      .notEmpty()
-      .withMessage("file_name is required")
-      .trim()
-      .escape(),
   ],
   async (req, res) => {
     try {
@@ -62,18 +28,18 @@ router.post(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, file_name } = req.body;
-      const result = await File.fileCreate(patient_id, file_name);
-      return res.json(result);
+      const { tag_name } = req.body;
+
+      const result = await Tag.tagCreate(tag_name);
+      res.json(result);
     } catch (error) {
-      console.log(error);
-      res.status(error);
+      res.json(error);
     }
   }
 );
 
 router.get(
-  "/fileList/:page",
+  "/tagList/:page",
   [param("page").notEmpty().isInt().toInt()],
   async (req, res) => {
     try {
@@ -82,7 +48,7 @@ router.get(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { page } = req.params;
-      const result = await File.fileList(page);
+      const result = await Tag.tagList(page);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -91,18 +57,14 @@ router.get(
 );
 
 router.put(
-  "/fileUpdate/:id",
+  "/tagUpdate/:id",
   [
-    body("patient_id")
+    body("tag_name")
       .notEmpty()
-      .withMessage("ID is required")
+      .withMessage("Tag-Name is required")
       .trim()
       .escape()
       .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
@@ -111,22 +73,17 @@ router.put(
         // Return true to indicate validation passed
         return true;
       }),
-    body("file_name")
-      .notEmpty()
-      .withMessage("file_name is required")
-      .trim()
-      .escape(),
     param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors));
       }
-      const { patient_id, file_name } = req.body;
+      const { tag_name } = req.body;
       const { id } = req.params;
-      const result = await File.fileUpdate(patient_id, file_name, id);
+      const result = await Tag.tagUpdate(tag_name, id);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -135,7 +92,7 @@ router.put(
 );
 
 router.delete(
-  "/fileDelete/:id",
+  "/tagDelete/:id",
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
     const errors = validationResult(req);
@@ -143,7 +100,7 @@ router.delete(
       return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
     }
     const { id } = req.params;
-    const result = await File.fileDelete(id);
+    const result = await Tag.tagDelete(id);
     res.json(result);
     try {
     } catch (error) {
