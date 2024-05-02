@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const { result } = require("lodash");
 const StatusCode = require("../helper/status_code_helper");
 const Partner = require("../models/partner_model");
 const Patient = require("../models/patient_model");
@@ -7,7 +6,7 @@ const { param, body, validationResult } = require("express-validator");
 
 //if partner is already exist , we use this endpoint
 router.post(
-  "/partnerCreate",
+  "/partnerJoin",
   [
     body("patient_id_1")
       .notEmpty()
@@ -75,7 +74,7 @@ router.post(
 //if we need to create new patient , we use this endpoint .
 // And to create new patient , we use createPatient model from Patient model
 router.post(
-  "/patientCreate",
+  "/partnerCreate",
   [
     body("name")
       .notEmpty()

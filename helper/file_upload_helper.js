@@ -20,6 +20,7 @@ const upload = multer({ storage: storage });
 const fileDelete = async (filePath) => {
   try {
     await fs.remove(filePath, (err) => {
+      console.log("isDeleted");
       if (err) return new StatusCode.UNKNOWN(err);
     });
     return new StatusCode.OK(null, "File is deleted");

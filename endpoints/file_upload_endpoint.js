@@ -22,6 +22,7 @@ router.post("/upload", fileUpload.upload.array("file"), async (req, res) => {
 router.delete("/delete", async (req, res) => {
   try {
     const path = req.body;
+    console.log(path.filePath);
     const result = await fileUpload.fileDelete(path.filePath);
     return res.json(result);
   } catch (error) {
@@ -50,11 +51,7 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("file_name")
-      .notEmpty()
-      .withMessage("file_name is required")
-      .trim()
-      .escape(),
+    body("file_name").notEmpty().withMessage("file_name is required").escape(),
   ],
   async (req, res) => {
     try {
