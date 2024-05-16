@@ -92,7 +92,9 @@ const patientNrcSearch = async (nrc) => {
     const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE nrc=?;`;
     const result = await DB.query(sql, [nrc]);
     if (result.length > 0) {
-      return new StatusCode.OK(result);
+      const sql = `SELECT COUNT (*) AS total FROM patients WHERE nrc= ?`;
+      const total = await DB.query(sql, [nrc]);
+      return new StatusCode.OK({ result, total });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
@@ -106,8 +108,11 @@ const patientIdSearch = async (id) => {
     const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
-      const patient = result[0];
-      return new StatusCode.OK({ patient });
+      const sql = `SELECT COUNT (*) AS total FROM patients WHERE id= ?`;
+      const total = await DB.query(sql, [id]);
+      return new StatusCode.OK({ result, total });
+      // const patient = result[0];
+      // return new StatusCode.OK({ patient });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }

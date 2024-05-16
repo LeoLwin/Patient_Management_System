@@ -2,6 +2,10 @@ const router = require("express").Router();
 const Patient = require("../models/patient_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
+const { bucket } = require("../helper/firebase_upload_helper");
+const multer = require("multer");
+const upload = multer();
+const path = require("path");
 
 router.post(
   "/patientCreate",
@@ -32,9 +36,7 @@ router.post(
       ),
     body("gender")
       .notEmpty()
-      .withMessage(
-        "Gender is required."
-      )
+      .withMessage("Gender is required.")
       .custom((value) => {
         const validGenders = ["male", "female"];
         if (!validGenders.includes(value.toLowerCase())) {
@@ -233,5 +235,32 @@ router.post(
     }
   }
 );
+
+// router.post(
+//   "/patientFirebaseUpload",
+//   upload.single("file"),
+//   async (req, res) => {
+//     try {
+//       if (!req.file) {
+//         return res.status(400).send("No file uploaded.");
+//       }
+//       const fileBuffer = req.file.buffer;
+//       const uniqueFileName = `${Date.now()}_${req.file.originalname}`;
+//       const filePath = `images/${uniqueFileName}`;
+
+//       // Upload the file to Firebase Storage
+//       await bucket.upload(fileBuffer, {
+//         destination: filePath,
+//         contentType: req.file.mimetype, // Set the content type based on the file's mimetype
+//       });
+
+//       // Send the uploaded file path as a response
+//       res.status(200).send(`File uploaded successfully. Path: ${filePath}`);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).send(error);
+//     }
+//   }
+// );
 
 module.exports = router;

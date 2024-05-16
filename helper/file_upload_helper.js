@@ -2,7 +2,6 @@ const multer = require("multer");
 const path = require("path");
 const StatusCode = require("../helper/status_code_helper");
 const fs = require("fs-extra");
-const { stat } = require("fs");
 
 // Define storage for uploaded files
 const storage = multer.diskStorage({
