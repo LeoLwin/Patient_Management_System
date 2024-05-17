@@ -24,4 +24,24 @@ const fileUpload = async (file) => {
   }
 };
 
-module.exports = { bucket, admin, fileUpload };
+const filedelete = async (fileUrl) => {
+  try {
+    console.log(fileUrl);
+    const { pathname } = new URL(fileUrl);
+    let filePath = decodeURIComponent(pathname.substring(1)); // Remove leading '/' and decode URI components
+    const bucketNameIndex = filePath.indexOf("/");
+    if (bucketNameIndex !== -1) {
+      filePath = filePath.substring(bucketNameIndex + 1);
+    }
+    // // Create a reference to the file to delete
+    const fileRef = bucket.file(filePath);
+    // Delete the file
+    await fileRef.delete();
+    return new StatusCode.OK("File is Deleted");
+  } catch (error) {
+    console.log(error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = { bucket, admin, fileUpload, filedelete };

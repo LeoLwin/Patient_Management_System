@@ -3,11 +3,12 @@ const DB = require("../helper/database_helper");
 
 // TODO: to follow coding standard
 
-const patientCreate = async (name, dob, nrc, gender) => {
+const patientCreate = async (name, dob, nrc, gender, imageUrl) => {
   try {
     // TODO: duplicate entry checking?
-    const sql = "INSERT INTO patients (name, dob, nrc, gender) VALUES(?,?,?,?)";
-    const result = await DB.query(sql, [name, dob, nrc, gender]);
+    const sql =
+      "INSERT INTO patients (name, dob, nrc, gender, imageUrl) VALUES(?,?,?,?,?)";
+    const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl]);
     return new StatusCode.OK(result, "New patient registration successful.");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -19,7 +20,7 @@ const patientList = async (page) => {
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender, imageUrl FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     const list = await DB.query(sql, [page_size, offset]);
 
     // Query to count total number of bundles
@@ -38,11 +39,14 @@ const patientList = async (page) => {
 };
 
 // TODO: use individual parameters
-const patientUpdate = async (name, dob, nrc, gender, id) => {
+const patientUpdate = async (name, dob, nrc, gender, imageUrl, id) => {
   try {
-    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?,gender=? WHERE id=?`;
-    const result = await DB.query(sql, [name, dob, nrc, gender, id]);
-    return new StatusCode.OK(null, "Pateint Data is updated");
+    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?,gender=?, imageUrl=? WHERE id=?`;
+    const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl, id]);
+    if (result.affectedRows == 1) {
+      return new StatusCode.OK(null, "Pateint Data is updated", result);
+    }
+    return new StatusCode.UNKNOWN(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -105,7 +109,7 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender FROM patients WHERE id=?`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender,imageUrl FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
       const sql = `SELECT COUNT (*) AS total FROM patients WHERE id= ?`;

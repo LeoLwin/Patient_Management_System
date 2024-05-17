@@ -4,8 +4,8 @@ const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
 const {
   bucket,
-  admin,
   fileUpload,
+  filedelete,
 } = require("../helper/firebase_upload_helper");
 const multer = require("multer");
 const storage = multer.memoryStorage();
@@ -119,6 +119,19 @@ router.post(
 
       return true; // Validation passed
     }),
+    body("file").custom((value, { req }) => {
+      // Check if a file was uploaded
+      if (!req.file) {
+        throw new Error("File is required");
+      }
+
+      // Check if the uploaded file is an image
+      if (!req.file.mimetype.startsWith("image")) {
+        throw new Error("Uploaded file must be an image");
+      }
+
+      return true; // Validation passed
+    }),
   ],
   async (req, res) => {
     try {
@@ -130,9 +143,15 @@ router.post(
       const file = req.file;
       const fileurl = await fileUpload(file);
       if (fileurl.code == 200) {
-        const image = fileurl.data;
-        
-        res.json(new StatusCode.OK({ name, dob, nrc, gender, image }));
+        const imageUrl = fileurl.data;
+        const result = await Patient.patientCreate(
+          name,
+          dob,
+          nrc,
+          gender,
+          imageUrl
+        );
+        res.json(new StatusCode.OK(result));
       }
       res.json(new StatusCode.UNKNOWN(fileurl));
     } catch (error) {
@@ -163,6 +182,7 @@ router.get(
 
 router.put(
   "/patientUpdate/:id",
+  upload.single("file"),
   [
     body("name")
       .notEmpty()
@@ -200,6 +220,19 @@ router.put(
         return true; // Validation passed
       }),
     param("id").notEmpty().isInt().toInt(),
+    body("file").custom((value, { req }) => {
+      // Check if a file was uploaded
+      if (!req.file) {
+        throw new Error("File is required");
+      }
+
+      // Check if the uploaded file is an image
+      if (!req.file.mimetype.startsWith("image")) {
+        throw new Error("Uploaded file must be an image");
+      }
+
+      return true; // Validation passed
+    }),
   ],
   async (req, res) => {
     try {
@@ -210,9 +243,26 @@ router.put(
 
       const { name, dob, nrc, gender } = req.body;
       const { id } = req.params;
+      const file = req.file;
 
-      const result = await Patient.patientUpdate(name, dob, nrc, gender, id);
-      res.json(result);
+      const fileurl = await fileUpload(file);
+
+      if (fileurl.code == 200) {
+        const imageUrl = fileurl.data;
+        const result = await Patient.patientUpdate(
+          name,
+          dob,
+          nrc,
+          gender,
+          imageUrl,
+          id
+        );
+        res.json(new StatusCode.OK(result));
+      }
+      res.json(new StatusCode.UNKNOWN(fileurl));
+
+      // const result = await Patient.patientUpdate(name, dob, nrc, gender, id);
+      // res.json(result);
     } catch (error) {
       res.status(error);
     }
@@ -228,9 +278,17 @@ router.delete(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-
-      const result = await Patient.patientDelete(req.params.id);
-      res.json(result);
+      const id = req.params.id;
+      const patient = await Patient.patientIdSearch(id);
+      if (patient.code == 200) {
+        const fileDelete = await filedelete(patient.data.result[0].imageUrl);
+        if (fileDelete.code == 200) {
+          const result = await Patient.patientDelete(id);
+          res.json(result);
+        }
+        res.json(fileDelete);
+      }
+      res.json(patient);
     } catch (error) {
       res.status(error);
     }
