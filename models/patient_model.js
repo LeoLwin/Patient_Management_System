@@ -20,7 +20,7 @@ const patientList = async (page) => {
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender, imageUrl FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, nrc, gender, imageUrl FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     const list = await DB.query(sql, [page_size, offset]);
 
     // Query to count total number of bundles
@@ -67,7 +67,7 @@ const patientNameSearch = async (name, page) => {
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `
-      SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, 
+      SELECT *, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, 
       MATCH(name) AGAINST (?) AS relevance 
       FROM patients 
       WHERE MATCH(name) AGAINST (?) 
@@ -93,7 +93,7 @@ const patientNameSearch = async (name, page) => {
 
 const patientNrcSearch = async (nrc) => {
   try {
-    const sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') AS dob FROM patients WHERE nrc=?;`;
+    const sql = `SELECT *, DATE_FORMAT(dob, '%Y/%m/%d') AS dob FROM patients WHERE nrc=?;`;
     const result = await DB.query(sql, [nrc]);
     if (result.length > 0) {
       const sql = `SELECT COUNT (*) AS total FROM patients WHERE nrc= ?`;
@@ -109,7 +109,7 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y-%m-%d') AS dob, nrc, gender,imageUrl FROM patients WHERE id=?`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, nrc, gender,imageUrl FROM patients WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
       const sql = `SELECT COUNT (*) AS total FROM patients WHERE id= ?`;

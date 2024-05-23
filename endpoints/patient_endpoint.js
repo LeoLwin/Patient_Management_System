@@ -30,8 +30,8 @@ router.post(
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
-      .withMessage("Date of birth must be in yyyymmdd format"),
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
       .matches(/^..\/......\(.\)......$/)
@@ -86,8 +86,8 @@ router.post(
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
-      .withMessage("Date of birth must be in yyyymmdd format"),
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
       .matches(/^..\/......\(.\)......$/)
@@ -106,19 +106,6 @@ router.post(
         }
         return true; // Validation passed
       }),
-    body("file").custom((value, { req }) => {
-      // Check if a file was uploaded
-      if (!req.file) {
-        throw new Error("File is required");
-      }
-
-      // Check if the uploaded file is an image
-      if (!req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
-      }
-
-      return true; // Validation passed
-    }),
     body("file").custom((value, { req }) => {
       // Check if a file was uploaded
       if (!req.file) {
@@ -200,8 +187,8 @@ router.put(
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
-      .withMessage("Date of birth must be in yyyymmdd format"),
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
       .matches(/^..\/......\(.\)......$/)
