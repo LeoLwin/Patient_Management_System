@@ -30,10 +30,10 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
     body("gender")
       .notEmpty()
       .withMessage("Gender is required.")
@@ -86,10 +86,10 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
     body("gender")
       .notEmpty()
       .withMessage("Gender is required.")
@@ -187,10 +187,10 @@ router.put(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
     body("gender")
       .notEmpty()
       .custom((value) => {

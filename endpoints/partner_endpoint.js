@@ -98,10 +98,10 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^..\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
     body("gender")
       .notEmpty()
       .custom((value) => {
