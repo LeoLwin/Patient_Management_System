@@ -63,7 +63,9 @@ router.post(
       const isExist = await Partner.partnerCheck(patient_id_1, patient_id_2);
 
       isExist.data !== 200
-        ? res.json(new StatusCode.ALREADY_EXISTS("A specified resource is not found"))
+        ? res.json(
+            new StatusCode.ALREADY_EXISTS("A specified resource is not found")
+          )
         : res.json(await Partner.partnerCreate(patient_id_1, patient_id_2));
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -92,8 +94,8 @@ router.post(
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}-\d{2}-\d{2}$/) // Matches format yyyy-mm-dd
-      .withMessage("Date of birth must be in yyyymmdd format"),
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
       .matches(/^..\/......\(.\)......$/)
@@ -135,20 +137,24 @@ router.post(
       }
       const { name, dob, nrc, gender, partner_id } = req.body;
       const newPatient = await Patient.patientCreate(name, dob, nrc, gender);
+      console.log(newPatient);
       if (newPatient.code != 200) {
         res.json(newPatient);
       }
+
       const isExist = await Partner.partnerCheck(
         newPatient.data.insertId,
         partner_id
       );
 
-      //if data is exit and we have created new patient Reisteration and how to handle that new data , delete or not
-      isExist.data.data
-        ? res.json(isExist)
-        : res.json(
-            await Partner.partnerCreate(newPatient.data.insertId, partner_id)
-          );
+      if (isExist.data.code == 404) {
+        res.json(
+          await Partner.partnerCreate(newPatient.data.insertId, partner_id)
+        );
+      }
+      res.json(
+        new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
+      );
     } catch (error) {
       res.status(error);
     }
