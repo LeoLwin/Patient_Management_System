@@ -16,10 +16,47 @@ const storage = multer.diskStorage({
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
 
+const sanitizeFileName = (input) => {
+  // Replace characters that are invalid in file paths with a safe character, e.g., "_"
+  return input.replace(/[\/\\?%*:|"<>]/g, "_");
+};
+
+const fileUpload = async (fileBuffer, fileName, nrc) => {
+  try {
+    // Sanitize the NRC string to make it a valid folder name
+    const sanitizedNrc = sanitizeFileName(nrc);
+    // Treat the entire NRC as a single directory name
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads",
+      "profilePic",
+      sanitizedNrc
+    );
+    const filePath = path.join(uploadDir, fileName);
+
+    // Ensure the directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // Write the file to the specified directory
+    fs.writeFileSync(filePath, fileBuffer);
+
+    // // Get the relative path from the absolute path
+    // const relativePath = path.relative(path.join(__dirname, "../"), filePath);
+
+    console.log(`File saved to ${filePath}`);
+    return new StatusCode.OK(filePath);
+  } catch (error) {
+    console.error(error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 const fileDelete = async (filePath) => {
   try {
+    console.log("filePath :", filePath);
     await fs.remove(filePath, (err) => {
-      console.log("isDeleted");
       if (err) return new StatusCode.UNKNOWN(err);
     });
     return new StatusCode.OK(null, "File is deleted");
@@ -29,4 +66,4 @@ const fileDelete = async (filePath) => {
   }
 };
 
-module.exports = { upload, fileDelete };
+module.exports = { upload, fileDelete, fileUpload };

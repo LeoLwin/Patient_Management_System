@@ -2,12 +2,8 @@ const router = require("express").Router();
 const Patient = require("../models/patient_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
-const {
-  bucket,
-  fileUpload,
-  filedelete,
-} = require("../helper/firebase_upload_helper");
 const multer = require("multer");
+const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -360,58 +356,178 @@ router.post(
   }
 );
 
+//create with pic
 router.post(
-  "/patientFirebaseUpload",
-  upload.single("file"),
+  "/patientPicUpload",
+  upload.single("image"),
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        return true; // Validation passed
+      }),
+    body("dob")
+      .notEmpty()
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
+    body("nrc")
+      .notEmpty()
+      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
+      .withMessage(
+        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
+      ),
+    body("gender")
+      .notEmpty()
+      .withMessage("Gender is required.")
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+
+    if (!req.file.mimetype.startsWith("image")) {
+      return res.status(400).send("Uploaded file must be an image.");
+    }
+
+    const { name, dob, nrc, gender } = req.body;
+    const image = req.file;
+
+    // console.log(image);
+    // console.log({ name, dob, nrc, gender });
+    const uploadResult = await fileUpload(
+      image.buffer,
+      image.originalname,
+      nrc
+    );
+
+    if (uploadResult.code === "500") {
+      return res.status(uploadResult.message);
+    }
+
+    if (uploadResult.code === "200") {
+      const imageUrl = uploadResult.data;
+      console.log(uploadResult.data);
+      const result = await Patient.patientCreate(
+        name,
+        dob,
+        nrc,
+        gender,
+        imageUrl
+      );
+      res.json(result);
+    }
+
+    // Continue with your business logic here (e.g., saving the image and data to the database)
+
+    res.status(uploadResult);
+  }
+);
+
+//delete with pic
+router.delete(
+  "/patientPicDelete/:id",
+  [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).send("No file uploaded.");
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { name } = req.body;
-      const fileBuffer = req.file.buffer;
-      const originalFileName = req.file.originalname;
-      // const uniqueFileName = Date.now() + "-" + originalFileName; // Generate a unique file name
-      await bucket.file(originalFileName).save(fileBuffer);
-      // Send the uploaded file path as a response
-
-      // Get the download URL of the uploaded file
-      const [url] = await bucket
-        .file(originalFileName)
-        .getSignedUrl({ action: "read", expires: "01-01-2030" });
-      res.status(200).send(`${url}`);
+      const id = req.params.id;
+      const patient = await Patient.patientIdSearch(id);
+      if (patient.code == 200) {
+        console.log(patient.data);
+        const deletResult = await fileDelete(patient.data.result[0].imageUrl);
+        console.log(deletResult);
+        if (deletResult.code == 200) {
+          const result = await Patient.patientDelete(id);
+          res.json(result);
+        }
+        res.json(deletResult);
+      }
+      res.json(patient);
     } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
+      res.status(error);
     }
   }
 );
 
-router.post("/patientFirebaseDelete", async (req, res) => {
-  try {
-    const fileUrl = req.body.file;
-    if (!fileUrl) {
-      return res.status(400).send("No file URL provided.");
-    }
-    const { pathname } = new URL(fileUrl);
-    let filePath = decodeURIComponent(pathname.substring(1)); // Remove leading '/' and decode URI components
-    const bucketNameIndex = filePath.indexOf("/");
-    if (bucketNameIndex !== -1) {
-      filePath = filePath.substring(bucketNameIndex + 1);
-      console.log(" filePath : ", filePath);
-    }
+module.exports = router;
 
-    // // Create a reference to the file to delete
-    const fileRef = bucket.file(filePath);
+// router.post(
+//   "/patientFirebaseUpload",
+//   upload.single("file"),
+//   async (req, res) => {
+//     try {
+//       if (!req.file) {
+//         return res.status(400).send("No file uploaded.");
+//       }
+//       const { name } = req.body;
+//       const fileBuffer = req.file.buffer;
+//       const originalFileName = req.file.originalname;
+//       // const uniqueFileName = Date.now() + "-" + originalFileName; // Generate a unique file name
+//       await bucket.file(originalFileName).save(fileBuffer);
+//       // Send the uploaded file path as a response
 
-    // Delete the file
-    await fileRef.delete();
-    res.json(new StatusCode.OK("Deleting"));
-    // res.json(fileRef);
-  } catch (error) {
-    console.error(error);
-    res.status(new StatusCode.UNKNOWN(error.message));
-  }
-});
+//       // Get the download URL of the uploaded file
+//       const [url] = await bucket
+//         .file(originalFileName)
+//         .getSignedUrl({ action: "read", expires: "01-01-2030" });
+//       res.status(200).send(`${url}`);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).send(error);
+//     }
+//   }
+// );
+
+// router.post("/patientFirebaseDelete", async (req, res) => {
+//   try {
+//     const fileUrl = req.body.file;
+//     if (!fileUrl) {
+//       return res.status(400).send("No file URL provided.");
+//     }
+//     const { pathname } = new URL(fileUrl);
+//     let filePath = decodeURIComponent(pathname.substring(1)); // Remove leading '/' and decode URI components
+//     const bucketNameIndex = filePath.indexOf("/");
+//     if (bucketNameIndex !== -1) {
+//       filePath = filePath.substring(bucketNameIndex + 1);
+//       console.log(" filePath : ", filePath);
+//     }
+
+//     // // Create a reference to the file to delete
+//     const fileRef = bucket.file(filePath);
+
+//     // Delete the file
+//     await fileRef.delete();
+//     res.json(new StatusCode.OK("Deleting"));
+//     // res.json(fileRef);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(new StatusCode.UNKNOWN(error.message));
+//   }
+// });
 
 module.exports = router;
