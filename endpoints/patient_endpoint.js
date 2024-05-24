@@ -34,9 +34,9 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^..\/......\(.\)......$/)
+      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
       .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
       ),
     body("gender")
       .notEmpty()
@@ -90,9 +90,9 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^..\/......\(.\)......$/)
+      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
       .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
       ),
     body("gender")
       .notEmpty()
@@ -191,9 +191,9 @@ router.put(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^..\/......\(.\)......$/)
+      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
       .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
       ),
     body("gender")
       .notEmpty()
@@ -323,9 +323,9 @@ router.post(
   [
     body("nrc")
       .notEmpty()
-      .matches(/^..\/......\(.\)......$/)
+      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
       .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)??????"
+        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
       ),
   ],
   async (req, res) => {
