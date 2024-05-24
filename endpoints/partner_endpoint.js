@@ -62,8 +62,8 @@ router.post(
       const { patient_id_1, patient_id_2 } = req.body;
       const isExist = await Partner.partnerCheck(patient_id_1, patient_id_2);
 
-      isExist.data.data
-        ? res.json(new StatusCode.ALREADY_EXISTS())
+      isExist.data !== 200
+        ? res.json(new StatusCode.ALREADY_EXISTS("A specified resource is not found"))
         : res.json(await Partner.partnerCreate(patient_id_1, patient_id_2));
     } catch (error) {
       res.status(500).json({ error: error.message });

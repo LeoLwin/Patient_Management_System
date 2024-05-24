@@ -2,6 +2,7 @@ const multer = require("multer");
 const path = require("path");
 const StatusCode = require("../helper/status_code_helper");
 const fs = require("fs-extra");
+const { v4: uuidv4 } = require("uuid");
 
 // Define storage for uploaded files
 const storage = multer.diskStorage({
@@ -26,13 +27,15 @@ const fileUpload = async (fileBuffer, fileName, nrc) => {
     // Sanitize the NRC string to make it a valid folder name
     const sanitizedNrc = sanitizeFileName(nrc);
     // Treat the entire NRC as a single directory name
+    const uniqueFileName = `${uuidv4()}-${fileName}`;
+
     const uploadDir = path.join(
       __dirname,
       "../uploads",
       "profilePic",
       sanitizedNrc
     );
-    const filePath = path.join(uploadDir, fileName);
+    const filePath = path.join(uploadDir, uniqueFileName);
 
     // Ensure the directory exists
     if (!fs.existsSync(uploadDir)) {

@@ -41,7 +41,8 @@ const patientList = async (page) => {
 // TODO: use individual parameters
 const patientUpdate = async (name, dob, nrc, gender, imageUrl, id) => {
   try {
-    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?,gender=?, imageUrl=? WHERE id=?`;
+    console.log({ name, dob, nrc, gender, imageUrl, id });
+    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?, gender=?, imageUrl=? WHERE id=?`;
     const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl, id]);
     if (result.affectedRows == 1) {
       return new StatusCode.OK(null, "Pateint Data is updated", result);

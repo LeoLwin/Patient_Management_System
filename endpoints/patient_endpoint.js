@@ -380,10 +380,10 @@ router.post(
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
       .notEmpty()
-      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
     body("gender")
       .notEmpty()
       .withMessage("Gender is required.")
@@ -442,6 +442,117 @@ router.post(
     // Continue with your business logic here (e.g., saving the image and data to the database)
 
     res.status(uploadResult);
+  }
+);
+
+//update with pic
+router.put(
+  "/patientPicUpdate/:id",
+  upload.single("image"),
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("dob")
+      .notEmpty()
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
+    body("nrc")
+      .notEmpty()
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
+    body("gender")
+      .notEmpty()
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
+    param("id").notEmpty().isInt().toInt(),
+    body("image").custom((value, { req }) => {
+      // Check if a file was uploaded
+      if (!req.file) {
+        throw new Error("Image is required");
+      }
+
+      // Check if the uploaded file is an image
+      if (!req.file.mimetype.startsWith("image")) {
+        throw new Error("Uploaded file must be an image");
+      }
+
+      return true; // Validation passed
+    }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+
+      const { name, dob, nrc, gender } = req.body;
+      const { id } = req.params;
+      const image = req.file;
+      console.log("Image", image);
+
+      const patient = await Patient.patientIdSearch(id);
+      console.log("Patient", patient);
+      if (patient.code == 200) {
+        const deletResult = await fileDelete(patient.data.result[0].imageUrl);
+        console.log("DeleteReslt", deletResult);
+        if (deletResult.code == 200) {
+          const file = await fileUpload(image.buffer, image.originalname, nrc);
+          console.log("ImamgeUrl", file);
+          const imageUrl = file.data;
+          if (file.code == 200) {
+            const result = await Patient.patientUpdate(
+              name,
+              dob,
+              nrc,
+              gender,
+              imageUrl,
+              id
+            );
+            await res.json(result);
+          }
+          res.json(fileurl);
+        }
+        if (fileurl.code == 200) {
+          const imageUrl = fileurl.data;
+          const result = await Patient.patientUpdate(
+            name,
+            dob,
+            nrc,
+            gender,
+            imageUrl,
+            id
+          );
+          res.json(new StatusCode.OK(result));
+        }
+        res.json(new StatusCode.UNKNOWN(fileurl));
+      }
+
+      res.json(patient);
+    } catch (error) {
+      res.status(error);
+    }
   }
 );
 
