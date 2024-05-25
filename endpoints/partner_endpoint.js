@@ -60,13 +60,20 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { patient_id_1, patient_id_2 } = req.body;
+      console.log({ patient_id_1, patient_id_2 });
       const isExist = await Partner.partnerCheck(patient_id_1, patient_id_2);
 
-      isExist.data !== 200
-        ? res.json(
-            new StatusCode.ALREADY_EXISTS("A specified resource is not found")
-          )
-        : res.json(await Partner.partnerCreate(patient_id_1, patient_id_2));
+      console.log("Is Exist :", isExist);
+
+      if (isExist.data.code == 409) {
+        console.log("Already Exit");
+        return res.json(new StatusCode.ALREADY_EXISTS());
+      }
+      const linkPartner = await Partner.partnerCreate(
+        patient_id_1,
+        patient_id_2
+      );
+      return res.json(new StatusCode.OK(linkPartner));
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

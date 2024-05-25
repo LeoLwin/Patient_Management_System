@@ -87,11 +87,12 @@ const patrnerIsExists = async (patient_id, partner_id) => {
       partner_id,
       patient_id,
     ]);
+    console.log("relation: ", relation);
     return relation.length > 0
       ? new StatusCode.ALREADY_EXISTS(relation)
       : new StatusCode.NOT_FOUND();
   } catch (error) {
-    return new StatusCode.OK(error.message);
+    return new StatusCode.UNKNOWN(error.message);
   }
 };
 
