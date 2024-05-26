@@ -514,7 +514,7 @@ router.put(
         const deletResult = await fileDelete(patient.data.result[0].imageUrl);
         console.log("DeleteReslt", deletResult);
         if (deletResult.code == 200) {
-          const file = await fileUpload(image.buffer, image.originalname, nrc);
+          const file = await fileUpload(image);
           console.log("ImamgeUrl", file);
           const imageUrl = file.data;
           if (file.code == 200) {

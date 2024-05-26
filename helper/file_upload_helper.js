@@ -17,11 +17,6 @@ const storage = multer.diskStorage({
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
 
-const sanitizeFileName = (input) => {
-  // Replace characters that are invalid in file paths with a safe character, e.g., "_"
-  return input.replace(/[\/\\?%*:|"<>]/g, "_");
-};
-
 const fileUpload = async (file) => {
   try {
     const uploadFile = file.buffer;
