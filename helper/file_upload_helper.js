@@ -22,39 +22,66 @@ const sanitizeFileName = (input) => {
   return input.replace(/[\/\\?%*:|"<>]/g, "_");
 };
 
-const fileUpload = async (fileBuffer, fileName, nrc) => {
+const fileUpload = async (file) => {
   try {
-    // Sanitize the NRC string to make it a valid folder name
-    const sanitizedNrc = sanitizeFileName(nrc);
-    // Treat the entire NRC as a single directory name
-    const uniqueFileName = `${uuidv4()}-${fileName}`;
+    const uploadFile = file.buffer;
 
-    const uploadDir = path.join(
-      __dirname,
-      "../uploads",
-      "profilePic",
-      sanitizedNrc
-    );
+    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const uploadDir = path.join(__dirname, "../uploads");
     const filePath = path.join(uploadDir, uniqueFileName);
 
     // Ensure the directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    await fs.mkdir(uploadDir, { recursive: true });
 
     // Write the file to the specified directory
-    fs.writeFileSync(filePath, fileBuffer);
-
-    // // Get the relative path from the absolute path
-    // const relativePath = path.relative(path.join(__dirname, "../"), filePath);
+    await fs.writeFile(filePath, uploadFile);
 
     console.log(`File saved to ${filePath}`);
-    return new StatusCode.OK(filePath);
+
+    // Construct the file URL
+    const baseUrl = "http://localhost:3000/images/"; // Replace with your actual base URL
+    const fileUrl = `${baseUrl}${uniqueFileName}`;
+
+    return new StatusCode.OK(fileUrl);
   } catch (error) {
     console.error(error);
-    return new StatusCode.UNKNOWN(error.message);
+    return new StatusCode.OK(error.message);
   }
 };
+
+// const fileUpload = async (fileBuffer, fileName, nrc) => {
+//   try {
+//     // Sanitize the NRC string to make it a valid folder name
+//     const sanitizedNrc = sanitizeFileName(nrc);
+//     // Treat the entire NRC as a single directory name
+//     const uniqueFileName = `${uuidv4()}-${fileName}`;
+
+//     const uploadDir = path.join(
+//       __dirname,
+//       "../uploads",
+//       "profilePic",
+//       sanitizedNrc
+//     );
+//     const filePath = path.join(uploadDir, uniqueFileName);
+
+//     // Ensure the directory exists
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir, { recursive: true });
+//     }
+
+//     // Write the file to the specified directory
+//     fs.writeFileSync(filePath, fileBuffer);
+
+//     // // Get the relative path from the absolute path
+//     // const relativePath = path.relative(path.join(__dirname, "../"), filePath);
+
+//     console.log(`File saved to ${filePath}`);
+//     return new StatusCode.OK(filePath);
+//   } catch (error) {
+//     console.error(error);
+//     return new StatusCode.UNKNOWN(error.message);
+//   }
+// };
 
 const fileDelete = async (filePath) => {
   try {

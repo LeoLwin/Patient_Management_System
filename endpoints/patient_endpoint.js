@@ -416,11 +416,7 @@ router.post(
 
     // console.log(image);
     // console.log({ name, dob, nrc, gender });
-    const uploadResult = await fileUpload(
-      image.buffer,
-      image.originalname,
-      nrc
-    );
+    const uploadResult = await fileUpload(image);
 
     if (uploadResult.code === "500") {
       return res.status(uploadResult.message);
