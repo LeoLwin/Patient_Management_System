@@ -314,6 +314,7 @@ router.post(
   }
 );
 
+//patientNrcSearch
 router.post(
   "/patientNrcSearch",
   [
@@ -339,6 +340,7 @@ router.post(
   }
 );
 
+//patientIdSearch/:id
 router.post(
   "/patientIdSearch/:id",
   [param("id").notEmpty().isInt().toInt()],
@@ -592,6 +594,25 @@ router.delete(
   }
 );
 
+//delete only pic
+router.delete(
+  "/deleteOnlyPic",
+  [body("fileUrl").notEmpty().withMessage("Url is required")],
+  async (req, res) => {
+    try {
+      const { fileUrl } = req.body;
+      fileDelete(fileUrl)
+        .then((response) => {
+          res.json(response);
+        })
+        .catch((error) => {
+          res.json(error);
+        });
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
 module.exports = router;
 
 // router.post(
