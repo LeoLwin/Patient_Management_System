@@ -493,20 +493,22 @@ router.put(
         }
         return true; // Validation passed
       }),
-    param("id").notEmpty().isInt().toInt(),
     body("image").custom((value, { req }) => {
-      // Check if a file was uploaded
-      if (!req.file) {
-        throw new Error("Image is required");
+      if (!req.file && !req.body.image) {
+        throw new Error("Either image file or image URL must be provided");
       }
-
-      // Check if the uploaded file is an image
-      if (!req.file.mimetype.startsWith("image")) {
+      if (req.file && !req.file.mimetype.startsWith("image")) {
         throw new Error("Uploaded file must be an image");
       }
-
-      return true; // Validation passed
+      // if (
+      //   req.body.image &&
+      //   !/^http?:\/\/.+\.(jpg|jpeg|png|gif)$/.test(req.body.image)
+      // ) {
+      //   throw new Error("Invalid image URL");
+      // }
+      return true;
     }),
+    param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
     try {
@@ -515,50 +517,60 @@ router.put(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      const { name, dob, nrc, gender } = req.body;
+      const { name, dob, nrc, gender, image: imageUrl } = req.body;
       const { id } = req.params;
-      const image = req.file;
-      console.log("Image", image);
+      let image;
 
-      const patient = await Patient.patientIdSearch(id);
-      console.log("Patient", patient);
-      if (patient.code == 200) {
-        console.log("Patient", patient.data.result[0].imageUrl);
-        const deletResult = await fileDelete(patient.data.result[0].imageUrl);
-        console.log("DeleteReslt", deletResult);
-        if (deletResult.code == 200) {
-          const file = await fileUpload(image, nrc);
-          console.log("ImamgeUrl", file);
-          const imageUrl = file.data;
-          if (file.code == 200) {
-            const result = await Patient.patientUpdate(
-              name,
-              dob,
-              nrc,
-              gender,
-              imageUrl,
-              id
-            );
-            await res.json(result);
-          }
-          res.json(fileurl);
-        }
-        if (fileurl.code == 200) {
-          const imageUrl = fileurl.data;
-          const result = await Patient.patientUpdate(
-            name,
-            dob,
-            nrc,
-            gender,
-            imageUrl,
-            id
-          );
-          res.json(new StatusCode.OK(result));
-        }
-        res.json(new StatusCode.UNKNOWN(fileurl));
+      if (req.file) {
+        // If a file is uploaded, process the file
+        image = req.file;
+        console.log({ name, dob, nrc, gender, image });
+        console.log(id);
+      } else if (imageUrl) {
+        // If an image URL is provided, use the URL
+        image = imageUrl;
+        console.log({ name, dob, nrc, gender, image });
+        console.log(id);
       }
 
-      res.json(patient);
+      const patient = await Patient.patientIdSearch(id);
+      console.log(patient);
+      if (patient.code == 200) {
+        const currentImageUrl = patient.data.result[0].imageUrl;
+        console.log("Patient", currentImageUrl);
+        if (req.file && currentImageUrl) {
+          // If a new file is uploaded, delete the old image
+          const deleteResult = await fileDelete(currentImageUrl);
+          console.log("Delete Result", deleteResult);
+        }
+      }
+      let newImageUrl;
+      if (req.file) {
+        // Upload new image and get the URL
+        const uploadResult = await fileUpload(image, nrc);
+        console.log("Uploaded Image URL", uploadResult);
+        if (uploadResult.code === "200") {
+          newImageUrl = uploadResult.data;
+          console.log(newImageUrl);
+        } else {
+          return res.json({ uploadResult: "File upload failed" });
+        }
+      } else if (imageUrl) {
+        // Use the provided image URL
+        newImageUrl = imageUrl;
+      }
+      // Update patient with the new image URL
+      const updateResult = await Patient.patientUpdate(
+        name,
+        dob,
+        nrc,
+        gender,
+        newImageUrl,
+        id
+      );
+      return res.json(updateResult);
+
+      // res.json(patient);
     } catch (error) {
       res.status(error);
     }
@@ -668,5 +680,117 @@ module.exports = router;
 //     res.status(new StatusCode.UNKNOWN(error.message));
 //   }
 // });
+
+//update with pic
+// router.put(
+//   "/patientPicUpdate/:id",
+//   upload.single("image"),
+//   [
+//     body("name")
+//       .notEmpty()
+//       .withMessage("Name is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("dob")
+//       .notEmpty()
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
+//     body("nrc")
+//       .notEmpty()
+//       .matches(
+//         /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+//       )
+//       .withMessage("Invalid format for NRC."),
+//     body("gender")
+//       .notEmpty()
+//       .custom((value) => {
+//         const validGenders = ["male", "female"];
+//         if (!validGenders.includes(value.toLowerCase())) {
+//           throw new Error(
+//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+//           );
+//         }
+//         return true; // Validation passed
+//       }),
+//     param("id").notEmpty().isInt().toInt(),
+//     body("image").custom((value, { req }) => {
+//       // Check if a file was uploaded
+//       if (!req.file) {
+//         throw new Error("Image is required");
+//       }
+
+//       // Check if the uploaded file is an image
+//       if (!req.file.mimetype.startsWith("image")) {
+//         throw new Error("Uploaded file must be an image");
+//       }
+
+//       return true; // Validation passed
+//     }),
+//   ],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+
+//       const { name, dob, nrc, gender } = req.body;
+//       const { id } = req.params;
+//       const image = req.file;
+//       console.log("Image", image);
+
+//       const patient = await Patient.patientIdSearch(id);
+//       console.log("Patient", patient);
+//       if (patient.code == 200) {
+//         console.log("Patient", patient.data.result[0].imageUrl);
+//         const deletResult = await fileDelete(patient.data.result[0].imageUrl);
+//         console.log("DeleteReslt", deletResult);
+//         if (deletResult.code == 200) {
+//           const file = await fileUpload(image, nrc);
+//           console.log("ImamgeUrl", file);
+//           const imageUrl = file.data;
+//           if (file.code == 200) {
+//             const result = await Patient.patientUpdate(
+//               name,
+//               dob,
+//               nrc,
+//               gender,
+//               imageUrl,
+//               id
+//             );
+//             await res.json(result);
+//           }
+//           res.json(fileurl);
+//         }
+//         if (fileurl.code == 200) {
+//           const imageUrl = fileurl.data;
+//           const result = await Patient.patientUpdate(
+//             name,
+//             dob,
+//             nrc,
+//             gender,
+//             imageUrl,
+//             id
+//           );
+//           res.json(new StatusCode.OK(result));
+//         }
+//         res.json(new StatusCode.UNKNOWN(fileurl));
+//       }
+
+//       res.json(patient);
+//     } catch (error) {
+//       res.status(error);
+//     }
+//   }
+// );
 
 module.exports = router;

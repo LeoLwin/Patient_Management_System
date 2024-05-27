@@ -16,13 +16,14 @@ app.get("/images/:nrc/:filename", (req, res) => {
   const nrc = req.params.nrc;
   const fileName = req.params.filename;
 
-  const sanitizedNrc = nrc.replace(/\//g, "_");
-  const filePath = path.join(__dirname, "uploads", sanitizedNrc, fileName);
+  // const sanitizedNrc = nrc.replace(/\//g, "_");
+  const filePath = path.join(__dirname, "uploads", nrc, fileName);
 
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       res.status(404).send({ message: "Check your file name!" });
     } else {
+      console.log(filePath);
       res.sendFile(filePath);
     }
   });
