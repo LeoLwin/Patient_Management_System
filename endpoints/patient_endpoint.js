@@ -62,86 +62,86 @@ router.post(
   }
 );
 
-router.post(
-  "/patientCreateWithPic",
-  upload.single("file"),
-  [
-    body("name")
-      .notEmpty()
-      .withMessage("Name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("dob")
-      .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
-    body("gender")
-      .notEmpty()
-      .withMessage("Gender is required.")
-      .custom((value) => {
-        const validGenders = ["male", "female"];
-        if (!validGenders.includes(value.toLowerCase())) {
-          throw new Error(
-            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-          );
-        }
-        return true; // Validation passed
-      }),
-    body("file").custom((value, { req }) => {
-      // Check if a file was uploaded
-      if (!req.file) {
-        throw new Error("File is required");
-      }
+// router.post(
+//   "/patientCreateWithPic",
+//   upload.single("file"),
+//   [
+//     body("name")
+//       .notEmpty()
+//       .withMessage("Name is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("dob")
+//       .notEmpty()
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
+//     body("nrc")
+//       .notEmpty()
+//       .matches(
+//         /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+//       )
+//       .withMessage("Invalid format for NRC."),
+//     body("gender")
+//       .notEmpty()
+//       .withMessage("Gender is required.")
+//       .custom((value) => {
+//         const validGenders = ["male", "female"];
+//         if (!validGenders.includes(value.toLowerCase())) {
+//           throw new Error(
+//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+//           );
+//         }
+//         return true; // Validation passed
+//       }),
+//     body("file").custom((value, { req }) => {
+//       // Check if a file was uploaded
+//       if (!req.file) {
+//         throw new Error("File is required");
+//       }
 
-      // Check if the uploaded file is an image
-      if (!req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
-      }
+//       // Check if the uploaded file is an image
+//       if (!req.file.mimetype.startsWith("image")) {
+//         throw new Error("Uploaded file must be an image");
+//       }
 
-      return true; // Validation passed
-    }),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const { name, dob, nrc, gender } = req.body;
-      const file = req.file;
-      const fileurl = await fileUpload(file);
-      if (fileurl.code == 200) {
-        const imageUrl = fileurl.data;
-        const result = await Patient.patientCreate(
-          name,
-          dob,
-          nrc,
-          gender,
-          imageUrl
-        );
-        res.json(new StatusCode.OK(result));
-      }
-      res.json(new StatusCode.UNKNOWN(fileurl));
-    } catch (error) {
-      res.status(error);
-    }
-  }
-);
+//       return true; // Validation passed
+//     }),
+//   ],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const { name, dob, nrc, gender } = req.body;
+//       const file = req.file;
+//       const fileurl = await fileUpload(file);
+//       if (fileurl.code == 200) {
+//         const imageUrl = fileurl.data;
+//         const result = await Patient.patientCreate(
+//           name,
+//           dob,
+//           nrc,
+//           gender,
+//           imageUrl
+//         );
+//         res.json(new StatusCode.OK(result));
+//       }
+//       res.json(new StatusCode.UNKNOWN(fileurl));
+//     } catch (error) {
+//       res.status(error);
+//     }
+//   }
+// );
 
 router.get(
   "/patientList/:page",
@@ -398,46 +398,56 @@ router.post(
       }),
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      if (!req.file) {
+        return res.status(400).send("No file uploaded.");
+      }
+
+      if (!req.file.mimetype.startsWith("image")) {
+        return res.status(400).send("Uploaded file must be an image.");
+      }
+
+      const { name, dob, nrc, gender } = req.body;
+      const image = req.file;
+
+      console.log(image);
+      console.log({ name, dob, nrc, gender });
+      const uploadResult = await fileUpload(image, nrc);
+
+      if (uploadResult.code === "500") {
+        return res.status(uploadResult.message);
+      }
+
+      if (uploadResult.code === "200") {
+        const imageUrl = uploadResult.data;
+        console.log(uploadResult.data);
+        const result = await Patient.patientCreate(
+          name,
+          dob,
+          nrc,
+          gender,
+          imageUrl
+        );
+        if (result.code !== "200") {
+          console.log("imageUrl", imageUrl);
+          console.log("equal 500");
+          const deleteResult = await fileDelete(imageUrl);
+          console.group("deleteResult", deleteResult);
+          res.json(result);
+        }
+
+        res.json(result);
+      }
+      // Continue with your business logic here (e.g., saving the image and data to the database)
+      res.json(uploadResult);
+    } catch (error) {
+      res.status(error);
     }
-
-    if (!req.file) {
-      return res.status(400).send("No file uploaded.");
-    }
-
-    if (!req.file.mimetype.startsWith("image")) {
-      return res.status(400).send("Uploaded file must be an image.");
-    }
-
-    const { name, dob, nrc, gender } = req.body;
-    const image = req.file;
-
-    // console.log(image);
-    // console.log({ name, dob, nrc, gender });
-    const uploadResult = await fileUpload(image);
-
-    if (uploadResult.code === "500") {
-      return res.status(uploadResult.message);
-    }
-
-    if (uploadResult.code === "200") {
-      const imageUrl = uploadResult.data;
-      console.log(uploadResult.data);
-      const result = await Patient.patientCreate(
-        name,
-        dob,
-        nrc,
-        gender,
-        imageUrl
-      );
-      res.json(result);
-    }
-
-    // Continue with your business logic here (e.g., saving the image and data to the database)
-
-    res.status(uploadResult);
   }
 );
 
@@ -511,10 +521,11 @@ router.put(
       const patient = await Patient.patientIdSearch(id);
       console.log("Patient", patient);
       if (patient.code == 200) {
+        console.log("Patient", patient.data.result[0].imageUrl);
         const deletResult = await fileDelete(patient.data.result[0].imageUrl);
         console.log("DeleteReslt", deletResult);
         if (deletResult.code == 200) {
-          const file = await fileUpload(image);
+          const file = await fileUpload(image, nrc);
           console.log("ImamgeUrl", file);
           const imageUrl = file.data;
           if (file.code == 200) {

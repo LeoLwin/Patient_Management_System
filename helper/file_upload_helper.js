@@ -17,12 +17,17 @@ const storage = multer.diskStorage({
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
 
-const fileUpload = async (file) => {
+const sanitizeFileName = (nrc) => {
+  return nrc.replace(/\//g, "_");
+};
+
+const fileUpload = async (file, nrc) => {
   try {
     const uploadFile = file.buffer;
 
+    const nrcFolder = sanitizeFileName(nrc);
     const uniqueFileName = `${uuidv4()}-${file.originalname}`;
-    const uploadDir = path.join(__dirname, "../uploads");
+    const uploadDir = path.join(__dirname, "../uploads", nrcFolder);
     const filePath = path.join(uploadDir, uniqueFileName);
 
     // Ensure the directory exists
@@ -35,7 +40,8 @@ const fileUpload = async (file) => {
 
     // Construct the file URL
     const baseUrl = "http://localhost:3000/images/"; // Replace with your actual base URL
-    const fileUrl = `${baseUrl}${uniqueFileName}`;
+    // const fileUrl = `${baseUrl}${uniqueFileName}`;
+    const fileUrl = `${baseUrl}${nrcFolder}/${uniqueFileName}`;
 
     return new StatusCode.OK(fileUrl);
   } catch (error) {
@@ -44,46 +50,25 @@ const fileUpload = async (file) => {
   }
 };
 
-// const fileUpload = async (fileBuffer, fileName, nrc) => {
-//   try {
-//     // Sanitize the NRC string to make it a valid folder name
-//     const sanitizedNrc = sanitizeFileName(nrc);
-//     // Treat the entire NRC as a single directory name
-//     const uniqueFileName = `${uuidv4()}-${fileName}`;
-
-//     const uploadDir = path.join(
-//       __dirname,
-//       "../uploads",
-//       "profilePic",
-//       sanitizedNrc
-//     );
-//     const filePath = path.join(uploadDir, uniqueFileName);
-
-//     // Ensure the directory exists
-//     if (!fs.existsSync(uploadDir)) {
-//       fs.mkdirSync(uploadDir, { recursive: true });
-//     }
-
-//     // Write the file to the specified directory
-//     fs.writeFileSync(filePath, fileBuffer);
-
-//     // // Get the relative path from the absolute path
-//     // const relativePath = path.relative(path.join(__dirname, "../"), filePath);
-
-//     console.log(`File saved to ${filePath}`);
-//     return new StatusCode.OK(filePath);
-//   } catch (error) {
-//     console.error(error);
-//     return new StatusCode.UNKNOWN(error.message);
-//   }
-// };
-
-const fileDelete = async (filePath) => {
+const fileDelete = async (fileUrl) => {
   try {
-    console.log("filePath :", filePath);
-    await fs.remove(filePath, (err) => {
-      if (err) return new StatusCode.UNKNOWN(err);
-    });
+    console.log("Original fileUrl:", fileUrl);
+    const { pathname } = new URL(fileUrl);
+    let filePath = decodeURIComponent(pathname.substring(1)); // Remove leading '/' and decode URI components
+    console.log("Decoded filePath:", filePath);
+
+    // Construct the full path to the file
+    const fullPath = path.join(
+      __dirname,
+      "../uploads",
+      filePath.replace(/^images\//, "")
+    );
+    console.log("Full path:", fullPath);
+
+    // Remove the file
+    await fs.unlink(fullPath);
+    console.log("File deleted successfully");
+
     return new StatusCode.OK(null, "File is deleted");
   } catch (error) {
     console.error(error);
