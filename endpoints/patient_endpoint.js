@@ -278,6 +278,7 @@ router.delete(
   }
 );
 
+//patientNameSearch
 router.post(
   "/patientNameSearch/:page",
   [
@@ -320,10 +321,10 @@ router.post(
   [
     body("nrc")
       .notEmpty()
-      .matches(/^\d{2}\/......\(.\)......$|^\d\/......\(.\)......$/)
-      .withMessage(
-        "Invalid format for NRC. It should match the pattern ??/??????(?)?????? or ?/??????(?)??????"
-      ),
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
   ],
   async (req, res) => {
     try {
@@ -407,11 +408,13 @@ router.post(
       }
 
       if (!req.file) {
-        return res.status(400).send("No file uploaded.");
+        return res.json(new StatusCode.PERMISSION_DENIED("No file uploaded."));
       }
 
       if (!req.file.mimetype.startsWith("image")) {
-        return res.status(400).send("Uploaded file must be an image.");
+        return res.json(
+          new StatusCode.PERMISSION_DENIED("Uploaded file must be an image.")
+        );
       }
 
       const { name, dob, nrc, gender } = req.body;

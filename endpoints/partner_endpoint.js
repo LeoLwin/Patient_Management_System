@@ -3,6 +3,10 @@ const StatusCode = require("../helper/status_code_helper");
 const Partner = require("../models/partner_model");
 const Patient = require("../models/patient_model");
 const { param, body, validationResult } = require("express-validator");
+const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 //if partner is already exist , we use this endpoint
 router.post(
@@ -82,6 +86,147 @@ router.post(
 
 //if we need to create new patient , we use this endpoint .
 // And to create new patient , we use createPatient model from Patient model
+router.post(
+  "/partnerCreateWithPic",
+  upload.single("image"),
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("dob")
+      .notEmpty()
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Date of birth must be in yyyy/mm/dd format"),
+    body("nrc")
+      .notEmpty()
+      .matches(
+        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
+      )
+      .withMessage("Invalid format for NRC."),
+    body("gender")
+      .notEmpty()
+      .custom((value) => {
+        const validGenders = ["male", "female"];
+        if (!validGenders.includes(value.toLowerCase())) {
+          throw new Error(
+            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+          );
+        }
+        return true; // Validation passed
+      }),
+    body("partner_id")
+      .notEmpty()
+      .withMessage("Name is required")
+      .isInt()
+      .withMessage("id must be int")
+      .toInt()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+
+      if (!req.file) {
+        return res.json(new StatusCode.UNKNOWN("No file uploaded."));
+      }
+
+      if (!req.file.mimetype.startsWith("image")) {
+        console.log("No image file");
+        return res.json(
+          new StatusCode.UNKNOWN("Uploaded file must be an image.")
+        );
+      }
+
+      const { name, dob, nrc, gender, partner_id } = req.body;
+      const image = req.file;
+      console.log({ name, dob, nrc, gender, partner_id });
+      console.log(image);
+      if (req.file) {
+        const uploadResult = await fileUpload(image, nrc);
+        console.log(uploadResult);
+        if (uploadResult.code === "200") {
+          const imageUrl = uploadResult.data;
+          const result = await Patient.patientCreate(
+            name,
+            dob,
+            nrc,
+            gender,
+            imageUrl
+          );
+          if (result.code !== "200") {
+            const deleteResult = await fileDelete(imageUrl);
+            console.log("deleteResult", deleteResult);
+            res.json(result);
+          }
+          console.log(result);
+
+          const isExist = await Partner.partnerCheck(
+            result.data.insertId,
+            partner_id
+          );
+          cons
+
+          if (isExist.data.code == 404) {
+            res.json(
+              await Partner.partnerCreate(result.data.insertId, partner_id)
+            );
+          }
+          res.json(
+            new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
+          );
+
+          res.json(isExist);
+        }
+        res.json(uploadResult);
+      }
+      // const newPatient = await Patient.patientCreate(name, dob, nrc, gender);
+      // console.log(newPatient);
+      // if (newPatient.code != 200) {
+      //   res.json(newPatient);
+      // }
+
+      // const isExist = await Partner.partnerCheck(
+      //   newPatient.data.insertId,
+      //   partner_id
+      // );
+
+      // if (isExist.data.code == 404) {
+      //   res.json(
+      //     await Partner.partnerCreate(newPatient.data.insertId, partner_id)
+      //   );
+      // }
+      // res.json(
+      //   new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
+      // );
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+///new Partner Create
 router.post(
   "/partnerCreate",
   [
@@ -358,7 +503,6 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-        `http://localhost:3000/patient/patientIdSearch/${id}`;
       }
       const { patient_id, partner_id } = req.body;
 
