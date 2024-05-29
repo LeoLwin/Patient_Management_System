@@ -11,6 +11,7 @@ const patientCreate = async (name, dob, nrc, gender, imageUrl) => {
     const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl]);
     return new StatusCode.OK(result, "New patient registration successful.");
   } catch (error) {
+    console.log("error", error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
