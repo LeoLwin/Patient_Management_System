@@ -1,0 +1,19 @@
+const StatusCode = require("../helper/status_code_helper");
+const DB = require("../helper/database_helper");
+
+const countStatus = async (table) => {
+  try {
+    const sql = `SELECT * FROM ${table} ORDER BY id DESC LIMIT 1`;
+    const result = await DB.query(sql);
+    console.log(result[0].id +1);
+     // Log the entire result to inspect the structure
+    if (result.length >= 0) {
+      return new StatusCode.OK(result[0].id + 1);
+    }
+  } catch (error) {
+    console.error("Error executing query:", error.message);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = { countStatus };

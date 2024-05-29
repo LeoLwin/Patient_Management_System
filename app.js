@@ -12,12 +12,12 @@ PORT = config.PORT || 2000;
 app.use(cors());
 app.use(express.json({ limit: "500mb" }));
 
-app.get("/images/:nrc/:filename", (req, res) => {
-  const nrc = req.params.nrc;
+app.get("/images/:id/:filename", (req, res) => {
+  const id = req.params.id;
   const fileName = req.params.filename;
 
   // const sanitizedNrc = nrc.replace(/\//g, "_");
-  const filePath = path.join(__dirname, "uploads", nrc, fileName);
+  const filePath = path.join(__dirname, "uploads", id, fileName);
 
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
@@ -29,13 +29,13 @@ app.get("/images/:nrc/:filename", (req, res) => {
   });
 });
 
-app.delete("/images/:nrc/:filename", async (req, res) => {
-  const nrc = req.params.nrc;
+app.delete("/images/:id/:filename", async (req, res) => {
+  const id = req.params.id;
   const fileName = req.params.filename;
 
   try {
-    const sanitizedNrc = nrc.replace(/\//g, "_");
-    const filePath = path.join(__dirname, "uploads", sanitizedNrc, fileName);
+    // const sanitizedNrc = nrc.replace(/\//g, "_");
+    const filePath = path.join(__dirname, "uploads", id, fileName);
     console.log("Deleting file:", filePath);
 
     await fs.unlink(filePath);

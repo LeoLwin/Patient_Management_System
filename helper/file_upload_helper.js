@@ -21,13 +21,14 @@ const sanitizeFileName = (nrc) => {
   return nrc.replace(/\//g, "_");
 };
 
-const fileUpload = async (file, nrc) => {
+const fileUpload = async (file, id) => {
   try {
     const uploadFile = file.buffer;
+    // Convert id to string
+    const idStr = String(id);
 
-    const nrcFolder = sanitizeFileName(nrc);
     const uniqueFileName = `${uuidv4()}-${file.originalname}`;
-    const uploadDir = path.join(__dirname, "../uploads", nrcFolder);
+    const uploadDir = path.join(__dirname, "../uploads", idStr);
     const filePath = path.join(uploadDir, uniqueFileName);
 
     // Ensure the directory exists
@@ -41,7 +42,7 @@ const fileUpload = async (file, nrc) => {
     // Construct the file URL
     const baseUrl = "http://localhost:3000/images/"; // Replace with your actual base URL
     // const fileUrl = `${baseUrl}${uniqueFileName}`;
-    const fileUrl = `${baseUrl}${nrcFolder}/${uniqueFileName}`;
+    const fileUrl = `${baseUrl}${idStr}/${uniqueFileName}`;
 
     return new StatusCode.OK(fileUrl);
   } catch (error) {

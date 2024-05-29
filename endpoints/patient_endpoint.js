@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Patient = require("../models/patient_model");
 const StatusCode = require("../helper/status_code_helper");
+const Count = require("../models/count_status");
 const { param, body, validationResult } = require("express-validator");
 const multer = require("multer");
 const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
@@ -420,36 +421,42 @@ router.post(
       const { name, dob, nrc, gender } = req.body;
       const image = req.file;
 
-      console.log(image);
-      console.log({ name, dob, nrc, gender });
-      const uploadResult = await fileUpload(image, nrc);
+      // console.log(image);
+      // console.log({ name, dob, nrc, gender });
 
-      if (uploadResult.code === "500") {
-        return res.status(uploadResult.message);
-      }
-
-      if (uploadResult.code === "200") {
-        const imageUrl = uploadResult.data;
-        console.log(uploadResult.data);
-        const result = await Patient.patientCreate(
-          name,
-          dob,
-          nrc,
-          gender,
-          imageUrl
-        );
-        if (result.code !== "200") {
-          console.log("imageUrl", imageUrl);
-          console.log("equal 500");
-          const deleteResult = await fileDelete(imageUrl);
-          console.group("deleteResult", deleteResult);
-          res.json(result);
+      const nextId = await Count.countStatus("patients");
+      console.log(nextId);
+      if (nextId.code == 200) {
+        const uploadResult = await fileUpload(image, nextId.data);
+        if (uploadResult.code === "500") {
+          return res.status(uploadResult.message);
         }
 
-        res.json(result);
+        if (uploadResult.code === "200") {
+          const imageUrl = uploadResult.data;
+          console.log(uploadResult.data);
+          const result = await Patient.patientCreate(
+            name,
+            dob,
+            nrc,
+            gender,
+            imageUrl
+          );
+          if (result.code !== "200") {
+            console.log("imageUrl", imageUrl);
+            console.log("equal 500");
+            const deleteResult = await fileDelete(imageUrl);
+            console.group("deleteResult", deleteResult);
+            res.json(result);
+          }
+
+          res.json(result);
+        }
+        // Continue with your business logic here (e.g., saving the image and data to the database)
+        res.json(uploadResult);
       }
-      // Continue with your business logic here (e.g., saving the image and data to the database)
-      res.json(uploadResult);
+
+      res.json(nextId);
     } catch (error) {
       res.status(error);
     }
@@ -550,7 +557,7 @@ router.put(
       let newImageUrl;
       if (req.file) {
         // Upload new image and get the URL
-        const uploadResult = await fileUpload(image, nrc);
+        const uploadResult = await fileUpload(image, id);
         console.log("Uploaded Image URL", uploadResult);
         if (uploadResult.code === "200") {
           newImageUrl = uploadResult.data;
@@ -628,6 +635,19 @@ router.delete(
     }
   }
 );
+
+//countStatus
+router.get("/patientsCountStatus", async (req, res) => {
+  try {
+    const { table } = req.body;
+    console.log(table);
+    const result = await Count.countStatus(table);
+    res.json(result);
+  } catch (error) {
+    res.status(error.message);
+  }
+});
+
 module.exports = router;
 
 // router.post(

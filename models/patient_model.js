@@ -126,6 +126,24 @@ const patientIdSearch = async (id) => {
   }
 };
 
+const patientCountStatus = async () => {
+  try {
+    const sql = `SHOW TABLE STATUS LIKE 'patients'`;
+    const result = await DB.query(sql);
+
+    if (result.length > 0) {
+      const autoIncrementValue = result[0].Auto_increment;
+      console.log(`Next auto-increment value: ${autoIncrementValue}`);
+      return new StatusCode.OK({ autoIncrementValue });
+    } else {
+      return new StatusCode.NOT_FOUND("Table not found");
+    }
+  } catch (error) {
+    console.error("Error executing query:", error.message);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   patientCreate,
   patientList,
@@ -134,4 +152,5 @@ module.exports = {
   patientNameSearch,
   patientNrcSearch,
   patientIdSearch,
+  patientCountStatus,
 };
