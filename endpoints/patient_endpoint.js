@@ -510,12 +510,7 @@ router.put(
       if (req.file && !req.file.mimetype.startsWith("image")) {
         throw new Error("Uploaded file must be an image");
       }
-      // if (
-      //   req.body.image &&
-      //   !/^http?:\/\/.+\.(jpg|jpeg|png|gif)$/.test(req.body.image)
-      // ) {
-      //   throw new Error("Invalid image URL");
-      // }
+
       return true;
     }),
     param("id").notEmpty().isInt().toInt(),
