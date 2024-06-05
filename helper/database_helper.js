@@ -14,6 +14,7 @@ const pool = mysql.createPool({
   charset: "utf8mb4",
 });
 
+
 pool.getConnection((err, connection) => {
   if (err) {
     console.log("db con err");

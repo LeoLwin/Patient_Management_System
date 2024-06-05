@@ -8,8 +8,7 @@ const formData = require("./form_data_endpoint");
 const fileUpload = require("./file_upload_endpoint");
 const partner = require("./partner_endpoint");
 const tag = require("./tags_endpoint");
-const path = require("path");
-const fs = require("fs");
+const HospAndLab = require("./hospital_and _lab");
 
 router.use("/patient", patient);
 router.use("/login", login);
@@ -19,6 +18,7 @@ router.use("/formData", formData);
 router.use("/fileUpload", fileUpload);
 router.use("/partner", partner);
 router.use("/tag", tag);
+router.use("/hospAndLab", HospAndLab);
 
 // router.get("/images/:nrc/:filename", (req, res) => {
 //   const nrc = req.params.nrc;

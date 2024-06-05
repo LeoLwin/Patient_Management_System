@@ -2,7 +2,6 @@ const router = require("express").Router();
 const Tag = require("../models/tags_model");
 const { param, body, validationResult } = require("express-validator");
 const StatusCode = require("../helper/status_code_helper");
-const { route } = require("./file_upload_endpoint");
 
 router.post(
   "/tagCreate",
