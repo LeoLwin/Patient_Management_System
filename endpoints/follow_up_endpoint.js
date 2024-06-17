@@ -78,6 +78,7 @@ router.post(
   }
 );
 
+//include page size
 router.get(
   "/followUpList/:page",
   [
@@ -111,6 +112,24 @@ router.get(
       const { page_size } = req.body;
       const { page } = req.params;
       const result = await followUp.followUpList(page, page_size);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+//not include page_size
+router.get(
+  "/followUpOnlyList",
+  // [param("page").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      // const errors = validationResult(req);
+      // if (!errors.isEmpty()) {
+      //   return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      // }
+      const result = await followUp.followUpOnlyList();
       res.json(result);
     } catch (error) {
       res.status(error);

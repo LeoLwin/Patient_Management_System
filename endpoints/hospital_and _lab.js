@@ -78,6 +78,7 @@ router.post(
   }
 );
 
+//include page and page_size
 router.get(
   "/HosAndLabList/:page",
   [
@@ -117,6 +118,16 @@ router.get(
     }
   }
 );
+
+//does not include page and page_size
+router.get("/HosAndLabOnlyList", async (req, res) => {
+  try {
+    const result = await HospAndLab.hospAndLabOnlyList();
+    res.json(result);
+  } catch (error) {
+    res.status(error);
+  }
+});
 
 router.put(
   "/HosAndLabUpdate/:id",
