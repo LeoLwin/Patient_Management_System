@@ -16,15 +16,13 @@ const followUpCreate = async (patient_id, date_time, category, remark) => {
 const followUpList = async (page, page_size) => {
   try {
     // const page_size = 10;
-    console.log(page, page_size);
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM follow_up ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
-    const list = DB.query(sql, [page_size, offset]);
-    console.log(list);
+    const list = await DB.query(sql, [page_size, offset]);
 
     //Query to count total number of bundles
     const countSql = `SELECT COUNT(*) AS TOTAL FROM follow_up`;
-    const countResult = DB.query(countSql);
+    const countResult = await DB.query(countSql);
     const total = countResult[0].total;
 
     if (list.length > 0) {
