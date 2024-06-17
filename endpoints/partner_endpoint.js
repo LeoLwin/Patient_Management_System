@@ -2,6 +2,7 @@ const router = require("express").Router();
 const StatusCode = require("../helper/status_code_helper");
 const Partner = require("../models/partner_model");
 const Patient = require("../models/patient_model");
+const Count = require("../models/count_status");
 const { param, body, validationResult } = require("express-validator");
 const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const multer = require("multer");
@@ -158,7 +159,9 @@ router.post(
           );
         }
 
-        const uploadResult = await fileUpload(req.file, nrc);
+        const nextId = await Count.countStatus("patients");
+
+        const uploadResult = await fileUpload(req.file, nextId.data);
         if (uploadResult.code !== "200") {
           return res.status(400).json(uploadResult);
         }

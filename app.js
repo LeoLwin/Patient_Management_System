@@ -23,7 +23,6 @@ app.get("/images/:id/:filename", (req, res) => {
     if (err) {
       res.status(404).send({ message: "Check your file name!" });
     } else {
-      console.log(filePath);
       res.sendFile(filePath);
     }
   });
