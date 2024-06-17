@@ -148,78 +148,56 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      if (!req.file) {
-        return res.json(new StatusCode.UNKNOWN("No file uploaded."));
-      }
-
-      if (!req.file.mimetype.startsWith("image")) {
-        console.log("No image file");
-        return res.json(
-          new StatusCode.UNKNOWN("Uploaded file must be an image.")
-        );
-      }
-
       const { name, dob, nrc, gender, partner_id } = req.body;
-      const image = req.file;
-      console.log({ name, dob, nrc, gender, partner_id });
-      console.log(image);
+      let imageUrl = null;
+
       if (req.file) {
-        const uploadResult = await fileUpload(image, nrc);
-        console.log(uploadResult);
-        if (uploadResult.code === "200") {
-          const imageUrl = uploadResult.data;
-          const result = await Patient.patientCreate(
-            name,
-            dob,
-            nrc,
-            gender,
-            imageUrl
+        if (!req.file.mimetype.startsWith("image")) {
+          return res.json(
+            new StatusCode.UNKNOWN("Uploaded file must be an image.")
           );
-          if (result.code !== "200") {
-            const deleteResult = await fileDelete(imageUrl);
-            console.log("deleteResult", deleteResult);
-            res.json(result);
-          }
-          console.log(result);
-
-          const isExist = await Partner.partnerCheck(
-            result.data.insertId,
-            partner_id
-          );
-          cons;
-
-          if (isExist.data.code == 404) {
-            res.json(
-              await Partner.partnerCreate(result.data.insertId, partner_id)
-            );
-          }
-          res.json(
-            new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
-          );
-
-          res.json(isExist);
         }
-        res.json(uploadResult);
+
+        const uploadResult = await fileUpload(req.file, nrc);
+        if (uploadResult.code !== "200") {
+          return res.status(400).json(uploadResult);
+        }
+        imageUrl = uploadResult.data;
       }
-      // const newPatient = await Patient.patientCreate(name, dob, nrc, gender);
-      // console.log(newPatient);
-      // if (newPatient.code != 200) {
-      //   res.json(newPatient);
-      // }
+      console.log({ name, dob, nrc, gender, partner_id });
+      console.log(imageUrl);
 
-      // const isExist = await Partner.partnerCheck(
-      //   newPatient.data.insertId,
-      //   partner_id
-      // );
+      const result = await Patient.patientCreate(
+        name,
+        dob,
+        nrc,
+        gender,
+        imageUrl
+      );
 
-      // if (isExist.data.code == 404) {
-      //   res.json(
-      //     await Partner.partnerCreate(newPatient.data.insertId, partner_id)
-      //   );
-      // }
-      // res.json(
-      //   new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
-      // );
+      if (result.code !== "200") {
+        if (imageUrl) {
+          const deleteResult = await fileDelete(imageUrl);
+          console.log("deleteResult", deleteResult);
+        }
+        res.json(result);
+      }
+
+      const isExist = await Partner.partnerCheck(
+        result.data.insertId,
+        partner_id
+      );
+
+      if (isExist.data.code == 404) {
+        const partnerCreateResult = await Partner.partnerCreate(
+          result.data.insertId,
+          partner_id
+        );
+        return res.json(partnerCreateResult);
+      }
+      res.json(
+        new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
+      );
     } catch (error) {
       res.status(error);
     }
