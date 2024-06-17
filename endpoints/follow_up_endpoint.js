@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const { param, body, validationResult } = require("express-validator");
+const followUp = require("../models/followUp_model");
 const StatusCode = require("../helper/status_code_helper");
-const HospAndLab = require("../models/hospital_and_lab");
 
 router.post(
-  "/HosAndLabCreate",
+  "/followUpCreate",
   [
     body("patient_id")
       .notEmpty()
@@ -24,20 +24,20 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("date")
+    body("date_time")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("location_name")
+      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/) // Matches format yyyy/mm/dd hh:mm
+      .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
+    body("category")
       .notEmpty()
-      .withMessage("location_name is required")
+      .withMessage("Category is required")
       .trim()
       .escape()
       .custom((value) => {
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("location_name cannot contain special characters");
+          throw new Error("Category cannot contain special characters");
         }
         // Return true to indicate validation passed
         return true;
@@ -63,12 +63,12 @@ router.post(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, date, location_name, remark } = req.body;
+      const { patient_id, date_time, category, remark } = req.body;
 
-      const result = await HospAndLab.hospAndLabCreate(
+      const result = await followUp.followUpCreate(
         patient_id,
-        date,
-        location_name,
+        date_time,
+        category,
         remark
       );
       res.json(result);
@@ -79,7 +79,7 @@ router.post(
 );
 
 router.get(
-  "/HosAndLabList/:page",
+  "/followUpList/:page",
   [
     body("page_size")
       .notEmpty()
@@ -110,7 +110,7 @@ router.get(
 
       const { page_size } = req.body;
       const { page } = req.params;
-      const result = await HospAndLab.hospAndLabList(page, page_size);
+      const result = await followUp.followUpList(page, page_size);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -119,7 +119,7 @@ router.get(
 );
 
 router.put(
-  "/HosAndLabUpdate/:id",
+  "/followUpUpdate/:id",
   [
     body("patient_id")
       .notEmpty()
@@ -139,20 +139,20 @@ router.put(
         // Return true to indicate validation passed
         return true;
       }),
-    body("date")
+    body("date_time")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("location_name")
+      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/) // Matches format yyyy/mm/dd hh:mm
+      .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
+    body("category")
       .notEmpty()
-      .withMessage("location_name is required")
+      .withMessage("Category is required")
       .trim()
       .escape()
       .custom((value) => {
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("location_name cannot contain special characters");
+          throw new Error("Category cannot contain special characters");
         }
         // Return true to indicate validation passed
         return true;
@@ -179,17 +179,15 @@ router.put(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors));
       }
-      const { patient_id, date, location_name, remark } = req.body;
+      const { patient_id, date_time, category, remark } = req.body;
       const { id } = req.params;
-
-      const result = await HospAndLab.hospAndLabUpdate(
+      const result = await followUp.followUpUpdate(
         patient_id,
-        date,
-        location_name,
+        date_time,
+        category,
         remark,
         id
       );
-
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -198,7 +196,7 @@ router.put(
 );
 
 router.delete(
-  "/HosAndLabDelete/:id",
+  "/followUpDelete/:id",
   [param("id").notEmpty().isInt().toInt().withMessage("Must Be Number")],
   async (req, res) => {
     const errors = validationResult(req);
@@ -209,7 +207,7 @@ router.delete(
     const { id } = req.params;
     console.log(id);
 
-    const result = await HospAndLab.hospAndLabDelete(id);
+    const result = await followUp.followUpDelete(id);
     res.json(result);
     try {
     } catch (error) {

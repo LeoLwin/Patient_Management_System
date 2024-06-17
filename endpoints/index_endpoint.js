@@ -9,6 +9,7 @@ const fileUpload = require("./file_upload_endpoint");
 const partner = require("./partner_endpoint");
 const tag = require("./tags_endpoint");
 const HospAndLab = require("./hospital_and _lab");
+const followUp = require("./follow_up_endpoint");
 
 router.use("/patient", patient);
 router.use("/login", login);
@@ -19,6 +20,7 @@ router.use("/fileUpload", fileUpload);
 router.use("/partner", partner);
 router.use("/tag", tag);
 router.use("/hospAndLab", HospAndLab);
+router.use("/followUp", followUp);
 
 // router.get("/images/:nrc/:filename", (req, res) => {
 //   const nrc = req.params.nrc;

@@ -1,6 +1,5 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
-const { off } = require("firebase/database");
 
 const hospAndLabCreate = async (patient_id, date, location_name, remark) => {
   try {
@@ -37,7 +36,6 @@ const hospAndLabCreate = async (patient_id, date, location_name, remark) => {
 const hospAndLabList = async (page, page_size) => {
   try {
     // const page_size = 10;
-    console.log(page_size);
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM hospital_and_lab ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     const list = await DB.query(sql, [page_size, offset]);
