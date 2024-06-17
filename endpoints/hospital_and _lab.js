@@ -81,15 +81,39 @@ router.post(
 
 router.get(
   "/HosAndLabList/:page",
-  [param("page").notEmpty().isInt().toInt()],
+  [
+    // body("page_size")
+    //   .notEmpty()
+    //   .withMessage("Page_size ID is required")
+    //   .trim()
+    //   .escape()
+    //   .custom((value) => {
+    //     // Check if the value is an integer
+    //     if (!Number.isInteger(Number(value))) {
+    //       throw new Error("Page_size must be an integer");
+    //     }
+    //     // Check if the name contains special characters
+    //     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //     if (specialCharsRegex.test(value)) {
+    //       throw new Error("Page_size cannot contain special characters");
+    //     }
+    //     // Return true to indicate validation passed
+    //     return true;
+    //   }),
+    param("page").notEmpty().isInt().toInt(),
+  ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+
+      const { page_size } = req.body;
+      console.log(page_size);
       const { page } = req.params;
-      const result = await HospAndLab.hospAndLabList(page);
+      console.log(page);
+      const result = await HospAndLab.hospAndLabList(page, page_size);
       res.json(result);
     } catch (error) {
       res.status(error);

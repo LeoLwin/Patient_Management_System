@@ -186,7 +186,7 @@ router.post(
             result.data.insertId,
             partner_id
           );
-          cons
+          cons;
 
           if (isExist.data.code == 404) {
             res.json(
