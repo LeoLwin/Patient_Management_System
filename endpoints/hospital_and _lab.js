@@ -229,4 +229,42 @@ router.delete(
   }
 );
 
+//get with patient_id
+router.post(
+  "/HosAndLabIdSearch",
+  [
+    body("patient_id")
+      .notEmpty()
+      .withMessage("ID is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the value is an integer
+        if (!Number.isInteger(Number(value))) {
+          throw new Error("ID must be an integer");
+        }
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const patient_id = req.body.patient_id;
+      const result = await HospAndLab.hospAndLabIdSearch(patient_id);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 module.exports = router;

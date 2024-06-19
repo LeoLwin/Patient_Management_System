@@ -425,7 +425,6 @@ router.post(
       // console.log({ name, dob, nrc, gender });
 
       const nextId = await Count.countStatus("patients");
-      console.log(nextId);
       if (nextId.code == 200) {
         const uploadResult = await fileUpload(image, nextId.data);
         if (uploadResult.code === "500") {

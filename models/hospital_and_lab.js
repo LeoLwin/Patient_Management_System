@@ -38,7 +38,10 @@ const hospAndLabList = async (page, page_size) => {
   try {
     // const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT * FROM hospital_and_lab ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+
+    const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    // const sql = `SELECT * FROM hospital_and_lab ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+
     const list = await DB.query(sql, [page_size, offset]);
 
     //Query to count total number of bundles
@@ -59,7 +62,7 @@ const hospAndLabList = async (page, page_size) => {
 //does not include page and page_size
 const hospAndLabOnlyList = async () => {
   try {
-    const sql = `SELECT * FROM hospital_and_lab`;
+    const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab`;
     const list = await DB.query(sql);
 
     const countSql = `SELECT COUNT(*) AS total FROM hospital_and_lab`;
@@ -73,6 +76,17 @@ const hospAndLabOnlyList = async () => {
     }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+// Search With Patient ID
+const hospAndLabIdSearch = async (patient_id) => {
+  try {
+    const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE patient_id=?`;
+    const result = await DB.query(sql, [patient_id]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error);
   }
 };
 
@@ -118,4 +132,5 @@ module.exports = {
   hospAndLabUpdate,
   hospAndLabDelete,
   hospAndLabOnlyList,
+  hospAndLabIdSearch,
 };

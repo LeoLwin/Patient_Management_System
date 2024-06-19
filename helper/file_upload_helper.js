@@ -77,4 +77,41 @@ const fileDelete = async (fileUrl) => {
   }
 };
 
-module.exports = { upload, fileDelete, fileUpload };
+const fileOnlyUpload = async (file) => {
+  try {
+    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const uploadDir = path.join(__dirname, "../uploads");
+    const filePath = path.join(uploadDir, uniqueFileName);
+
+    // Ensure the directory exists
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    // Write the file to the specified directory
+    await fs.writeFile(filePath, file.buffer); // file.buffer for the file content
+
+    console.log(`File saved to ${uploadDir}`);
+
+    const baseUrl = "http://localhost:3000/uploads/"; // Replace with your actual base URL
+    const fileUrl = `${baseUrl}${uniqueFileName}`;
+
+    return new StatusCode.OK(fileUrl);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+const fileOnlyDelete = async (fileUrl) => {
+  try {
+    console.log(file);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = {
+  upload,
+  fileDelete,
+  fileUpload,
+  fileOnlyUpload,
+  fileOnlyDelete,
+};
