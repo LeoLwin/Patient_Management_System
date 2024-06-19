@@ -3,6 +3,8 @@ const { param, body, validationResult } = require("express-validator");
 const StatusCode = require("../helper/status_code_helper");
 const HospAndLab = require("../models/hospital_and_lab");
 
+//Hospital and Lab
+
 router.post(
   "/HosAndLabCreate",
   [
@@ -231,7 +233,7 @@ router.delete(
 
 //get with patient_id
 router.post(
-  "/HosAndLabIdSearch",
+  "/HosAndLabPatientIdSearch",
   [
     body("patient_id")
       .notEmpty()
@@ -259,7 +261,25 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const patient_id = req.body.patient_id;
-      const result = await HospAndLab.hospAndLabIdSearch(patient_id);
+      const result = await HospAndLab.hospAndLabPatientIdSearch(patient_id);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.get(
+  "/HosAndLabIdSearch/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const id = req.params.id;
+      const result = await HospAndLab.hospAndLabIdSearch(id);
       res.json(result);
     } catch (error) {
       res.status(error);

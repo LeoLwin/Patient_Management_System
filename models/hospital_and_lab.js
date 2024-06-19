@@ -80,7 +80,7 @@ const hospAndLabOnlyList = async () => {
 };
 
 // Search With Patient ID / does not include page and page_size
-const hospAndLabIdSearch = async (patient_id) => {
+const hospAndLabPatientIdSearch = async (patient_id) => {
   try {
     const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE patient_id=?`;
     const list = await DB.query(sql, [patient_id]);
@@ -135,11 +135,22 @@ const hospAndLabDelete = async (id) => {
   }
 };
 
+const hospAndLabIdSearch = async (id) => {
+  try {
+    const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE id=?`;
+    const result = await DB.query(sql, [id]);
+    return new StatusCode.OK(result);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   hospAndLabCreate,
   hospAndLabList,
   hospAndLabUpdate,
   hospAndLabDelete,
   hospAndLabOnlyList,
+  hospAndLabPatientIdSearch,
   hospAndLabIdSearch,
 };
