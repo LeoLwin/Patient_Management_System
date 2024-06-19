@@ -79,7 +79,7 @@ const hospAndLabOnlyList = async () => {
   }
 };
 
-// Search With Patient ID
+// Search With Patient ID / does not include page and page_size
 const hospAndLabIdSearch = async (patient_id) => {
   try {
     const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE patient_id=?`;
