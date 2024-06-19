@@ -83,8 +83,17 @@ const hospAndLabOnlyList = async () => {
 const hospAndLabIdSearch = async (patient_id) => {
   try {
     const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE patient_id=?`;
-    const result = await DB.query(sql, [patient_id]);
-    return new StatusCode.OK(result);
+    const list = await DB.query(sql, [patient_id]);
+
+    const countSql = `SELECT COUNT(*) AS total FROM hospital_and_lab`;
+    const countResult = await DB.query(countSql);
+    const total = countResult[0].total;
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error);
   }
