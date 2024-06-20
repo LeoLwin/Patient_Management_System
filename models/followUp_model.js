@@ -81,8 +81,12 @@ const followUpDelete = async (id) => {
 const folllowUpIdSearch = async (id) => {
   try {
     const sql = `SELECT * FROM follow_up WHERE id=?`;
-    const reuslt = await DB.query(sql, [id]);
-    return new StatusCode.OK(reuslt);
+    const result = await DB.query(sql, [id]);
+    if (result.length > 0) {
+      return new StatusCode.OK();
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
