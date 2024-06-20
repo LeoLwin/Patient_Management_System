@@ -78,10 +78,21 @@ const followUpDelete = async (id) => {
   }
 };
 
+const folllowUpIdSearch = async (id) => {
+  try {
+    const sql = `SELECT * FROM follow_up WHERE id=?`;
+    const reuslt = await DB.query(sql, [id]);
+    return new StatusCode.OK(reuslt);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   followUpCreate,
   followUpList,
   followUpUpdate,
   followUpDelete,
   followUpOnlyList,
+  folllowUpIdSearch,
 };

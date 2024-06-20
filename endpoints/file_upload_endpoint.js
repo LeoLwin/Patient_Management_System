@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const fileUpload = require("../helper/file_upload_helper");
+const FileUpload = require("../helper/file_upload_helper");
 const File = require("../models/file_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
@@ -13,6 +13,18 @@ router.post("/fileOnlyUpload", upload.single("file"), async (req, res) => {
     const file = req.file;
     const url = await fileUpload.fileOnlyUpload(file);
     res.json(new StatusCode.OK(url));
+  } catch (error) {
+    return res.status(new StatusCode.UNKNOWN(error.message));
+  }
+});
+
+//file only delete
+router.delete("/delete", async (req, res) => {
+  try {
+    const path = req.body;
+    console.log(path.filePath);
+    const result = await FileUpload.fileDelete(path.filePath);
+    return res.json(result);
   } catch (error) {
     return res.status(new StatusCode.UNKNOWN(error.message));
   }
@@ -85,15 +97,38 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      let path;
-
       if (req.file) {
-        console.log(req.body);
-        console.log(req.file);
-        path = req.file;
+        const file = req.file;
+
+        const uploadResult = await FileUpload.fileOnlyUpload(file);
+
+        if (uploadResult.code === "500") {
+          return res.status(uploadResult.message);
+        }
+        const mb = await FileUpload.fileByteToSize(file.size);
+
+        const { patient_id, name, type } = req.body;
+        const path = uploadResult.data;
+        const size = mb.data;
+        const result = await File.fileCreate(
+          patient_id,
+          name,
+          path,
+          size,
+          type
+        );
+        res.json(result);
       } else {
-        console.log(req.body);
-        path = req.body.path;
+        const { patient_id, name, path, type } = req.body;
+        const size = "0MB";
+        const result = await File.fileCreate(
+          patient_id,
+          name,
+          path,
+          size,
+          type
+        );
+        res.json(result);
       }
 
       // res.json(req.file);
@@ -103,17 +138,141 @@ router.post(
   }
 );
 
-router.delete("/delete", async (req, res) => {
-  try {
-    const path = req.body;
-    console.log(path.filePath);
-    const result = await fileUpload.fileDelete(path.filePath);
-    return res.json(result);
-  } catch (error) {
-    return res.status(new StatusCode.UNKNOWN(error.message));
+router.get(
+  "/fileList/:page",
+  [param("page").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { page } = req.params;
+      const result = await File.fileList(page);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
   }
-});
+);
 
+router.put(
+  "/fileUpdate/:id",
+  // [
+  //   body("name")
+  //     .notEmpty()
+  //     .withMessage("Name is required")
+  //     .trim()
+  //     .escape()
+  //     .custom((value) => {
+  //       // Check if the name contains special characters
+  //       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+  //       if (specialCharsRegex.test(value)) {
+  //         throw new Error("Name cannot contain special characters");
+  //       }
+  //       // Return true to indicate validation passed
+  //       return true;
+  //     }),
+  //   body("patient_id")
+  //     .notEmpty()
+  //     .withMessage("Patient_id is required")
+  //     .trim()
+  //     .escape()
+  //     .custom((value) => {
+  //       // Check if the value is an integer
+  //       if (!Number.isInteger(Number(value))) {
+  //         throw new Error("Patient_id must be an integer");
+  //       }
+
+  //       // Check if the name contains special characters
+  //       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+  //       if (specialCharsRegex.test(value)) {
+  //         throw new Error("Patient_id cannot contain special characters");
+  //       }
+
+  //       // Return true to indicate validation passed
+  //       return true;
+  //     }),
+  //   body("type")
+  //     .notEmpty()
+  //     .withMessage("Type is required")
+  //     .trim()
+  //     .escape()
+  //     .custom((value) => {
+  //       // Check if the name contains special characters
+  //       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+  //       if (specialCharsRegex.test(value)) {
+  //         throw new Error("Type cannot contain special characters");
+  //       }
+  //       // Return true to indicate validation passed
+  //       return true;
+  //     }),
+
+  //   body("file").custom((value, { req }) => {
+  //     if (!req.file && !req.body.path) {
+  //       throw new Error("Either file or Folder Name must be provided");
+  //     }
+  //     return true;
+  //   }),
+  //   param("id").notEmpty().isInt().toInt(),
+  // ],
+  async (req, res) => {
+    try {
+      // const errors = validationResult(req);
+      // if (!errors.isEmpty()) {
+      //   return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      // }
+      console.log("hello");
+      console.log(req.body);
+      console.log(req.file);
+      const { patient_id, name, type, path: pathUrl } = req.body;
+      const { id } = req.params;
+      let path;
+
+      // console.log({ patient_id, name, type, path: pathUrl });
+
+      // if (req.file) {
+      //   const file = req.file;
+
+      //   const uploadResult = await FileUpload.fileOnlyUpload(file);
+
+      //   if (uploadResult.code === "500") {
+      //     return res.status(uploadResult.message);
+      //   }
+      //   const mb = await FileUpload.fileByteToSize(file.size);
+
+      //   const { patient_id, name, type } = req.body;
+      //   const path = uploadResult.data;
+      //   const size = mb.data;
+      //   const result = await File.fileUpdate(
+      //     patient_id,
+      //     name,
+      //     path,
+      //     size,
+      //     type
+      //   );
+      //   res.json(result);
+      // } else {
+      //   const { patient_id, name, path, type } = req.body;
+      //   const size = "0MB";
+      //   const result = await File.fileUpdate(
+      //     patient_id,
+      //     name,
+      //     path,
+      //     size,
+      //     type
+      //   );
+      //   res.json(result);
+      // }
+
+      // res.json(req.file);
+    } catch (error) {
+      return res.status(new StatusCode.UNKNOWN(error.message));
+    }
+  }
+);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.post(
   "/fileCreate",
   [
@@ -148,24 +307,6 @@ router.post(
       return res.json(result);
     } catch (error) {
       console.log(error);
-      res.status(error);
-    }
-  }
-);
-
-router.get(
-  "/fileList/:page",
-  [param("page").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const { page } = req.params;
-      const result = await File.fileList(page);
-      res.json(result);
-    } catch (error) {
       res.status(error);
     }
   }

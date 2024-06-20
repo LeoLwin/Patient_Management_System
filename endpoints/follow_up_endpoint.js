@@ -235,4 +235,23 @@ router.delete(
   }
 );
 
+// Id Search
+router.get(
+  "/followUpIDSearch/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const id = req.params.id;
+      const result = await followUp.folllowUpIdSearch(id);
+      res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 module.exports = router;

@@ -108,10 +108,28 @@ const fileOnlyDelete = async (fileUrl) => {
   }
 };
 
+const fileByteToSize = async (bytes) => {
+  try {
+    const kb = bytes / 1024;
+    const mb = kb / 1024;
+    let size;
+
+    if (mb >= 1) {
+      size = `${mb.toFixed()} MB`;
+    } else {
+      size = `${kb.toFixed()} KB`;
+    }
+    return new StatusCode.OK(size);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   upload,
   fileDelete,
   fileUpload,
   fileOnlyUpload,
   fileOnlyDelete,
+  fileByteToSize,
 };
