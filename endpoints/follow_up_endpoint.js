@@ -26,7 +26,7 @@ router.post(
       }),
     body("date_time")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/) // Matches format yyyy/mm/dd hh:mm
+      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i) // Matches format yyyy/mm/dd hh:mm
       .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
     body("category")
       .notEmpty()

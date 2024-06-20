@@ -63,4 +63,18 @@ const fileDelete = async (id) => {
   }
 };
 
-module.exports = { fileCreate, fileList, fileUpdate, fileDelete };
+const fileIdSearch = async (id) => {
+  try {
+    const sql = ` SELECT * FROM file WHERE id =?`;
+    const result = await DB.query(sql, [id]);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND();
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = { fileCreate, fileList, fileUpdate, fileDelete, fileIdSearch };
