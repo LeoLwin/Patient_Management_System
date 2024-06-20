@@ -94,8 +94,8 @@ const folllowUpIdSearch = async (id) => {
 
 const followUpPatientIdSearch = async (patient_id) => {
   try {
-    const sql = `SELECT * FROM follow_up`;
-    const list = await DB.query(sql);
+    const sql = `SELECT * FROM follow_up  WHERE patient_id=?`;
+    const list = await DB.query(sql, [patient_id]);
 
     const countSql = `SELECT COUNT(*) AS total FROM follow_up`;
     const countResult = await DB.query(countSql);
