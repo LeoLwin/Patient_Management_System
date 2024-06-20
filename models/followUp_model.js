@@ -92,6 +92,22 @@ const folllowUpIdSearch = async (id) => {
   }
 };
 
+const followUpPatientIdSearch = async (patient_id) => {
+  try {
+    console.log(patient_id);
+    const sql = `SELECT * FROM follow_up WHERE patient_id=?`;
+    const result = await DB.query(sql, [patient_id]);
+    console.log(result);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   followUpCreate,
   followUpList,
@@ -99,4 +115,5 @@ module.exports = {
   followUpDelete,
   followUpOnlyList,
   folllowUpIdSearch,
+  followUpPatientIdSearch,
 };
