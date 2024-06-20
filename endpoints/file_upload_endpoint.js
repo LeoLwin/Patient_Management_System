@@ -244,7 +244,7 @@ router.put(
       if (file.code !== 200) {
         res.json(file);
       }
-      const currentPath = file.data.path;
+      const currentPath = file.data[0].path;
       console.log("File Path", currentPath);
       if (req.file && currentPath) {
         const deleteResult = await FileUpload.fileDelete(currentPath);
@@ -265,6 +265,8 @@ router.put(
         newPathUrl = pathUrl;
       }
 
+      console.log({ patient_id, name, path, type, id });
+
       const updateResult = await File.fileUpdate(
         patient_id,
         name,
@@ -272,7 +274,7 @@ router.put(
         type,
         id
       );
-      return res.json(updateCurrentUser);
+      return res.json(updateResult);
     } catch (error) {
       res.status(error);
     }

@@ -94,12 +94,15 @@ const folllowUpIdSearch = async (id) => {
 
 const followUpPatientIdSearch = async (patient_id) => {
   try {
-    console.log(patient_id);
-    const sql = `SELECT * FROM follow_up WHERE patient_id=?`;
-    const result = await DB.query(sql, [patient_id]);
-    console.log(result);
-    if (result.length > 0) {
-      return new StatusCode.OK(result);
+    const sql = `SELECT * FROM follow_up`;
+    const list = await DB.query(sql);
+
+    const countSql = `SELECT COUNT(*) AS total FROM follow_up`;
+    const countResult = await DB.query(countSql);
+    const total = countResult[0].total;
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
