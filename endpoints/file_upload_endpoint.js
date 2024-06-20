@@ -224,7 +224,7 @@ router.put(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, name, path: pathUrl, type } = req.body;
+      const { patient_id, name, path: pathUrl, size, type } = req.body;
       const { id } = req.params;
       let path;
 
@@ -241,13 +241,13 @@ router.put(
 
       const file = await File.fileIdSearch(id);
       console.log(file);
-      if (file.code !== 200) {
+      if (file.code !== "200") {
         res.json(file);
       }
       const currentPath = file.data[0].path;
       console.log("File Path", currentPath);
       if (req.file && currentPath) {
-        const deleteResult = await FileUpload.fileDelete(currentPath);
+        const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
         console.log("Delete Result", deleteResult);
       }
       let newPathUrl;
@@ -265,12 +265,13 @@ router.put(
         newPathUrl = pathUrl;
       }
 
-      console.log({ patient_id, name, path, type, id });
+      console.log({ patient_id, name, newPathUrl, size, type, id });
 
       const updateResult = await File.fileUpdate(
         patient_id,
         name,
         newPathUrl,
+        size,
         type,
         id
       );

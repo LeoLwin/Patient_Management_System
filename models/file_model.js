@@ -37,7 +37,16 @@ const fileList = async (page) => {
 
 const fileUpdate = async (patient_id, name, path, size, type, id) => {
   try {
-    const sql = `UPDATE files SET  patient_id =?, name=?, path=?,size=?,type=? WHERE id=?`;
+    console.log("This is from model update", {
+      patient_id,
+      name,
+      path,
+      size,
+      type,
+      id,
+    });
+
+    const sql = `UPDATE file SET patient_id = ?, name = ?, path = ?, size = ?, type = ? WHERE id = ?`;
     const result = await DB.query(sql, [
       patient_id,
       name,
@@ -46,9 +55,10 @@ const fileUpdate = async (patient_id, name, path, size, type, id) => {
       type,
       id,
     ]);
+
     return new StatusCode.OK(result, "File Data is updated");
   } catch (error) {
-    return new StatusCode.UNKNOWN(error.mesaage);
+    return new StatusCode.UNKNOWN(error.message); // Fixed typo here: `mesaage` to `message`
   }
 };
 

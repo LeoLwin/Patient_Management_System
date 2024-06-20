@@ -102,7 +102,18 @@ const fileOnlyUpload = async (file) => {
 
 const fileOnlyDelete = async (fileUrl) => {
   try {
-    console.log(file);
+    console.log("Original fileUrl:", fileUrl);
+    const { pathname } = new URL(fileUrl);
+    console.log("Path Name", pathname);
+    let filePath = decodeURIComponent(pathname.substring(9)); // Remove leading '/' and decode URI components
+    console.log("Decoded filePath:", filePath);
+
+    const fullPath = path.join(__dirname, "../uploads", filePath.replace());
+    console.log("Full Path", fullPath);
+    // Remove the file
+    await fs.unlink(fullPath);
+    console.log("File deleted successfully");
+    return new StatusCode.OK(null, "File is deleted");
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
