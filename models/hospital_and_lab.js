@@ -139,7 +139,11 @@ const hospAndLabIdSearch = async (id) => {
   try {
     const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE id=?`;
     const result = await DB.query(sql, [id]);
-    return new StatusCode.OK(result);
+    if (list.length > 0) {
+      return new StatusCode.OK();
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

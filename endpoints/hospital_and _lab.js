@@ -269,6 +269,7 @@ router.post(
   }
 );
 
+// Id Search
 router.get(
   "/HosAndLabIdSearch/:id",
   [param("id").notEmpty().isInt().toInt()],

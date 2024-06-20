@@ -18,16 +18,90 @@ router.post("/fileOnlyUpload", upload.single("file"), async (req, res) => {
   }
 });
 
-router.post("/fileCreate", upload.single("path"), [], async (req, res) => {
-  try {
-    console.log(req.body);
-    console.log(req.file);
+router.post(
+  "/fileCreate",
+  upload.single("file"),
+  [
+    body("name")
+      .notEmpty()
+      .withMessage("Name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("patient_id")
+      .notEmpty()
+      .withMessage("Patient_id is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the value is an integer
+        if (!Number.isInteger(Number(value))) {
+          throw new Error("Patient_id must be an integer");
+        }
 
-    // res.json(req.file);
-  } catch (error) {
-    return res.status(new StatusCode.UNKNOWN(error.message));
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Patient_id cannot contain special characters");
+        }
+
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("type")
+      .notEmpty()
+      .withMessage("Type is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Type cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+
+    body("file").custom((value, { req }) => {
+      if (!req.file && !req.body.path) {
+        throw new Error("Either file or Folder Name must be provided");
+      }
+      return true;
+    }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+
+      let path;
+
+      if (req.file) {
+        console.log(req.body);
+        console.log(req.file);
+        path = req.file;
+      } else {
+        console.log(req.body);
+        path = req.body.path;
+      }
+
+      // res.json(req.file);
+    } catch (error) {
+      return res.status(new StatusCode.UNKNOWN(error.message));
+    }
   }
-});
+);
 
 router.delete("/delete", async (req, res) => {
   try {
