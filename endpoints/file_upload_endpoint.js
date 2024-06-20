@@ -270,7 +270,7 @@ router.put(
       const updateResult = await File.fileUpdate(
         patient_id,
         name,
-        path,
+        newPathUrl,
         type,
         id
       );

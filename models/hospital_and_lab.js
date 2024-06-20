@@ -85,8 +85,8 @@ const hospAndLabPatientIdSearch = async (patient_id) => {
     const sql = `SELECT *, DATE_FORMAT(date, '%Y/%m/%d') AS date FROM hospital_and_lab WHERE patient_id=?`;
     const list = await DB.query(sql, [patient_id]);
 
-    const countSql = `SELECT COUNT(*) AS total FROM hospital_and_lab`;
-    const countResult = await DB.query(countSql);
+    const countSql = `SELECT COUNT(*) AS total FROM hospital_and_lab WHERE patient_id=?`;
+    const countResult = await DB.query(countSql, [patient_id]);
     const total = countResult[0].total;
 
     if (list.length > 0) {
