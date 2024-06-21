@@ -136,6 +136,19 @@ const fileByteToSize = async (bytes) => {
   }
 };
 
+const checkFilePath = async (fileUrl) => {
+  try {
+    console.log("Original fileUrl:", fileUrl);
+    const { protocol, pathname } = new URL(fileUrl);
+
+    if (protocol === "http:" || protocol === "https:") {
+      return new StatusCode.OK(null, "Provided path is a URL, not a file path");
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   upload,
   fileDelete,
@@ -143,4 +156,5 @@ module.exports = {
   fileOnlyUpload,
   fileOnlyDelete,
   fileByteToSize,
+  checkFilePath,
 };

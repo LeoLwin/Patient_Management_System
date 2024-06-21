@@ -65,7 +65,6 @@ const followUpUpdate = async (patient_id, date_time, category, remark, id) => {
       remark,
       id,
     ]);
-    console.log(result);
     if (result.affectedRows == "1") {
       return new StatusCode.OK(result, "FollowUp Data is updated");
     }

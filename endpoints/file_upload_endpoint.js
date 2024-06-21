@@ -297,15 +297,16 @@ router.delete(
     if (file.code !== "200") {
       res.json(file);
     }
-    const currentPath = file.data[0].path;
-    console.log("File Path", currentPath);
+
+    console.log("File Path", file.data[0].path);
+    const currentPath = FileUpload.checkFilePath(file.data[0].path);
+    console.log("File is true or false : ", currentPath);
     if (currentPath) {
       const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
-      console.log("Delete Result", deleteResult);
+      console.log("Delete Result", delete deleteResult);
     }
-    res.json(id);
-    // const result = await File.fileDelete(id);
-    // res.json(result);
+    const result = await File.fileDelete(id);
+    res.json(result);
     try {
     } catch (error) {
       res.status(error);
