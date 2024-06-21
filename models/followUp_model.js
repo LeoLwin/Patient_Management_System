@@ -89,7 +89,7 @@ const folllowUpIdSearch = async (id) => {
     const sql = `SELECT * FROM follow_up WHERE id=?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
-      return new StatusCode.OK(result);
+      return new StatusCode.OK(result[0]);
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
