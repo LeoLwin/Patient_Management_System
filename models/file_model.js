@@ -1,5 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
+const { TotpMultiFactorGenerator } = require("firebase/auth/web-extension");
 
 const fileCreate = async (patient_id, name, path, size, type) => {
   try {
@@ -13,6 +14,7 @@ const fileCreate = async (patient_id, name, path, size, type) => {
   }
 };
 
+//fileList
 const fileList = async (page) => {
   try {
     const page_size = 10;
@@ -35,6 +37,7 @@ const fileList = async (page) => {
   }
 };
 
+// fileUpdate
 const fileUpdate = async (patient_id, name, path, size, type, id) => {
   try {
     console.log("This is from model update", {
@@ -62,6 +65,7 @@ const fileUpdate = async (patient_id, name, path, size, type, id) => {
   }
 };
 
+//fileDelete
 const fileDelete = async (id) => {
   try {
     console.log(id);
@@ -73,6 +77,7 @@ const fileDelete = async (id) => {
   }
 };
 
+//fileIdSearch
 const fileIdSearch = async (id) => {
   try {
     const sql = ` SELECT * FROM file WHERE id =?`;
@@ -87,4 +92,36 @@ const fileIdSearch = async (id) => {
   }
 };
 
-module.exports = { fileCreate, fileList, fileUpdate, fileDelete, fileIdSearch };
+//type Search
+const typeSearch = async (type) => {
+  try {
+    // const page_size = 10;
+    // const offset = (page - 1) * page_size;
+    // const sql = `SELECT * FROM file ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const sql = `SELECT * FROM file WHERE type = ? ORDER BY id DESC`;
+    const list = await DB.query(sql, [type]);
+    console.log(list);
+
+    // Query to count total number of bundles
+    const countSql = "SELECT COUNT(*) AS total FROM file WHERE type=?";
+    const countResult = await DB.query(countSql, [type]);
+    const total = countResult[0].total;
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.mesaage);
+  }
+};
+
+module.exports = {
+  fileCreate,
+  fileList,
+  fileUpdate,
+  fileDelete,
+  fileIdSearch,
+  typeSearch,
+};
