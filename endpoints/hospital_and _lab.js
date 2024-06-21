@@ -44,20 +44,20 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("remark")
-      .notEmpty()
-      .withMessage("Remark is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Remark cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    // body("remark")
+    //   .notEmpty()
+    //   .withMessage("Remark is required")
+    //   .trim()
+    //   .escape()
+    //   .custom((value) => {
+    //     // Check if the name contains special characters
+    //     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //     if (specialCharsRegex.test(value)) {
+    //       throw new Error("Remark cannot contain special characters");
+    //     }
+    //     // Return true to indicate validation passed
+    //     return true;
+    //   }),
   ],
   async (req, res) => {
     try {
@@ -170,20 +170,20 @@ router.put(
         // Return true to indicate validation passed
         return true;
       }),
-    body("remark")
-      .notEmpty()
-      .withMessage("Remark is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Remark cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    // body("remark")
+    //   .notEmpty()
+    //   .withMessage("Remark is required")
+    //   .trim()
+    //   .escape()
+    //   .custom((value) => {
+    //     // Check if the name contains special characters
+    //     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //     if (specialCharsRegex.test(value)) {
+    //       throw new Error("Remark cannot contain special characters");
+    //     }
+    //     // Return true to indicate validation passed
+    //     return true;
+    //   }),
     param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
