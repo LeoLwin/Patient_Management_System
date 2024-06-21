@@ -224,18 +224,28 @@ router.put(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, name, path: pathUrl, size, type } = req.body;
+      const { patient_id, name, path: pathUrl, type } = req.body;
       const { id } = req.params;
       let path;
+      let size;
+      let deleteStatus = false;
 
       if (req.file) {
         console.log(req.file);
         path = req.file;
-        console.log({ patient_id, name, path, type });
+        bytes = req.file.size;
+        console.log(bytes);
+        const getmb = await FileUpload.fileByteToSize(bytes);
+        console.log(getmb);
+        size = getmb.data;
+        console.log("Size", size);
+        console.log({ patient_id, name, path, size, type });
         console.log(id);
       } else if (pathUrl) {
         path = pathUrl;
-        console.log({ patient_id, name, path, type });
+        size = "0 MB";
+        deleteStatus = true;
+        console.log({ patient_id, name, path, size, type });
         console.log(id);
       }
 
@@ -246,7 +256,7 @@ router.put(
       }
       const currentPath = file.data[0].path;
       console.log("File Path", currentPath);
-      if (req.file && currentPath) {
+      if ((req.file && currentPath) || deleteStatus) {
         const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
         console.log("Delete Result", deleteResult);
       }
@@ -286,28 +296,30 @@ router.delete(
   "/fileDelete/:id",
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-    }
-    const { id } = req.params;
-
-    const file = await File.fileIdSearch(id);
-    console.log(file);
-    if (file.code !== "200") {
-      res.json(file);
-    }
-
-    console.log("File Path", file.data[0].path);
-    const currentPath = FileUpload.checkFilePath(file.data[0].path);
-    console.log("File is true or false : ", currentPath);
-    if (currentPath) {
-      const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
-      console.log("Delete Result", delete deleteResult);
-    }
-    const result = await File.fileDelete(id);
-    res.json(result);
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { id } = req.params;
+
+      const file = await File.fileIdSearch(id);
+      console.log(file);
+      if (file.code !== "200") {
+        return res.json(file);
+      }
+
+      console.log("File Path", file.data[0].path);
+      const currentPath = await FileUpload.checkFilePath(file.data[0].path);
+      console.log("File is true or false : ", currentPath);
+      console.log("True or false", currentPath.code);
+      if (currentPath.code == 200) {
+        console.log();
+        const deleteResult = await FileUpload.fileOnlyDelete(file.data[0].path);
+        console.log("Delete Result", delete deleteResult);
+      }
+      const result = await File.fileDelete(id);
+      res.json(result);
     } catch (error) {
       res.status(error);
     }

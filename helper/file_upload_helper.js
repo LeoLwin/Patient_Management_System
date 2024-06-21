@@ -139,10 +139,12 @@ const fileByteToSize = async (bytes) => {
 const checkFilePath = async (fileUrl) => {
   try {
     console.log("Original fileUrl:", fileUrl);
-    const { protocol, pathname } = new URL(fileUrl);
+    const { protocol } = new URL(fileUrl);
 
     if (protocol === "http:" || protocol === "https:") {
-      return new StatusCode.OK(null, "Provided path is a URL, not a file path");
+      return new StatusCode.OK("Provided path is a URL, not a file path");
+    } else {
+      return new StatusCode.UNKNOWN("Provided path is not a URL");
     }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
