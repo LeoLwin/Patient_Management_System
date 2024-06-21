@@ -121,7 +121,7 @@ router.post(
         res.json(result);
       } else {
         const { patient_id, name, path, type } = req.body;
-        const size = "0MB";
+        size = "0MB";
         const result = await File.fileCreate(
           patient_id,
           name,
@@ -282,6 +282,37 @@ router.put(
   }
 );
 
+router.delete(
+  "/fileDelete/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+    }
+    const { id } = req.params;
+
+    const file = await File.fileIdSearch(id);
+    console.log(file);
+    if (file.code !== "200") {
+      res.json(file);
+    }
+    const currentPath = file.data[0].path;
+    console.log("File Path", currentPath);
+    if (currentPath) {
+      const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
+      console.log("Delete Result", deleteResult);
+    }
+    res.json(id);
+    // const result = await File.fileDelete(id);
+    // res.json(result);
+    try {
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 // file Id Search
 router.get(
   "/fileIDSearch/:id",
@@ -379,24 +410,6 @@ router.put(
       const { id } = req.params;
       const result = await File.fileUpdate(patient_id, file_name, id);
       res.json(result);
-    } catch (error) {
-      res.status(error);
-    }
-  }
-);
-
-router.delete(
-  "/fileDelete/:id",
-  [param("id").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-    }
-    const { id } = req.params;
-    const result = await File.fileDelete(id);
-    res.json(result);
-    try {
     } catch (error) {
       res.status(error);
     }

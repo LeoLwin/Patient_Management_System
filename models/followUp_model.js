@@ -58,8 +58,15 @@ const followUpOnlyList = async () => {
 const followUpUpdate = async (patient_id, date_time, category, remark, id) => {
   try {
     const sql = `UPDATE follow_up SET patient_id = ?, date_time = ?, category= ?,remark = ? WHERE id=?`;
-    const result = DB.query(sql, [patient_id, date_time, category, remark, id]);
-    if (result.affectedRows == 1) {
+    const result = await DB.query(sql, [
+      patient_id,
+      date_time,
+      category,
+      remark,
+      id,
+    ]);
+    console.log(result);
+    if (result.affectedRows == "1") {
       return new StatusCode.OK(result, "FollowUp Data is updated");
     }
     return new StatusCode.OK(result, "FollowUp Data is not update!");
