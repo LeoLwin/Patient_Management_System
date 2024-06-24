@@ -32,11 +32,11 @@ router.delete("/delete", async (req, res) => {
 
 router.post(
   "/fileCreate",
-  upload.single("path"),
+  upload.single("name"),
   [
-    body("name")
+    body("path")
       .notEmpty()
-      .withMessage("Name is required")
+      .withMessage("Path is required")
       .trim()
       .escape()
       .custom((value) => {
@@ -82,7 +82,6 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-
     body("file").custom((value, { req }) => {
       if (!req.file && !req.body.path) {
         throw new Error("Either file or Folder Name must be provided");
@@ -108,8 +107,8 @@ router.post(
         }
         const mb = await FileUpload.fileByteToSize(file.size);
 
-        const { patient_id, name, type } = req.body;
-        const path = uploadResult.data;
+        const { patient_id, path, type } = req.body;
+        const name = uploadResult.data;
         const size = mb.data;
         const result = await File.fileCreate(
           patient_id,
@@ -159,9 +158,9 @@ router.get(
 
 router.put(
   "/fileUpdate/:id",
-  upload.single("path"),
+  upload.single("name"),
   [
-    body("name")
+    body("path")
       .notEmpty()
       .withMessage("Name is required")
       .trim()
@@ -210,7 +209,7 @@ router.put(
         return true;
       }),
 
-    body("path").custom((value, { req }) => {
+    body("name").custom((value, { req }) => {
       if (!req.file && !req.body.path) {
         throw new Error("Either file or Folder Name must be provided");
       }
@@ -224,15 +223,15 @@ router.put(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, name, path: pathUrl, type } = req.body;
+      const { patient_id, name: nameUrl, path, type } = req.body;
       const { id } = req.params;
-      let path;
+      let name;
       let size;
       let deleteStatus = false;
 
       if (req.file) {
         console.log(req.file);
-        path = req.file;
+        name = req.file;
         bytes = req.file.size;
         console.log(bytes);
         const getmb = await FileUpload.fileByteToSize(bytes);
@@ -241,8 +240,8 @@ router.put(
         console.log("Size", size);
         console.log({ patient_id, name, path, size, type });
         console.log(id);
-      } else if (pathUrl) {
-        path = pathUrl;
+      } else if (nameUrl) {
+        name = nameUrl;
         size = "0 MB";
         deleteStatus = true;
         console.log({ patient_id, name, path, size, type });
@@ -260,27 +259,34 @@ router.put(
         const deleteResult = await FileUpload.fileOnlyDelete(currentPath);
         console.log("Delete Result", deleteResult);
       }
-      let newPathUrl;
+      let newname;
 
       if (req.file) {
-        const uploadResult = await FileUpload.fileOnlyUpload(path);
+        const uploadResult = await FileUpload.fileOnlyUpload(name);
         console.log("Uploaded Image URL", uploadResult);
         if (uploadResult.code === "200") {
-          newPathUrl = uploadResult.data;
-          console.log(newPathUrl);
+          newname = uploadResult.data;
+          console.log("newname", newname);
         } else {
           return res.json({ uploadResult: "File upload failed" });
         }
-      } else if (pathUrl) {
-        newPathUrl = pathUrl;
+      } else if (name) {
+        newname = nameUrl;
       }
 
-      console.log({ patient_id, name, newPathUrl, size, type, id });
+      console.log("This is endpoint ", {
+        patient_id,
+        newname,
+        path,
+        size,
+        type,
+        id,
+      });
 
       const updateResult = await File.fileUpdate(
         patient_id,
-        name,
-        newPathUrl,
+        newname,
+        path,
         size,
         type,
         id
@@ -382,7 +388,7 @@ router.post(
 );
 
 //mainFolder Search
-router.get("/mainfFolderSearch/:path", async (req, res) => {
+router.get("/mainfFolderSearch", async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -390,10 +396,15 @@ router.get("/mainfFolderSearch/:path", async (req, res) => {
         .status(400)
         .json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
     }
-    const pathString = req.params.path;
-    const obj = JSON.parse(pathString);
-    const patient_id = obj.patient_id;
-    const path = obj.path;
+    const { patient_id, path } = req.query;
+
+    // Validate or process the parameters as needed
+    if (!patient_id || !path) {
+      return res.status(400).json({
+        error: "patient_id and path are required in query parameters",
+      });
+    }
+
     const result = await File.fileSearch(patient_id, path);
     res.json(result);
   } catch (error) {
