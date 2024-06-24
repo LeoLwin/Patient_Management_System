@@ -117,6 +117,18 @@ const typeSearch = async (type) => {
   }
 };
 
+const fileSearch = async (patient_id, path) => {
+  try {
+    const sql = `SELECT * FROM file WHERE patient_id= ? AND path =?`;
+    const result = await DB.query(sql, [patient_id, path]);
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {}
+};
+
 module.exports = {
   fileCreate,
   fileList,
@@ -124,4 +136,5 @@ module.exports = {
   fileDelete,
   fileIdSearch,
   typeSearch,
+  fileSearch,
 };

@@ -381,6 +381,27 @@ router.post(
   }
 );
 
+//mainFolder Search
+router.get("/mainfFolderSearch/:path", async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+    }
+    const pathString = req.params.path;
+    const obj = JSON.parse(pathString);
+    const id = obj.id;
+    const path = obj.path;
+    const result = await File.fileSearch(id, path);
+    res.json(result);
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 module.exports = router;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

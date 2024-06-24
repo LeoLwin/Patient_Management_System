@@ -3,8 +3,6 @@ const { param, body, validationResult } = require("express-validator");
 const StatusCode = require("../helper/status_code_helper");
 const HospAndLab = require("../models/hospital_and_lab");
 
-//Hospital and Lab
-
 router.post(
   "/HosAndLabCreate",
   [
