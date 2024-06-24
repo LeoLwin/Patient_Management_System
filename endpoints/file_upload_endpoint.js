@@ -392,9 +392,9 @@ router.get("/mainfFolderSearch/:path", async (req, res) => {
     }
     const pathString = req.params.path;
     const obj = JSON.parse(pathString);
-    const id = obj.id;
+    const patient_id = obj.patient_id;
     const path = obj.path;
-    const result = await File.fileSearch(id, path);
+    const result = await File.fileSearch(patient_id, path);
     res.json(result);
   } catch (error) {
     console.error("Error:", error.message);
