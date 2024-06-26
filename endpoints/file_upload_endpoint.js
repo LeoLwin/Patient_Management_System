@@ -87,6 +87,16 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
+    body("name").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Name cannot contain special characters");
+      }
+
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("file").custom((value, { req }) => {
       if (!req.file && !req.body.path) {
         throw new Error("Either file or Folder Name must be provided");
