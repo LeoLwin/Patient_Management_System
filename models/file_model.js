@@ -4,7 +4,7 @@ const { TotpMultiFactorGenerator } = require("firebase/auth/web-extension");
 
 const fileCreate = async (patient_id, name, path, size, type) => {
   try {
-    // console.log({ patient_id, name, path, size, type });
+    console.log({ patient_id, name, path, size, type });
     const sql = `INSERT INTO file (patient_id, name, path, size, type) VALUES (?,?,?,?,?)`;
     await DB.query(sql, [patient_id, name, path, size, type]);
     return new StatusCode.OK(null, "New file is created.");

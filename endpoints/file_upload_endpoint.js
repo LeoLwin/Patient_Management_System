@@ -87,16 +87,16 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("name").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Name cannot contain special characters");
-      }
+    // body("name").custom((value) => {
+    //   // Check if the name contains special characters
+    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //   if (specialCharsRegex.test(value)) {
+    //     throw new Error("Name cannot contain special characters");
+    //   }
 
-      // Return true to indicate validation passed
-      return true;
-    }),
+    //   // Return true to indicate validation passed
+    //   return true;
+    // }),
     body("file").custom((value, { req }) => {
       if (!req.file && !req.body.path) {
         throw new Error("Either file or Folder Name must be provided");
@@ -135,6 +135,7 @@ router.post(
         res.json(result);
       } else {
         const { patient_id, name, path, type } = req.body;
+        console.log(req.body);
         size = "0MB";
         const result = await File.fileCreate(
           patient_id,
@@ -341,31 +342,38 @@ router.delete(
       if (file.code !== "200") {
         return res.json(file);
       }
-      if (file.type == "file") {
-        console.log("File Path", file.data[0].path);
-        const currentPath = await FileUpload.checkFilePath(file.data[0].path);
+
+      console.log("File Path", file.data[0].type);
+      if (file.data[0].type === "file") {
+        console.log("File Path.......", file.data[0].name);
+        const currentPath = await FileUpload.checkFilePath(file.data[0].name);
         console.log("File is true or false : ", currentPath);
         console.log("True or false", currentPath.code);
-        if (currentPath.code == 200) {
-          console.log();
+        if (currentPath.code == "200") {
           const deleteResult = await FileUpload.fileOnlyDelete(
-            file.data[0].path
+            file.data[0].name
           );
           console.log("Delete Result", deleteResult);
+
+          res.json(deleteResult);
         }
         const result = await File.fileDelete(id);
         res.json(result);
       } else {
         console.log("File_Path", file.data[0].path);
         console.log("File Name", file.data[0].name);
-        const sendPath = file.data[0].path + " " + file.data[0].name;
+        const sendPath = file.data[0].path + ">" + file.data[0].name;
         console.log(sendPath);
         const FolderData = await File.pathSearch(sendPath);
+        console.log("Folder Data", FolderData);
 
         if (FolderData.code === "403") {
-          // const result = await File.fileDelete(id);
-          // res.json(result);
           res.json(FolderData);
+        }
+
+        if (FolderData.code === "404") {
+          const result = await File.fileDelete(id);
+          res.json(result);
         }
 
         console.log("Folder Data", FolderData);
@@ -374,7 +382,7 @@ router.delete(
           FolderData.data.forEach(async (item) => {
             console.log(item.id);
             const deletePromise = await File.fileDelete(item.id);
-            console.log(deletePromise); // Assuming item has a 'path' property
+            console.log(deletePromise);
           });
         }
       }
