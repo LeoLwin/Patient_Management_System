@@ -341,7 +341,7 @@ router.delete(
         const FolderData = await File.pathSearch(sendPath);
 
         if (FolderData.code !== "200") {
-          res.json(FolderData.length);
+          res.json(FolderData);
         }
         console.log("Folder Data", FolderData);
         if (FolderData.length > 0) {
