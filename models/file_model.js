@@ -17,6 +17,7 @@ const fileCreate = async (patient_id, name, path, size, type) => {
 //fileList
 const fileList = async (page) => {
   try {
+    console.log(page);
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM file ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
@@ -68,9 +69,9 @@ const fileUpdate = async (patient_id, name, path, size, type, id) => {
 //fileDelete
 const fileDelete = async (id) => {
   try {
-    console.log(id);
-    const sql = `DELETE FROM file WHERE id=?`;
-    await DB.query(sql, [id]);
+    console.log("Model Id", id);
+    // const sql = `DELETE FROM file WHERE id=?`;
+    // await DB.query(sql, [id]);
     return new StatusCode.OK(null, `File ${id} is deleted`);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.mesaage);
@@ -117,6 +118,39 @@ const typeSearch = async (type) => {
   }
 };
 
+//path Search
+const pathSearch = async (path) => {
+  try {
+    const sql = `SELECT * FROM file WHERE path = ? ORDER BY id DESC`;
+    const list = await DB.query(sql, [path]);
+    console.log("List", list);
+    console.log("Count", list.length);
+
+    if (list.length > 0) {
+      console.log("Loop");
+      for (const data of list) {
+        console.log(data.type);
+        if (data.type === "folder") {
+          console.log(
+            `You must delete ${data.id} ${data.name} Folder before deleting this folder`
+          );
+          return new StatusCode.PERMISSION_DENIED(
+            `You must delete" ${data.id}" "${data.name}" Folder before deleting this folder`
+          );
+        }
+      }
+
+      return new StatusCode.OK(list);
+    } else {
+      console.log("No items found for path:", path);
+      return new StatusCode.NOT_FOUND(null, "No items found for path");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 const fileSearch = async (patient_id, path) => {
   try {
     const sql = `SELECT * FROM file WHERE patient_id= ? AND path =?`;
@@ -137,4 +171,5 @@ module.exports = {
   fileIdSearch,
   typeSearch,
   fileSearch,
+  pathSearch,
 };

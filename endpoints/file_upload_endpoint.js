@@ -34,20 +34,21 @@ router.post(
   "/fileCreate",
   upload.single("name"),
   [
-    body("path")
-      .notEmpty()
-      .withMessage("Path is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    body("path").notEmpty().withMessage("Path is required").trim().escape(),
+    // .custom((value) => {
+    //   // Regular expression to match disallowed characters
+    //   const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
+
+    //   // Check if the value contains any disallowed characters other than '>'
+    //   if (disallowedCharsRegex.test(value) && !value.includes(">")) {
+    //     throw new Error(
+    //       "Name cannot contain special characters other than '>'"
+    //     );
+    //   }
+
+    //   // Return true to indicate validation passed
+    //   return true;
+    // })
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_id is required")
@@ -314,18 +315,39 @@ router.delete(
       if (file.code !== "200") {
         return res.json(file);
       }
+      if (file.type == "file") {
+        console.log("File Path", file.data[0].path);
+        const currentPath = await FileUpload.checkFilePath(file.data[0].path);
+        console.log("File is true or false : ", currentPath);
+        console.log("True or false", currentPath.code);
+        if (currentPath.code == 200) {
+          console.log();
+          const deleteResult = await FileUpload.fileOnlyDelete(
+            file.data[0].path
+          );
+          console.log("Delete Result", deleteResult);
+        }
+        const result = await File.fileDelete(id);
+        res.json(result);
+      } else {
+        console.log("Folder");
+        console.log("File_Path", file.data[0].path);
+        console.log("File Naem", file.data[0].name);
+        const sendPath = file.data[0].path + " " + file.data[0].name;
+        console.log(sendPath);
+        const FolderData = await File.pathSearch(sendPath);
+        if (FolderData.code !== "200") {
+          return res.json(FolderData);
+        }
 
-      console.log("File Path", file.data[0].path);
-      const currentPath = await FileUpload.checkFilePath(file.data[0].path);
-      console.log("File is true or false : ", currentPath);
-      console.log("True or false", currentPath.code);
-      if (currentPath.code == 200) {
-        console.log();
-        const deleteResult = await FileUpload.fileOnlyDelete(file.data[0].path);
-        console.log("Delete Result", delete deleteResult);
+        console.log("Folder Data", FolderData);
+        FolderData.data.forEach((item) => {
+          console.log(item.id);
+          const deletePromise = File.fileDelete(item.id);
+          console.log(deletePromise); // Assuming item has a 'path' property
+        });
+        // console.log(FolderData);
       }
-      const result = await File.fileDelete(id);
-      res.json(result);
     } catch (error) {
       res.status(error);
     }
