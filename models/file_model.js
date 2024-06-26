@@ -70,8 +70,8 @@ const fileUpdate = async (patient_id, name, path, size, type, id) => {
 const fileDelete = async (id) => {
   try {
     console.log("Model Id", id);
-    // const sql = `DELETE FROM file WHERE id=?`;
-    // await DB.query(sql, [id]);
+    const sql = `DELETE FROM file WHERE id=?`;
+    await DB.query(sql, [id]);
     return new StatusCode.OK(null, `File ${id} is deleted`);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.mesaage);

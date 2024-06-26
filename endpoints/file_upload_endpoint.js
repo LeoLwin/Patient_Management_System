@@ -34,21 +34,25 @@ router.post(
   "/fileCreate",
   upload.single("name"),
   [
-    body("path").notEmpty().withMessage("Path is required").trim().escape(),
-    // .custom((value) => {
-    //   // Regular expression to match disallowed characters
-    //   const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
+    body("path")
+      .notEmpty()
+      .withMessage("Path is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Regular expression to match disallowed characters
+        const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
 
-    //   // Check if the value contains any disallowed characters other than '>'
-    //   if (disallowedCharsRegex.test(value) && !value.includes(">")) {
-    //     throw new Error(
-    //       "Name cannot contain special characters other than '>'"
-    //     );
-    //   }
+        // Check if the value contains any disallowed characters other than '>'
+        if (disallowedCharsRegex.test(value) && !value.includes(">")) {
+          throw new Error(
+            "Name cannot contain special characters other than '>'"
+          );
+        }
 
-    //   // Return true to indicate validation passed
-    //   return true;
-    // })
+        // Return true to indicate validation passed
+        return true;
+      }),
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_id is required")
@@ -339,14 +343,15 @@ router.delete(
         if (FolderData.code !== "200") {
           return res.json(FolderData);
         }
-
         console.log("Folder Data", FolderData);
-        FolderData.data.forEach((item) => {
+        FolderData.data.forEach(async (item) => {
           console.log(item.id);
-          const deletePromise = File.fileDelete(item.id);
+          const deletePromise = await File.fileDelete(item.id);
           console.log(deletePromise); // Assuming item has a 'path' property
         });
-        // console.log(FolderData);
+
+        const result = await File.fileDelete(id);
+        res.json(result);
       }
     } catch (error) {
       res.status(error);
