@@ -334,24 +334,27 @@ router.delete(
         const result = await File.fileDelete(id);
         res.json(result);
       } else {
-        console.log("Folder");
         console.log("File_Path", file.data[0].path);
-        console.log("File Naem", file.data[0].name);
+        console.log("File Name", file.data[0].name);
         const sendPath = file.data[0].path + " " + file.data[0].name;
         console.log(sendPath);
         const FolderData = await File.pathSearch(sendPath);
+
         if (FolderData.code !== "200") {
-          return res.json(FolderData);
+          res.json(FolderData.length);
         }
         console.log("Folder Data", FolderData);
-        FolderData.data.forEach(async (item) => {
-          console.log(item.id);
-          const deletePromise = await File.fileDelete(item.id);
-          console.log(deletePromise); // Assuming item has a 'path' property
-        });
+        if (FolderData.length > 0) {
+          console.log("Length", FolderData.length);
+          FolderData.data.forEach(async (item) => {
+            console.log(item.id);
+            const deletePromise = await File.fileDelete(item.id);
+            console.log(deletePromise); // Assuming item has a 'path' property
+          });
+        }
 
-        const result = await File.fileDelete(id);
-        res.json(result);
+        // const result = await File.fileDelete(id);
+        // res.json(result);
       }
     } catch (error) {
       res.status(error);
