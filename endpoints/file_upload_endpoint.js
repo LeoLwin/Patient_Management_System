@@ -341,7 +341,8 @@ router.delete(
         const FolderData = await File.pathSearch(sendPath);
 
         if (FolderData.code !== "200") {
-          res.json(FolderData);
+          const result = await File.fileDelete(id);
+          res.json(result);
         }
         console.log("Folder Data", FolderData);
         if (FolderData.length > 0) {
@@ -352,9 +353,6 @@ router.delete(
             console.log(deletePromise); // Assuming item has a 'path' property
           });
         }
-
-        // const result = await File.fileDelete(id);
-        // res.json(result);
       }
     } catch (error) {
       res.status(error);
