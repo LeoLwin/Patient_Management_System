@@ -340,10 +340,12 @@ router.delete(
         console.log(sendPath);
         const FolderData = await File.pathSearch(sendPath);
 
-        if (FolderData.code !== "200") {
-          const result = await File.fileDelete(id);
-          res.json(result);
+        if (FolderData.code === "403") {
+          // const result = await File.fileDelete(id);
+          // res.json(result);
+          res.json(FolderData);
         }
+
         console.log("Folder Data", FolderData);
         if (FolderData.length > 0) {
           console.log("Length", FolderData.length);

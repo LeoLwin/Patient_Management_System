@@ -132,10 +132,10 @@ const pathSearch = async (path) => {
         console.log(data.type);
         if (data.type === "folder") {
           console.log(
-            `You must delete ${data.id} ${data.name} Folder before deleting this folder`
+            `You must delete ${data.id}of ${data.name} Folder before deleting this folder`
           );
           return new StatusCode.PERMISSION_DENIED(
-            `You must delete" ${data.id}" "${data.name}" Folder before deleting this folder`
+            `You must delete  ${data.id}  of ${data.name} Folder before deleting this folder`
           );
         }
       }
