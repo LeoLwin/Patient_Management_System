@@ -34,25 +34,25 @@ router.post(
   "/fileCreate",
   upload.single("name"),
   [
-    body("path")
-      .notEmpty()
-      .withMessage("Path is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Regular expression to match disallowed characters
-        const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
+    // body("path")
+    //   .notEmpty()
+    //   .withMessage("Path is required")
+    //   .trim()
+    //   .escape()
+    //   .custom((value) => {
+    //     // Regular expression to match disallowed characters
+    //     const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
 
-        // Check if the value contains any disallowed characters other than '>'
-        if (disallowedCharsRegex.test(value) && !value.includes(">")) {
-          throw new Error(
-            "Name cannot contain special characters other than '>'"
-          );
-        }
+    //     // Check if the value contains any disallowed characters other than '>'
+    //     if (disallowedCharsRegex.test(value) && !value.includes(">")) {
+    //       throw new Error(
+    //         "Name cannot contain special characters other than '>'"
+    //       );
+    //     }
 
-        // Return true to indicate validation passed
-        return true;
-      }),
+    //     // Return true to indicate validation passed
+    //     return true;
+    //   }),
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_id is required")
