@@ -288,7 +288,7 @@ router.get(
 
 //from date to date search
 router.post(
-  "/  ",
+  "/HosAndLabDateSearch",
   [
     body("start_date")
       .notEmpty()
@@ -308,6 +308,7 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { start_date, end_date } = req.body;
+      console.log(req.body);
 
       const formattedStartDate = start_date.split("/").join("-");
       const formattedEndDate = end_date.split("/").join("-");

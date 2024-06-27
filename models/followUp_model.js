@@ -119,11 +119,11 @@ const followUpPatientIdSearch = async (patient_id) => {
 
 const followUpDateSearch = async (date) => {
   try {
-    console.log(date);
-    const sql = `SELECT * FROM follow_up  WHERE DATE(date_time) =?`;
+    // Format date to match MySQL date format
+    const sql = `SELECT * FROM follow_up WHERE SUBSTRING(date_time, 1, 10) = ? `;
     const list = await DB.query(sql, [date]);
 
-    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE DATE(date_time)=?`;
+    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10)=?`;
     const countResult = await DB.query(countSql, [date]);
     const total = countResult[0].total;
 
