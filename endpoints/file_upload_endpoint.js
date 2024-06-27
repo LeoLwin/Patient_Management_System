@@ -176,20 +176,16 @@ router.put(
   "/fileUpdate/:id",
   upload.single("name"),
   [
-    body("path")
-      .notEmpty()
-      .withMessage("Name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    body("path").notEmpty().withMessage("Name is required").trim().escape(),
+    // .custom((value) => {
+    //   // Check if the name contains special characters
+    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //   if (specialCharsRegex.test(value)) {
+    //     throw new Error("Name cannot contain special characters");
+    //   }
+    //   // Return true to indicate validation passed
+    //   return true;
+    // })
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_id is required")

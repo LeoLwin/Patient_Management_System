@@ -149,6 +149,26 @@ const hospAndLabIdSearch = async (id) => {
   }
 };
 
+const hospAndLabDateSearch = async (start_date, end_date) => {
+  try {
+    console.log("Date Model ", start_date, end_date);
+
+    const sql = `
+      SELECT *,DATE_FORMAT(date, '%Y/%m/%d') as date FROM hospital_and_lab WHERE date BETWEEN ? AND ?`;
+
+    const result = await DB.query(sql, [start_date, end_date]);
+
+    if (result.length > 0) {
+      return new StatusCode.OK(result);
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {
+    console.error("Error in hospAndLabDateSearch:", error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   hospAndLabCreate,
   hospAndLabList,
@@ -157,4 +177,5 @@ module.exports = {
   hospAndLabOnlyList,
   hospAndLabPatientIdSearch,
   hospAndLabIdSearch,
+  hospAndLabDateSearch,
 };

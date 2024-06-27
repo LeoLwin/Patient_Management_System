@@ -117,6 +117,26 @@ const followUpPatientIdSearch = async (patient_id) => {
   }
 };
 
+const followUpDateSearch = async (date) => {
+  try {
+    console.log(date);
+    const sql = `SELECT * FROM follow_up  WHERE DATE(date_time) =?`;
+    const list = await DB.query(sql, [date]);
+
+    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE DATE(date_time)=?`;
+    const countResult = await DB.query(countSql, [date]);
+    const total = countResult[0].total;
+
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   followUpCreate,
   followUpList,
@@ -125,4 +145,5 @@ module.exports = {
   followUpOnlyList,
   folllowUpIdSearch,
   followUpPatientIdSearch,
+  followUpDateSearch,
 };

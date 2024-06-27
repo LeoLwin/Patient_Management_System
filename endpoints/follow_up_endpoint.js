@@ -282,4 +282,53 @@ router.get(
   }
 );
 
+//Date Search
+router.post(
+  "/followUpDateSearch",
+  [
+    body("date")
+      .notEmpty()
+      .withMessage("Date is required")
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Start_Date  must be in yyyy/mm/dd format"),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { date } = req.body;
+
+      // const formattedDate = date.split("/").join("-");
+
+      const result = await followUp.followUpDateSearch(date);
+      return res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+router.post(
+  "/followUpDateSearch ",
+
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { date } = req.body;
+
+      const formattedDate = date.split("/").join("-");
+
+      const result = await followUp.followUpDateSearch(formattedDate);
+      return res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 module.exports = router;

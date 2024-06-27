@@ -286,4 +286,41 @@ router.get(
   }
 );
 
+//from date to date search
+router.post(
+  "/  ",
+  [
+    body("start_date")
+      .notEmpty()
+      .withMessage("Start_Date is required")
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+      .withMessage("Start_Date  must be in yyyy/mm/dd format"),
+  ],
+  body("end_date")
+    .notEmpty()
+    .withMessage("End_Date is required")
+    .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+    .withMessage("End_Date must be in yyyy/mm/dd format"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { start_date, end_date } = req.body;
+
+      const formattedStartDate = start_date.split("/").join("-");
+      const formattedEndDate = end_date.split("/").join("-");
+
+      const result = await HospAndLab.hospAndLabDateSearch(
+        formattedStartDate,
+        formattedEndDate
+      );
+      return res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
 module.exports = router;
