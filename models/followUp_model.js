@@ -153,7 +153,7 @@ const followUpDateSearch = async (date) => {
     const records = await DB.query(sqlStep1, paramsStep1);
 
     // Step 2: Retrieve patient information for each record found
-    const results = [];
+    const list = [];
     for (const record of records) {
       const {
         Patient_id,
@@ -177,7 +177,7 @@ const followUpDateSearch = async (date) => {
       const paramsStep2 = [Patient_id, Record_id];
       const patientInfo = await DB.query(sqlStep2, paramsStep2);
       if (patientInfo.length > 0) {
-        results.push({
+        list.push({
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
           nrc: patientInfo[0].NRC,
@@ -188,9 +188,13 @@ const followUpDateSearch = async (date) => {
       }
     }
 
+    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10)=?`;
+    const countResult = await DB.query(countSql, [date]);
+    const total = countResult[0].total;
+
     // Return results
-    if (results.length > 0) {
-      return new StatusCode.OK(results);
+    if (list.length > 0) {
+      return new StatusCode.OK({ list, total });
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
