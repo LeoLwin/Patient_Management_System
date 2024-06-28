@@ -180,7 +180,7 @@ const followUpDateSearch = async (date) => {
         results.push({
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
-          NRC: patientInfo[0].NRC,
+          nrc: patientInfo[0].NRC,
           date: Record_Date,
           category: Record_Category,
           remark: Record_Remark,

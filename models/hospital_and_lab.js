@@ -236,7 +236,7 @@ const hospAndLabDateSearch = async (start_date, end_date) => {
         results.push({
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
-          nRC: patientInfo[0].NRC,
+          nrc: patientInfo[0].NRC,
           date: Record_Date,
           location: Record_Location,
           remark: Record_Remark,
