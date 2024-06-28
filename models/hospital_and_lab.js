@@ -149,22 +149,109 @@ const hospAndLabIdSearch = async (id) => {
   }
 };
 
+// const hospAndLabDateSearch = async (start_date, end_date) => {
+//   try {
+//     console.log("Date Model ", start_date, end_date);
+
+//     const sql = `SELECT *,DATE_FORMAT(date, '%Y/%m/%d') as date FROM hospital_and_lab WHERE date BETWEEN ? AND ?`;
+
+//     const list = await DB.query(sql, [start_date, end_date]);
+
+//     const countSql = `SELECT COUNT(*) AS total FROM hospital_and_lab WHERE date BETWEEN ? AND ?`;
+//     const countResult = await DB.query(countSql, [start_date, end_date]);
+//     const total = countResult[0].total;
+
+//     if (list.length > 0) {
+//       return new StatusCode.OK({ list, total });
+//     } else {
+//       return new StatusCode.NOT_FOUND(null);
+//     }
+//   } catch (error) {
+//     console.error("Error in hospAndLabDateSearch:", error);
+//     return new StatusCode.UNKNOWN(error.message);
+//   }
+// };
+
+// const hospAndLabDateSearchHepler = async (patient_id) => {
+//   try {
+//     const sql = `SELECT patients.id AS Patient_id,
+//         patients.name AS Name,
+//         patients.nrc AS NRC,
+//         hospital_and_lab.date AS Date,
+//         hospital_and_lab.location_name AS Location,
+//         hospital_and_lab.remark AS Remark
+//   FROM patients
+//   LEFT JOIN hospital_and_lab ON patients.id = hospital_and_lab.patient_id
+//   WHERE patients.id = ?;
+// `;
+
+//     const result = await DB.query(sql, [patient_id]);
+//     return new StatusCode.OK(result);
+//   } catch (error) {
+//     console.error("Error in hospAndLabDateSearchHepler:", error);
+//     return new StatusCode.UNKNOWN(error.message);
+//   }
+// };
+
 const hospAndLabDateSearch = async (start_date, end_date) => {
   try {
-    console.log("Date Model ", start_date, end_date);
+    // Step 1: Search hospital and lab records between start_date and end_date
+    const sqlStep1 = `
+          SELECT hospital_and_lab.id AS Record_id,
+                 hospital_and_lab.date AS Record_Date,
+                 hospital_and_lab.location_name AS Record_Location,
+                 hospital_and_lab.remark AS Record_Remark,
+                 hospital_and_lab.patient_id AS Patient_id
+          FROM hospital_and_lab
+          WHERE date BETWEEN ? AND ?
+        `;
+    const paramsStep1 = [start_date, end_date];
+    const records = await DB.query(sqlStep1, paramsStep1);
 
-    const sql = `
-      SELECT *,DATE_FORMAT(date, '%Y/%m/%d') as date FROM hospital_and_lab WHERE date BETWEEN ? AND ?`;
+    // Step 2: Retrieve patient information for each record found
+    const results = [];
+    for (const record of records) {
+      const {
+        Patient_id,
+        Record_id,
+        Record_Date,
+        Record_Location,
+        Record_Remark,
+      } = record;
+      const sqlStep2 = `
+            SELECT patients.id AS Patient_id,
+                   patients.name AS Name,
+                   patients.nrc AS NRC,
+                   DATE_FORMAT(hospital_and_lab.date, '%Y/%m/%d') AS Date,
+                   hospital_and_lab.location_name AS Location,
+                   hospital_and_lab.remark AS Remark
+            FROM patients
+            LEFT JOIN hospital_and_lab ON patients.id = hospital_and_lab.patient_id
+            WHERE patients.id = ?
+              AND hospital_and_lab.id = ?
+          `;
+      const paramsStep2 = [Patient_id, Record_id];
+      const patientInfo = await DB.query(sqlStep2, paramsStep2);
+      if (patientInfo.length > 0) {
+        results.push({
+          patient_id: patientInfo[0].Patient_id,
+          name: patientInfo[0].Name,
+          nRC: patientInfo[0].NRC,
+          date: Record_Date,
+          location: Record_Location,
+          remark: Record_Remark,
+        });
+      }
+    }
 
-    const result = await DB.query(sql, [start_date, end_date]);
-
-    if (result.length > 0) {
-      return new StatusCode.OK(result);
+    // Return results
+    if (results.length > 0) {
+      return new StatusCode.OK(results);
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {
-    console.error("Error in hospAndLabDateSearch:", error);
+    console.error("Error in hospAndLabSearch:", error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };

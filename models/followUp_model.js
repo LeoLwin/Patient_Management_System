@@ -117,22 +117,85 @@ const followUpPatientIdSearch = async (patient_id) => {
   }
 };
 
+// const followUpDateSearch = async (date) => {
+//   try {
+//     // Format date to match MySQL date format
+//     const sql = `SELECT * FROM follow_up WHERE SUBSTRING(date_time, 1, 10) = ? `;
+//     const list = await DB.query(sql, [date]);
+
+//     const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10)=?`;
+//     const countResult = await DB.query(countSql, [date]);
+//     const total = countResult[0].total;
+
+//     if (list.length > 0) {
+//       return new StatusCode.OK({ list, total });
+//     } else {
+//       return new StatusCode.NOT_FOUND(null);
+//     }
+//   } catch (error) {
+//     return new StatusCode.UNKNOWN(error.message);
+//   }
+// };
+
 const followUpDateSearch = async (date) => {
   try {
-    // Format date to match MySQL date format
-    const sql = `SELECT * FROM follow_up WHERE SUBSTRING(date_time, 1, 10) = ? `;
-    const list = await DB.query(sql, [date]);
+    // Step 1: Search follow_up records for a specific date
+    const sqlStep1 = `
+      SELECT follow_up.id AS Record_id,
+             follow_up.date_time AS Record_Date,
+             follow_up.category AS Record_Category,
+             follow_up.remark AS Record_Remark,
+             follow_up.patient_id AS Patient_id
+      FROM follow_up
+      WHERE SUBSTRING(follow_up.date_time, 1, 10) = ?
+    `;
+    const paramsStep1 = [date];
+    const records = await DB.query(sqlStep1, paramsStep1);
 
-    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10)=?`;
-    const countResult = await DB.query(countSql, [date]);
-    const total = countResult[0].total;
+    // Step 2: Retrieve patient information for each record found
+    const results = [];
+    for (const record of records) {
+      const {
+        Patient_id,
+        Record_id,
+        Record_Date,
+        Record_Category,
+        Record_Remark,
+      } = record;
+      const sqlStep2 = `
+        SELECT patients.id AS Patient_id,
+               patients.name AS Name,
+               patients.nrc AS NRC,
+               follow_up.date_time AS Date,
+               follow_up.category AS Category,
+               follow_up.remark AS Remark
+        FROM patients
+        LEFT JOIN follow_up ON patients.id = follow_up.patient_id
+        WHERE patients.id = ?
+          AND follow_up.id = ?
+      `;
+      const paramsStep2 = [Patient_id, Record_id];
+      const patientInfo = await DB.query(sqlStep2, paramsStep2);
+      if (patientInfo.length > 0) {
+        results.push({
+          patient_id: patientInfo[0].Patient_id,
+          name: patientInfo[0].Name,
+          NRC: patientInfo[0].NRC,
+          date: Record_Date,
+          category: Record_Category,
+          remark: Record_Remark,
+        });
+      }
+    }
 
-    if (list.length > 0) {
-      return new StatusCode.OK({ list, total });
+    // Return results
+    if (results.length > 0) {
+      return new StatusCode.OK(results);
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {
+    console.error("Error in followUpDateSearch:", error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
