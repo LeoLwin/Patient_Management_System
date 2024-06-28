@@ -181,7 +181,7 @@ const followUpDateSearch = async (date) => {
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
           nrc: patientInfo[0].NRC,
-          date: Record_Date,
+          date_time: Record_Date,
           category: Record_Category,
           remark: Record_Remark,
         });
