@@ -193,7 +193,7 @@ const hospAndLabIdSearch = async (id) => {
 //   }
 // };
 
-const hospAndLabDateSearch = async (start_date, end_date) => {
+const hospAndLabDateSearch = async (start_date, end_date, location_name) => {
   try {
     // Step 1: Search hospital and lab records between start_date and end_date
     const sqlStep1 = `
@@ -203,9 +203,9 @@ const hospAndLabDateSearch = async (start_date, end_date) => {
                  hospital_and_lab.remark AS Record_Remark,
                  hospital_and_lab.patient_id AS Patient_id
           FROM hospital_and_lab
-          WHERE date BETWEEN ? AND ?
+          WHERE date BETWEEN ? AND ? AND location_name= ?
         `;
-    const paramsStep1 = [start_date, end_date];
+    const paramsStep1 = [start_date, end_date, location_name];
     const records = await DB.query(sqlStep1, paramsStep1);
 
     // Step 2: Retrieve patient information for each record found
@@ -222,7 +222,7 @@ const hospAndLabDateSearch = async (start_date, end_date) => {
             SELECT patients.id AS Patient_id,
                    patients.name AS Name,
                    patients.nrc AS NRC,
-                   DATE_FORMAT(hospital_and_lab.date, '%Y/%m/%d') AS Date,
+                   DATE_FORMAT(date, '%Y/%m/%d') as Date,
                    hospital_and_lab.location_name AS Location,
                    hospital_and_lab.remark AS Remark
             FROM patients
@@ -237,7 +237,7 @@ const hospAndLabDateSearch = async (start_date, end_date) => {
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
           nrc: patientInfo[0].NRC,
-          date: Record_Date,
+          date: patientInfo[0].Date,
           location: Record_Location,
           remark: Record_Remark,
         });

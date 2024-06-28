@@ -166,6 +166,7 @@ const followUpDateSearch = async (date) => {
         SELECT patients.id AS Patient_id,
                patients.name AS Name,
                patients.nrc AS NRC,
+               follow_up.id,
                follow_up.date_time AS Date,
                follow_up.category AS Category,
                follow_up.remark AS Remark
@@ -178,6 +179,7 @@ const followUpDateSearch = async (date) => {
       const patientInfo = await DB.query(sqlStep2, paramsStep2);
       if (patientInfo.length > 0) {
         list.push({
+          id: patientInfo[0].id,
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
           nrc: patientInfo[0].NRC,

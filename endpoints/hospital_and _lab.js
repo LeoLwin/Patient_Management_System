@@ -301,13 +301,27 @@ router.post(
     .withMessage("End_Date is required")
     .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
     .withMessage("End_Date must be in yyyy/mm/dd format"),
+  body("location_name")
+    .notEmpty()
+    .withMessage("location_name is required")
+    .trim()
+    .escape()
+    .custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("location_name cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { start_date, end_date } = req.body;
+      const { start_date, end_date, location_name } = req.body;
       console.log(req.body);
 
       const formattedStartDate = start_date.split("/").join("-");
@@ -315,7 +329,8 @@ router.post(
 
       const result = await HospAndLab.hospAndLabDateSearch(
         formattedStartDate,
-        formattedEndDate
+        formattedEndDate,
+        location_name
       );
       return res.json(result);
     } catch (error) {
