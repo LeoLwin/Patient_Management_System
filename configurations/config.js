@@ -17,4 +17,5 @@ define("Google_Client_Secret", process.env.Google_Client_Secret);
 define("REDIRECT_URI", process.env.REDIRECT_URI);
 
 define("PORT", process.env.PORT);
+define("LOCALHOST", process.env.LOCALHOST);
 define("JWT_SECRET", process.env.JWT_SECRET);

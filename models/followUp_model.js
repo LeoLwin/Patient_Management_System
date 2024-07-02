@@ -55,14 +55,24 @@ const followUpOnlyList = async () => {
   }
 };
 
-const followUpUpdate = async (patient_id, date_time, category, remark, id) => {
+const followUpUpdate = async (
+  patient_id,
+  date_time,
+  category,
+  remark,
+  remainder_2,
+  remainder_1,
+  id
+) => {
   try {
-    const sql = `UPDATE follow_up SET patient_id = ?, date_time = ?, category= ?,remark = ? WHERE id=?`;
+    const sql = `UPDATE follow_up SET patient_id = ?, date_time = ?, category= ?, remark = ? , remainder_2 = ?, remainder_1=?  WHERE id=?`;
     const result = await DB.query(sql, [
       patient_id,
       date_time,
       category,
       remark,
+      remainder_2,
+      remainder_1,
       id,
     ]);
     if (result.affectedRows == "1") {
@@ -137,8 +147,10 @@ const followUpPatientIdSearch = async (patient_id) => {
 //   }
 // };
 
-const followUpDateSearch = async (date) => {
+const followUpDateSearch = async () => {
   try {
+    let date = await getCurrentDate();
+    let beforeDate = await getBeforeOneDay();
     // Step 1: Search follow_up records for a specific date
     const sqlStep1 = `
       SELECT follow_up.id AS Record_id,
@@ -147,9 +159,9 @@ const followUpDateSearch = async (date) => {
              follow_up.remark AS Record_Remark,
              follow_up.patient_id AS Patient_id
       FROM follow_up
-      WHERE SUBSTRING(follow_up.date_time, 1, 10) = ?
+      WHERE SUBSTRING(follow_up.date_time, 1, 10) IN (?, ?)
     `;
-    const paramsStep1 = [date];
+    const paramsStep1 = [date, beforeDate];
     const records = await DB.query(sqlStep1, paramsStep1);
 
     // Step 2: Retrieve patient information for each record found
@@ -166,10 +178,12 @@ const followUpDateSearch = async (date) => {
         SELECT patients.id AS Patient_id,
                patients.name AS Name,
                patients.nrc AS NRC,
-               follow_up.id,
+               follow_up.id AS FollowUp_id,
                follow_up.date_time AS Date,
                follow_up.category AS Category,
-               follow_up.remark AS Remark
+               follow_up.remark AS Remark,
+               follow_up.remainder_2,
+               follow_up.remainder_1
         FROM patients
         LEFT JOIN follow_up ON patients.id = follow_up.patient_id
         WHERE patients.id = ?
@@ -179,32 +193,151 @@ const followUpDateSearch = async (date) => {
       const patientInfo = await DB.query(sqlStep2, paramsStep2);
       if (patientInfo.length > 0) {
         list.push({
-          id: patientInfo[0].id,
+          id: patientInfo[0].FollowUp_id,
           patient_id: patientInfo[0].Patient_id,
           name: patientInfo[0].Name,
           nrc: patientInfo[0].NRC,
           date_time: Record_Date,
           category: Record_Category,
           remark: Record_Remark,
+          remainder_2: patientInfo[0].remainder_2,
+          remainder_1: patientInfo[0].remainder_1,
         });
       }
     }
 
-    const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10)=?`;
-    const countResult = await DB.query(countSql, [date]);
+    // Step 3: Count total follow_up records for the given dates
+    const countSql = `
+      SELECT COUNT(*) AS total
+      FROM follow_up
+      WHERE SUBSTRING(date_time, 1, 10) IN (?, ?)
+    `;
+    const countResult = await DB.query(countSql, [date, beforeDate]);
     const total = countResult[0].total;
 
     // Return results
     if (list.length > 0) {
-      return new StatusCode.OK({ list, total });
+      return { status: "OK", data: { list, total } };
     } else {
-      return new StatusCode.NOT_FOUND(null);
+      return { status: "NOT_FOUND", data: null };
     }
   } catch (error) {
     console.error("Error in followUpDateSearch:", error);
-    return new StatusCode.UNKNOWN(error.message);
+    return { status: "UNKNOWN", message: error.message };
   }
+  // try {
+  //   let date = await getCurrentDate();
+  //   // Step 1: Search follow_up records for a specific date
+  //   const sqlStep1 = `
+  //     SELECT follow_up.id AS Record_id,
+  //            follow_up.date_time AS Record_Date,
+  //            follow_up.category AS Record_Category,
+  //            follow_up.remark AS Record_Remark,
+  //            follow_up.patient_id AS Patient_id
+  //     FROM follow_up
+  //     WHERE SUBSTRING(follow_up.date_time, 1, 10) = ?
+  //   `;
+  //   const paramsStep1 = [date];
+  //   const records = await DB.query(sqlStep1, paramsStep1);
+  //   // Step 2: Retrieve patient information for each record found
+  //   const list = [];
+  //   for (const record of records) {
+  //     const {
+  //       Patient_id,
+  //       Record_id,
+  //       Record_Date,
+  //       Record_Category,
+  //       Record_Remark,
+  //     } = record;
+  //     const sqlStep2 = `
+  //       SELECT patients.id AS Patient_id,
+  //              patients.name AS Name,
+  //              patients.nrc AS NRC,
+  //              follow_up.id AS FollowUp_id,
+  //              follow_up.date_time AS Date,
+  //              follow_up.category AS Category,
+  //              follow_up.remark AS Remark,
+  //              follow_up.remainder_2,
+  //              follow_up.remainder_1
+  //       FROM patients
+  //       LEFT JOIN follow_up ON patients.id = follow_up.patient_id
+  //       WHERE patients.id = ?
+  //         AND follow_up.id = ?
+  //     `;
+  //     const paramsStep2 = [Patient_id, Record_id];
+  //     const patientInfo = await DB.query(sqlStep2, paramsStep2);
+  //     if (patientInfo.length > 0) {
+  //       list.push({
+  //         id: patientInfo[0].FollowUp_id,
+  //         patient_id: patientInfo[0].Patient_id,
+  //         name: patientInfo[0].Name,
+  //         nrc: patientInfo[0].NRC,
+  //         date_time: Record_Date,
+  //         category: Record_Category,
+  //         remark: Record_Remark,
+  //         remainder_2: patientInfo[0].remainder_2,
+  //         remainder_1: patientInfo[0].remainder_1,
+  //       });
+  //     }
+  //   }
+  //   // Step 3: Count total follow_up records for the given date
+  //   const countSql = `SELECT COUNT(*) AS total FROM follow_up WHERE SUBSTRING(date_time, 1, 10) = ?`;
+  //   const countResult = await DB.query(countSql, [date]);
+  //   const total = countResult[0].total;
+  //   // Return results
+  //   if (list.length > 0) {
+  //     return { status: "OK", data: { list, total } };
+  //   } else {
+  //     return { status: "NOT_FOUND", data: null };
+  //   }
+  // } catch (error) {
+  //   console.error("Error in followUpDateSearch:", error);
+  //   return { status: "UNKNOWN", message: error.message };
+  // }
 };
+
+const getCurrentDate = () => {
+  console.log("Today");
+  const now = new Date();
+  const year = now.getFullYear();
+  let month = now.getMonth() + 1;
+  let day = now.getDate();
+
+  // Ensure month and day are two digits
+  if (month < 10) {
+    month = `0${month}`;
+  }
+  if (day < 10) {
+    day = `0${day}`;
+  }
+
+  // Format: YYYY-MM-DD
+  const currentDate = `${year}/${month}/${day}`;
+  return currentDate;
+};
+
+const getBeforeOneDay = () => {
+  const now = new Date();
+  now.setDate(now.getDate() + 1); // Subtract 1 day from current date
+
+  const year = now.getFullYear();
+  let month = now.getMonth() + 1;
+  let day = now.getDate();
+
+  // Ensure month and day are two digits
+  if (month < 10) {
+    month = `0${month}`;
+  }
+  if (day < 10) {
+    day = `0${day}`;
+  }
+
+  // Format: YYYY/MM/DD
+  const beforeDate = `${year}/${month}/${day}`;
+  return beforeDate;
+};
+
+// Example usage:
 
 module.exports = {
   followUpCreate,

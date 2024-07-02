@@ -1,3 +1,4 @@
+const config = require("../configurations/config");
 const multer = require("multer");
 const path = require("path");
 const StatusCode = require("../helper/status_code_helper");
@@ -16,10 +17,6 @@ const storage = multer.diskStorage({
 
 // Initialize Multer with the storage configuration
 const upload = multer({ storage: storage });
-
-const sanitizeFileName = (nrc) => {
-  return nrc.replace(/\//g, "_");
-};
 
 const fileUpload = async (file, id) => {
   try {
@@ -40,7 +37,7 @@ const fileUpload = async (file, id) => {
     console.log(`File saved to ${filePath}`);
 
     // Construct the file URL
-    const baseUrl = "http://localhost:3000/images/"; // Replace with your actual base URL
+    const baseUrl = `http://${config.LOCALHOST}:${config.PORT}/uploads/`; // Replace with your actual base URL
     // const fileUrl = `${baseUrl}${uniqueFileName}`;
     const fileUrl = `${baseUrl}${idStr}/${uniqueFileName}`;
 
@@ -89,10 +86,14 @@ const fileOnlyUpload = async (file) => {
     // Write the file to the specified directory
     await fs.writeFile(filePath, file.buffer); // file.buffer for the file content
 
-    console.log(`File saved to ${uploadDir}`);
+    console.log(`File saved to : ${uploadDir}`);
+    console.log("FIle  loaclhost:");
+    console.log("FIle  PORT :", config.PORT);
 
-    const baseUrl = "http://localhost:3000/uploads/"; // Replace with your actual base URL
+    const baseUrl = `http://${config.LOCALHOST}:${config.PORT}/uploads/`; // Replace with your actual base URL
+    console.log(baseUrl);
     const fileUrl = `${baseUrl}${uniqueFileName}`;
+    console.log(fileUrl);
 
     return new StatusCode.OK(fileUrl);
   } catch (error) {

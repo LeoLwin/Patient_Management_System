@@ -135,66 +135,77 @@ router.get(
 router.put(
   "/followUpUpdate/:id",
   [
+    // Validate patient_id
     body("patient_id")
       .notEmpty()
-      .withMessage("Patinet ID is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+      .withMessage("Patient ID is required")
+      .isInt()
+      .withMessage("Patient ID must be an integer"),
+
+    // Validate date_time
     body("date_time")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i) // Matches format yyyy/mm/dd hh:mm
+      .withMessage("Date and time is required")
+      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i)
       .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
+
+    // Validate category
     body("category")
       .notEmpty()
       .withMessage("Category is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Category cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    // body("remark").custom((value) => {
-    //   // Check if the name contains special characters
-    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    //   if (specialCharsRegex.test(value)) {
-    //     throw new Error("Remark cannot contain special characters");
-    //   }
-    //   // Return true to indicate validation passed
-    //   return true;
-    // }),
-    param("id").notEmpty().isInt().toInt(),
+      .matches(/^[a-zA-Z ]+$/)
+      .withMessage("Category can only contain letters and spaces"),
+
+    // Validate remark (if needed)
+    // body("remark")
+    //   .optional()
+    //   .matches(/^[a-zA-Z0-9 ]*$/)
+    //   .withMessage("Remark can only contain letters, numbers, and spaces"),
+
+    // Validate remainder_2
+    body("remainder_2")
+      .optional({ nullable: true }) // Allows null or empty string
+      .if(body("remainder_2").exists()) // Check if remainder_2 exists
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/)
+      .withMessage("remainder_2 must be in yyyy/mm/dd format"),
+
+    // Validate remainder_1 or allow null
+    body("remainder_1")
+      .optional({ nullable: true }) // Allows null or empty string
+      .if(body("remainder_1").exists()) // Check if remainder_1 exists
+      .matches(/^\d{4}\/\d{2}\/\d{2}$/)
+      .withMessage("remainder_1 must be in yyyy/mm/dd format"),
+
+    // Validate id parameter
+    param("id")
+      .notEmpty()
+      .withMessage("ID parameter is required")
+      .isInt()
+      .withMessage("ID parameter must be an integer"),
   ],
   async (req, res) => {
+    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors));
       }
-      const { patient_id, date_time, category, remark } = req.body;
+      const {
+        patient_id,
+        date_time,
+        category,
+        remark,
+        remainder_2,
+        remainder_1,
+      } = req.body;
       const { id } = req.params;
       const result = await followUp.followUpUpdate(
         patient_id,
         date_time,
         category,
         remark,
+        remainder_2,
+        remainder_1,
         id
       );
       res.json(result);
@@ -283,46 +294,32 @@ router.get(
 );
 
 //Date Search
-router.post(
+router.get(
   "/followUpDateSearch",
-  [
-    body("date")
-      .notEmpty()
-      .withMessage("Date is required")
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Start_Date  must be in yyyy/mm/dd format"),
-  ],
+  // [
+  //   body("date")
+  //     .notEmpty()
+  //     .withMessage("Date is required")
+  //     .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+  //     .withMessage("Start_Date  must be in yyyy/mm/dd format"),
+  // ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const { date } = req.body;
+      // const errors = validationResult(req);
+      // if (!errors.isEmpty()) {
+      //   return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      // }
+      // const { date } = req.body;
 
       // const formattedDate = date.split("/").join("-");
-      console.log(date);
+      // console.log(date);
 
-      const result = await followUp.followUpDateSearch(date);
+      const result = await followUp.followUpDateSearch();
       return res.json(result);
     } catch (error) {
       res.status(error);
     }
   }
 );
-
-router.post("/followUpDateSearch ", async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-    }
-    const { date } = req.body;
-    const result = await followUp.followUpDateSearch(date);
-    return res.json(result);
-  } catch (error) {
-    res.status(error);
-  }
-});
 
 module.exports = router;
