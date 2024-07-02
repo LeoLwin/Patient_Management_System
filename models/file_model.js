@@ -154,13 +154,22 @@ const pathSearch = async (path) => {
 const fileSearch = async (patient_id, path) => {
   try {
     const sql = `SELECT * FROM file WHERE patient_id= ? AND path =?`;
-    const result = await DB.query(sql, [patient_id, path]);
-    if (result.length > 0) {
-      return new StatusCode.OK(result);
+    const result0 = await DB.query(sql, [patient_id, path]);
+
+    if (result0.length > 0) {
+      let result = [];
+      for (let i = 0; i < result0.length; i++) {
+        console.log(result0[i]);
+      }
+      return new StatusCode.OK(result0);
     } else {
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {}
+};
+
+const getnameUrl = async (data) => {
+  console.log(data);
 };
 
 module.exports = {

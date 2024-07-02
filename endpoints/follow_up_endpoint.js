@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { param, body, validationResult } = require("express-validator");
 const followUp = require("../models/followUp_model");
 const StatusCode = require("../helper/status_code_helper");
+const follow_Up_Helper = require("../helper/follow_up_helper");
 
 router.post(
   "/followUpCreate",
@@ -163,14 +164,14 @@ router.put(
     //   .withMessage("Remark can only contain letters, numbers, and spaces"),
 
     // Validate remainder_2
-    body("remainder_2")
+    body("reminder_2")
       .optional({ nullable: true }) // Allows null or empty string
       .if(body("remainder_2").exists()) // Check if remainder_2 exists
       .matches(/^\d{4}\/\d{2}\/\d{2}$/)
       .withMessage("remainder_2 must be in yyyy/mm/dd format"),
 
     // Validate remainder_1 or allow null
-    body("remainder_1")
+    body("reminder_1")
       .optional({ nullable: true }) // Allows null or empty string
       .if(body("remainder_1").exists()) // Check if remainder_1 exists
       .matches(/^\d{4}\/\d{2}\/\d{2}$/)
@@ -184,7 +185,6 @@ router.put(
       .withMessage("ID parameter must be an integer"),
   ],
   async (req, res) => {
-    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -195,8 +195,8 @@ router.put(
         date_time,
         category,
         remark,
-        remainder_2,
-        remainder_1,
+        reminder_2,
+        reminder_1,
       } = req.body;
       const { id } = req.params;
       const result = await followUp.followUpUpdate(
@@ -204,8 +204,8 @@ router.put(
         date_time,
         category,
         remark,
-        remainder_2,
-        remainder_1,
+        reminder_2,
+        reminder_1,
         id
       );
       res.json(result);
@@ -316,6 +316,57 @@ router.get(
 
       const result = await followUp.followUpDateSearch();
       return res.json(result);
+    } catch (error) {
+      res.status(error);
+    }
+  }
+);
+
+//updateReminder
+router.get(
+  "/updateReminder/:id",
+  [param("id").notEmpty().isInt().toInt()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const id = req.params.id;
+      const fu_data = await followUp.folllowUpIdSearch(id);
+      if (fu_data.code !== "200") {
+        res.json(fu_data);
+      }
+      const getReminder = await follow_Up_Helper.getUpdateReminder(
+        fu_data.data.date_time
+      );
+
+      if (getReminder.data == 1) {
+        let getDate = await follow_Up_Helper.getCurrentDate();
+        const result = await followUp.followUpUpdate(
+          fu_data.data.patient_id,
+          fu_data.data.date_time,
+          fu_data.data.category,
+          fu_data.data.remark,
+          getDate.data,
+          null,
+          id
+        );
+        res.json({ result });
+      } else {
+        let getBeforeDate = await follow_Up_Helper.getBeforeOneDay();
+        const result = await followUp.followUpUpdate(
+          fu_data.data.patient_id,
+          fu_data.data.date_time,
+          fu_data.data.category,
+          fu_data.data.remark,
+          null,
+          getBeforeDate.data,
+          id
+        );
+
+        res.json(result);
+      }
     } catch (error) {
       res.status(error);
     }

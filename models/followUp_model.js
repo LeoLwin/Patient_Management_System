@@ -1,5 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
+const follow_Up_Helper = require("../helper/follow_up_helper");
 
 const followUpCreate = async (patient_id, date_time, category, remark) => {
   try {
@@ -60,19 +61,19 @@ const followUpUpdate = async (
   date_time,
   category,
   remark,
-  remainder_2,
-  remainder_1,
+  reminder_2,
+  reminder_1,
   id
 ) => {
   try {
-    const sql = `UPDATE follow_up SET patient_id = ?, date_time = ?, category= ?, remark = ? , remainder_2 = ?, remainder_1=?  WHERE id=?`;
+    const sql = `UPDATE follow_up SET patient_id = ?, date_time = ?, category= ?, remark = ? , reminder_2 = ?, reminder_1=?  WHERE id=?`;
     const result = await DB.query(sql, [
       patient_id,
       date_time,
       category,
       remark,
-      remainder_2,
-      remainder_1,
+      reminder_2,
+      reminder_1,
       id,
     ]);
     if (result.affectedRows == "1") {
@@ -149,8 +150,14 @@ const followUpPatientIdSearch = async (patient_id) => {
 
 const followUpDateSearch = async () => {
   try {
-    let date = await getCurrentDate();
-    let beforeDate = await getBeforeOneDay();
+    let getDate = await follow_Up_Helper.getCurrentDate();
+    let getBeforeDate = await follow_Up_Helper.getBeforeOneDay();
+
+    if (getDate.code !== "200" || getBeforeDate.code !== "200") {
+      return;
+    }
+    let date = getDate.data;
+    let beforeDate = getBeforeDate.data;
     // Step 1: Search follow_up records for a specific date
     const sqlStep1 = `
       SELECT follow_up.id AS Record_id,
@@ -182,8 +189,8 @@ const followUpDateSearch = async () => {
                follow_up.date_time AS Date,
                follow_up.category AS Category,
                follow_up.remark AS Remark,
-               follow_up.remainder_2,
-               follow_up.remainder_1
+               follow_up.reminder_2,
+               follow_up.reminder_1
         FROM patients
         LEFT JOIN follow_up ON patients.id = follow_up.patient_id
         WHERE patients.id = ?
@@ -200,12 +207,11 @@ const followUpDateSearch = async () => {
           date_time: Record_Date,
           category: Record_Category,
           remark: Record_Remark,
-          remainder_2: patientInfo[0].remainder_2,
-          remainder_1: patientInfo[0].remainder_1,
+          reminder_2: patientInfo[0].reminder_2,
+          reminder_1: patientInfo[0].reminder_1,
         });
       }
     }
-
     // Step 3: Count total follow_up records for the given dates
     const countSql = `
       SELECT COUNT(*) AS total
@@ -217,14 +223,14 @@ const followUpDateSearch = async () => {
 
     // Return results
     if (list.length > 0) {
-      return { status: "OK", data: { list, total } };
+      return new StatusCode.OK({ list, total });
     } else {
-      return { status: "NOT_FOUND", data: null };
+      return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {
-    console.error("Error in followUpDateSearch:", error);
-    return { status: "UNKNOWN", message: error.message };
+    return new StatusCode.UNKNOWN(error.message);
   }
+
   // try {
   //   let date = await getCurrentDate();
   //   // Step 1: Search follow_up records for a specific date
@@ -257,8 +263,8 @@ const followUpDateSearch = async () => {
   //              follow_up.date_time AS Date,
   //              follow_up.category AS Category,
   //              follow_up.remark AS Remark,
-  //              follow_up.remainder_2,
-  //              follow_up.remainder_1
+  //              follow_up.reminder_2,
+  //              follow_up.reminder_1
   //       FROM patients
   //       LEFT JOIN follow_up ON patients.id = follow_up.patient_id
   //       WHERE patients.id = ?
@@ -275,8 +281,8 @@ const followUpDateSearch = async () => {
   //         date_time: Record_Date,
   //         category: Record_Category,
   //         remark: Record_Remark,
-  //         remainder_2: patientInfo[0].remainder_2,
-  //         remainder_1: patientInfo[0].remainder_1,
+  //         reminder_2: patientInfo[0].reminder_2,
+  //         reminder_1: patientInfo[0].reminder_1,
   //       });
   //     }
   //   }
@@ -296,45 +302,14 @@ const followUpDateSearch = async () => {
   // }
 };
 
-const getCurrentDate = () => {
-  console.log("Today");
-  const now = new Date();
-  const year = now.getFullYear();
-  let month = now.getMonth() + 1;
-  let day = now.getDate();
+const folllowUpdateReminder = async (id) => {
+  try {
+    const result = await follow_Up_Helper.getUpdateReminder(now);
 
-  // Ensure month and day are two digits
-  if (month < 10) {
-    month = `0${month}`;
+    return new StatusCode.OK(follow_up_data);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
   }
-  if (day < 10) {
-    day = `0${day}`;
-  }
-
-  // Format: YYYY-MM-DD
-  const currentDate = `${year}/${month}/${day}`;
-  return currentDate;
-};
-
-const getBeforeOneDay = () => {
-  const now = new Date();
-  now.setDate(now.getDate() + 1); // Subtract 1 day from current date
-
-  const year = now.getFullYear();
-  let month = now.getMonth() + 1;
-  let day = now.getDate();
-
-  // Ensure month and day are two digits
-  if (month < 10) {
-    month = `0${month}`;
-  }
-  if (day < 10) {
-    day = `0${day}`;
-  }
-
-  // Format: YYYY/MM/DD
-  const beforeDate = `${year}/${month}/${day}`;
-  return beforeDate;
 };
 
 // Example usage:
@@ -348,4 +323,5 @@ module.exports = {
   folllowUpIdSearch,
   followUpPatientIdSearch,
   followUpDateSearch,
+  folllowUpdateReminder,
 };
