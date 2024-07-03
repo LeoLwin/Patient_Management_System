@@ -34,6 +34,7 @@ router.post(
   "/fileCreate",
   upload.single("name"),
   [
+    body("path").notEmpty().withMessage("Path is required"),
     // body("path")
     //   .notEmpty()
     //   .withMessage("Path is required")
@@ -177,7 +178,7 @@ router.put(
   "/fileUpdate/:id",
   upload.single("name"),
   [
-    body("path").notEmpty().withMessage("Name is required").trim().escape(),
+    body("path").notEmpty().withMessage("Path is required"),
     // .custom((value) => {
     //   // Check if the name contains special characters
     //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
@@ -249,6 +250,7 @@ router.put(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { patient_id, name: nameUrl, path, type } = req.body;
+
       const { id } = req.params;
       let name;
       let size;

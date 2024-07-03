@@ -26,11 +26,18 @@ const fileList = async (page) => {
     const countResult = await DB.query(countSql);
     const total = countResult[0].total;
 
-    if (list.length > 0) {
-      return new StatusCode.OK({ list, total });
-    } else {
-      return new StatusCode.NOT_FOUND(null);
+    let result = [];
+    for (let i = 0; i < list.length; i++) {
+      const nameURL = await getnameUrl(list[i]);
+      result.push(nameURL);
     }
+
+    return new StatusCode.OK({ result, total });
+    // if (list.length > 0) {
+    //   return new StatusCode.OK({ list, total });
+    // } else {
+    //   return new StatusCode.NOT_FOUND(null);
+    // }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.mesaage);
   }
@@ -138,12 +145,13 @@ const pathSearch = async (path) => {
 
 const fileSearch = async (patient_id, path) => {
   try {
+    console.log("Patient_id :", patient_id, "Path : ", path);
     const sql = `SELECT * FROM file WHERE patient_id= ? AND path =? ORDER BY CASE WHEN type='folder' THEN 0 ELSE 1 END, upload_dateTime DESC`;
     const result0 = await DB.query(sql, [patient_id, path]);
     console.log(result0);
     console.log(patient_id, path);
 
-    if (result0.length <= 0) {
+    if (result0.length <= 0 && path === "main") {
       const dFolder = await dFolderCreate(patient_id, path);
       console.log("dFolder :", dFolder);
       if (dFolder) {
@@ -155,7 +163,7 @@ const fileSearch = async (patient_id, path) => {
 
     let result = [];
     for (let i = 0; i < result0.length; i++) {
-      const nameURL = await FileUpload.getnameUrl(result0[i]);
+      const nameURL = await getnameUrl(result0[i]);
       result.push(nameURL);
     }
 
@@ -163,8 +171,42 @@ const fileSearch = async (patient_id, path) => {
   } catch (error) {}
 };
 
+const getnameUrl = async (data) => {
+  console.log(data);
+  if (data.type == "folder") {
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  }
+  const parts = data.name.split("/uploads/");
+  if (parts.length === 2) {
+    const filename = parts[1];
+
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: filename,
+      nameURL: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  } else {
+    console.error("URL format is not correct");
+    return null; // or throw an error, depending on your use case
+  }
+};
+
 const dFolderCreate = async (patient_id, path) => {
   try {
+    console.log("dFolderCreate -> Patient_id :", patient_id, "Path : ", path);
     const defaultFolders = [
       "Information",
       "Passport",
@@ -193,6 +235,7 @@ const dFolderCreate = async (patient_id, path) => {
 //   if (data.type == "folder") {
 //     return {
 //       id: data.id,
+
 //       patient_id: data.patient_id,
 //       name: data.name,
 //       path: data.path,
@@ -231,4 +274,5 @@ module.exports = {
   fileSearch,
   pathSearch,
   dFolderCreate,
+  getnameUrl,
 };
