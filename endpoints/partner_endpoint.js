@@ -110,11 +110,22 @@ router.post(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
+      // .optional({ nullable: true })
+      .custom((value) => {
+        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+          throw new Error("Invalid format for NRC");
+        }
+        return true;
+      }),
+    body("passport").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Passport cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("gender")
       .notEmpty()
       .custom((value) => {
@@ -149,7 +160,7 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      const { name, dob, nrc, gender, partner_id } = req.body;
+      const { name, dob, nrc, passport, gender, partner_id } = req.body;
       let imageUrl = null;
 
       if (req.file) {
@@ -167,13 +178,14 @@ router.post(
         }
         imageUrl = uploadResult.data;
       }
-      console.log({ name, dob, nrc, gender, partner_id });
+      console.log({ name, dob, nrc, passport, gender, partner_id });
       console.log(imageUrl);
 
       const result = await Patient.patientCreate(
         name,
         dob,
         nrc,
+        passport,
         gender,
         imageUrl
       );

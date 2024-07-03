@@ -24,7 +24,7 @@ const fileUpload = async (file, id) => {
     // Convert id to string
     const idStr = String(id);
 
-    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const uniqueFileName = `Patient-${id}-${file.originalname}`;
     const uploadDir = path.join(__dirname, "../uploads", idStr);
     const filePath = path.join(uploadDir, uniqueFileName);
 
@@ -74,9 +74,9 @@ const fileDelete = async (fileUrl) => {
   }
 };
 
-const fileOnlyUpload = async (file) => {
+const fileOnlyUpload = async (file, name) => {
   try {
-    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const uniqueFileName = `Patient-ID-${name}-${file.originalname}`;
     const uploadDir = path.join(__dirname, "../uploads");
     const filePath = path.join(uploadDir, uniqueFileName);
 

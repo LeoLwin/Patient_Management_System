@@ -115,15 +115,14 @@ router.post(
 
       if (req.file) {
         const file = req.file;
+        const { patient_id, path, type } = req.body;
 
-        const uploadResult = await FileUpload.fileOnlyUpload(file);
+        const uploadResult = await FileUpload.fileOnlyUpload(file, patient_id);
 
         if (uploadResult.code === "500") {
           return res.status(uploadResult.message);
         }
         const mb = await FileUpload.fileByteToSize(file.size);
-
-        const { patient_id, path, type } = req.body;
 
         const name = uploadResult.data;
         const size = mb.data;
