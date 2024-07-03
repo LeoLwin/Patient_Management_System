@@ -59,7 +59,7 @@ const fileDelete = async (fileUrl) => {
     const fullPath = path.join(
       __dirname,
       "../uploads",
-      filePath.replace(/^images\//, "")
+      filePath.replace(/^uploads\//, "")
     );
     console.log("Full path:", fullPath);
 

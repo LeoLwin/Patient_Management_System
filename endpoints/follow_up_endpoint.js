@@ -364,7 +364,6 @@ router.get(
           getBeforeDate.data,
           id
         );
-
         res.json(result);
       }
     } catch (error) {

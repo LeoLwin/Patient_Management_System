@@ -30,11 +30,22 @@ router.post(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
+      // .optional({ nullable: true })
+      .custom((value) => {
+        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+          throw new Error("Invalid format for NRC");
+        }
+        return true;
+      }),
+    body("passport").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Passport cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("gender")
       .notEmpty()
       .withMessage("Gender is required.")
@@ -54,8 +65,21 @@ router.post(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { name, dob, nrc, gender } = req.body;
-      const result = await Patient.patientCreate(name, dob, nrc, gender);
+      const { name, dob, nrc, passport, gender } = req.body;
+      if (nrc == null && passport == null) {
+        return res.json(
+          new StatusCode.PERMISSION_DENIED(
+            "You need To fill  one of NRC and PASSPORT !"
+          )
+        );
+      }
+      const result = await Patient.patientCreate(
+        name,
+        dob,
+        nrc,
+        passport,
+        gender
+      );
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -383,11 +407,22 @@ router.post(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
+      // .optional({ nullable: true })
+      .custom((value) => {
+        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+          throw new Error("Invalid format for NRC");
+        }
+        return true;
+      }),
+    body("passport").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Passport cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("gender")
       .notEmpty()
       .withMessage("Gender is required.")
@@ -418,7 +453,14 @@ router.post(
         );
       }
 
-      const { name, dob, nrc, gender } = req.body;
+      const { name, dob, nrc, passport, gender } = req.body;
+      if (nrc == null && passport == null) {
+        return res.json(
+          new StatusCode.PERMISSION_DENIED(
+            "You need To fill  one of NRC and PASSPORT !"
+          )
+        );
+      }
       const image = req.file;
 
       // console.log(image);
@@ -438,6 +480,7 @@ router.post(
             name,
             dob,
             nrc,
+            passport,
             gender,
             imageUrl
           );
@@ -486,11 +529,22 @@ router.put(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
+      // .optional({ nullable: true })
+      .custom((value) => {
+        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+          throw new Error("Invalid format for NRC");
+        }
+        return true;
+      }),
+    body("passport").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Passport cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("gender")
       .notEmpty()
       .custom((value) => {
@@ -521,19 +575,26 @@ router.put(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
-      const { name, dob, nrc, gender, image: imageUrl } = req.body;
+      const { name, dob, nrc, passport, gender, image: imageUrl } = req.body;
+      if (nrc == null && passport == null) {
+        return res.json(
+          new StatusCode.PERMISSION_DENIED(
+            "You need To fill  one of NRC and PASSPORT !"
+          )
+        );
+      }
       const { id } = req.params;
       let image;
 
       if (req.file) {
         // If a file is uploaded, process the file
         image = req.file;
-        console.log({ name, dob, nrc, gender, image });
+        console.log({ name, dob, nrc, passport, gender, image });
         console.log(id);
       } else if (imageUrl) {
         // If an image URL is provided, use the URL
         image = imageUrl;
-        console.log({ name, dob, nrc, gender, image });
+        console.log({ name, dob, nrc, passport, gender, image });
         console.log(id);
       }
 
@@ -563,11 +624,13 @@ router.put(
         // Use the provided image URL
         newImageUrl = imageUrl;
       }
+
       // Update patient with the new image URL
       const updateResult = await Patient.patientUpdate(
         name,
         dob,
         nrc,
+        passport,
         gender,
         newImageUrl,
         id

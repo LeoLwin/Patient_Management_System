@@ -156,20 +156,52 @@ const fileSearch = async (patient_id, path) => {
     const sql = `SELECT * FROM file WHERE patient_id= ? AND path =?`;
     const result0 = await DB.query(sql, [patient_id, path]);
 
-    if (result0.length > 0) {
-      let result = [];
-      for (let i = 0; i < result0.length; i++) {
-        console.log(result0[i]);
-      }
-      return new StatusCode.OK(result0);
-    } else {
+    if (result0.length <= 0) {
       return new StatusCode.NOT_FOUND(null);
     }
+
+    let result = [];
+    for (let i = 0; i < result0.length; i++) {
+      const nameURL = await getnameUrl(result0[i]);
+      result.push(nameURL);
+    }
+    console.log("Result", result);
+
+    return new StatusCode.OK(result);
   } catch (error) {}
 };
 
 const getnameUrl = async (data) => {
   console.log(data);
+  if (data.type == "folder") {
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  }
+  const parts = data.name.split("/uploads/");
+  if (parts.length === 2) {
+    const filename = parts[1];
+
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: filename,
+      nameURL: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  } else {
+    console.error("URL format is not correct");
+    return null; // or throw an error, depending on your use case
+  }
 };
 
 module.exports = {

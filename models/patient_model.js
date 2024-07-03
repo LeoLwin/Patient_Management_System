@@ -3,12 +3,20 @@ const DB = require("../helper/database_helper");
 
 // TODO: to follow coding standard
 
-const patientCreate = async (name, dob, nrc, gender, imageUrl) => {
+const patientCreate = async (name, dob, nrc, passport, gender, imageUrl) => {
   try {
+    console.log(name, dob, nrc, passport, gender, imageUrl);
     // TODO: duplicate entry checking?
     const sql =
-      "INSERT INTO patients (name, dob, nrc, gender, imageUrl) VALUES(?,?,?,?,?)";
-    const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl]);
+      "INSERT INTO patients (name, dob, nrc,passport, gender, imageUrl) VALUES(?,?,?,?,?,?)";
+    const result = await DB.query(sql, [
+      name,
+      dob,
+      nrc,
+      passport,
+      gender,
+      imageUrl,
+    ]);
     return new StatusCode.OK(result, "New patient registration successful.");
   } catch (error) {
     console.log("error", error);
@@ -21,7 +29,7 @@ const patientList = async (page) => {
     // TODO: sql injection
     const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, nrc, gender, imageUrl FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, nrc,passport, gender, imageUrl FROM patients ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     const list = await DB.query(sql, [page_size, offset]);
 
     // Query to count total number of bundles
@@ -40,11 +48,28 @@ const patientList = async (page) => {
 };
 
 // TODO: use individual parameters
-const patientUpdate = async (name, dob, nrc, gender, imageUrl, id) => {
+const patientUpdate = async (
+  name,
+  dob,
+  nrc,
+  passport,
+  gender,
+  imageUrl,
+  id
+) => {
   try {
-    console.log({ name, dob, nrc, gender, imageUrl, id });
-    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?, gender=?, imageUrl=? WHERE id=?`;
-    const result = await DB.query(sql, [name, dob, nrc, gender, imageUrl, id]);
+    console.log("Update", { name, dob, nrc, passport, gender, imageUrl, id });
+    const sql = `UPDATE patients SET name=?, dob=? ,nrc=?, passport=?, gender=?, imageUrl=? WHERE id=?`;
+    const result = await DB.query(sql, [
+      name,
+      dob,
+      nrc,
+      passport,
+      gender,
+      imageUrl,
+      id,
+    ]);
+    console.log(result);
     if (result.affectedRows == 1) {
       return new StatusCode.OK(null, "Pateint Data is updated", result);
     }

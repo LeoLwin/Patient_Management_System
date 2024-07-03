@@ -12,7 +12,7 @@ PORT = config.PORT || 2000;
 app.use(cors());
 app.use(express.json({ limit: "500mb" }));
 
-app.get("/images/:id/:filename", async (req, res) => {
+app.get("/uploads/:id/:filename", async (req, res) => {
   const id = req.params.id;
   const fileName = req.params.filename;
 
@@ -28,7 +28,7 @@ app.get("/images/:id/:filename", async (req, res) => {
   });
 });
 
-app.delete("/images/:id/:filename", async (req, res) => {
+app.delete("/uploads/:id/:filename", async (req, res) => {
   const id = req.params.id;
   const fileName = req.params.filename;
 
