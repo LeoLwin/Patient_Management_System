@@ -152,6 +152,39 @@ const checkFilePath = async (fileUrl) => {
   }
 };
 
+const getnameUrl = async (data) => {
+  console.log(data);
+  if (data.type == "folder") {
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  }
+  const parts = data.name.split("/uploads/");
+  if (parts.length === 2) {
+    const filename = parts[1];
+
+    return {
+      id: data.id,
+      patient_id: data.patient_id,
+      name: filename,
+      nameURL: data.name,
+      path: data.path,
+      size: data.size,
+      upload_dateTime: data.upload_dateTime,
+      type: data.type,
+    };
+  } else {
+    console.error("URL format is not correct");
+    return null; // or throw an error, depending on your use case
+  }
+};
+
 module.exports = {
   upload,
   fileDelete,
@@ -160,4 +193,5 @@ module.exports = {
   fileOnlyDelete,
   fileByteToSize,
   checkFilePath,
+  getnameUrl,
 };

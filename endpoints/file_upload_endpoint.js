@@ -123,6 +123,7 @@ router.post(
         const mb = await FileUpload.fileByteToSize(file.size);
 
         const { patient_id, path, type } = req.body;
+
         const name = uploadResult.data;
         const size = mb.data;
         const result = await File.fileCreate(
@@ -462,6 +463,7 @@ router.get("/mainfFolderSearch", async (req, res) => {
     }
 
     const result = await File.fileSearch(patient_id, path);
+    // console.log("End point", result);
     res.json(result);
   } catch (error) {
     console.error("Error:", error.message);

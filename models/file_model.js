@@ -1,10 +1,9 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
-const { TotpMultiFactorGenerator } = require("firebase/auth/web-extension");
+const FileUpload = require("../helper/file_upload_helper");
 
 const fileCreate = async (patient_id, name, path, size, type) => {
   try {
-    console.log({ patient_id, name, path, size, type });
     const sql = `INSERT INTO file (patient_id, name, path, size, type) VALUES (?,?,?,?,?)`;
     await DB.query(sql, [patient_id, name, path, size, type]);
     return new StatusCode.OK(null, "New file is created.");
@@ -17,7 +16,6 @@ const fileCreate = async (patient_id, name, path, size, type) => {
 //fileList
 const fileList = async (page) => {
   try {
-    console.log(page);
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `SELECT * FROM file ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
@@ -41,15 +39,6 @@ const fileList = async (page) => {
 // fileUpdate
 const fileUpdate = async (patient_id, name, path, size, type, id) => {
   try {
-    console.log("This is from model update", {
-      patient_id,
-      name,
-      path,
-      size,
-      type,
-      id,
-    });
-
     const sql = `UPDATE file SET patient_id = ?, name = ?, path = ?, size = ?, type = ? WHERE id = ?`;
     const result = await DB.query(sql, [
       patient_id,
@@ -69,7 +58,6 @@ const fileUpdate = async (patient_id, name, path, size, type, id) => {
 //fileDelete
 const fileDelete = async (id) => {
   try {
-    console.log("Model Id", id);
     const sql = `DELETE FROM file WHERE id=?`;
     await DB.query(sql, [id]);
     return new StatusCode.OK(null, `File ${id} is deleted`);
@@ -123,11 +111,8 @@ const pathSearch = async (path) => {
   try {
     const sql = `SELECT * FROM file WHERE path = ? ORDER BY id DESC`;
     const list = await DB.query(sql, [path]);
-    console.log("List", list);
-    console.log("Count", list.length);
 
     if (list.length > 0) {
-      console.log("Loop");
       for (const data of list) {
         console.log(data.type);
         if (data.type === "folder") {
@@ -153,56 +138,88 @@ const pathSearch = async (path) => {
 
 const fileSearch = async (patient_id, path) => {
   try {
-    const sql = `SELECT * FROM file WHERE patient_id= ? AND path =?`;
+    const sql = `SELECT * FROM file WHERE patient_id= ? AND path =? ORDER BY CASE WHEN type='folder' THEN 0 ELSE 1 END, upload_dateTime DESC`;
     const result0 = await DB.query(sql, [patient_id, path]);
+    console.log(result0);
+    console.log(patient_id, path);
 
     if (result0.length <= 0) {
-      return new StatusCode.NOT_FOUND(null);
+      const dFolder = await dFolderCreate(patient_id, path);
+      console.log("dFolder :", dFolder);
+      if (dFolder) {
+        const sql = `SELECT * FROM file WHERE patient_id= ? AND path =? ORDER BY CASE WHEN type='folder' THEN 0 ELSE 1 END, upload_dateTime DESC`;
+        const result0 = await DB.query(sql, [patient_id, path]);
+        return new StatusCode.OK(result0);
+      }
     }
 
     let result = [];
     for (let i = 0; i < result0.length; i++) {
-      const nameURL = await getnameUrl(result0[i]);
+      const nameURL = await FileUpload.getnameUrl(result0[i]);
       result.push(nameURL);
     }
-    console.log("Result", result);
 
     return new StatusCode.OK(result);
   } catch (error) {}
 };
 
-const getnameUrl = async (data) => {
-  console.log(data);
-  if (data.type == "folder") {
-    return {
-      id: data.id,
-      patient_id: data.patient_id,
-      name: data.name,
-      path: data.path,
-      size: data.size,
-      upload_dateTime: data.upload_dateTime,
-      type: data.type,
-    };
-  }
-  const parts = data.name.split("/uploads/");
-  if (parts.length === 2) {
-    const filename = parts[1];
-
-    return {
-      id: data.id,
-      patient_id: data.patient_id,
-      name: filename,
-      nameURL: data.name,
-      path: data.path,
-      size: data.size,
-      upload_dateTime: data.upload_dateTime,
-      type: data.type,
-    };
-  } else {
-    console.error("URL format is not correct");
-    return null; // or throw an error, depending on your use case
+const dFolderCreate = async (patient_id, path) => {
+  try {
+    const defaultFolders = [
+      "Information",
+      "Passport",
+      "Medical_Record",
+      "Others",
+    ];
+    let size = "oMB";
+    let type = "Folder";
+    let result = [];
+    for (let i = 0; i < defaultFolders.length; i++) {
+      let name = defaultFolders[i];
+      const data = await fileCreate(patient_id, name, path, size, type);
+      await result.push(data);
+    }
+    const allCreated = result.every((data) => data.code === "200");
+    if (allCreated) {
+      console.log(allCreated);
+      return new StatusCode.OK(true);
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
   }
 };
+
+// const getnameUrl = async (data) => {
+//   if (data.type == "folder") {
+//     return {
+//       id: data.id,
+//       patient_id: data.patient_id,
+//       name: data.name,
+//       path: data.path,
+//       size: data.size,
+//       upload_dateTime: data.upload_dateTime,
+//       type: data.type,
+//     };
+//   }
+//   const parts = data.name.split("/uploads/");
+//   if (parts.length === 2) {
+//     const filename = parts[1];
+
+//     return {
+//       id: data.id,
+//       patient_id: data.patient_id,
+//       name: filename,
+//       nameURL: data.name,
+//       path: data.path,
+//       size: data.size,
+//       upload_dateTime: data.upload_dateTime,
+//       type: data.type,
+//     };
+//   } else {
+//     console.error("URL format is not correct");
+//     return null; // or throw an error, depending on your use case
+//   }
+// };
 
 module.exports = {
   fileCreate,
@@ -213,4 +230,5 @@ module.exports = {
   typeSearch,
   fileSearch,
   pathSearch,
+  dFolderCreate,
 };
