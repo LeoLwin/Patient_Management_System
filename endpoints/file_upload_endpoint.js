@@ -3,6 +3,8 @@ const FileUpload = require("../helper/file_upload_helper");
 const File = require("../models/file_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
+const progress = require("progress-stream");
+const fs = require("fs");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -35,25 +37,6 @@ router.post(
   upload.single("name"),
   [
     body("path").notEmpty().withMessage("Path is required"),
-    // body("path")
-    //   .notEmpty()
-    //   .withMessage("Path is required")
-    //   .trim()
-    //   .escape()
-    //   .custom((value) => {
-    //     // Regular expression to match disallowed characters
-    //     const disallowedCharsRegex = /[!@#$%^&*(),.?":{}|<=]/;
-
-    //     // Check if the value contains any disallowed characters other than '>'
-    //     if (disallowedCharsRegex.test(value) && !value.includes(">")) {
-    //       throw new Error(
-    //         "Name cannot contain special characters other than '>'"
-    //       );
-    //     }
-
-    //     // Return true to indicate validation passed
-    //     return true;
-    //   }),
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_id is required")
@@ -64,13 +47,11 @@ router.post(
         if (!Number.isInteger(Number(value))) {
           throw new Error("Patient_id must be an integer");
         }
-
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
           throw new Error("Patient_id cannot contain special characters");
         }
-
         // Return true to indicate validation passed
         return true;
       }),
@@ -88,16 +69,7 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    // body("name").custom((value) => {
-    //   // Check if the name contains special characters
-    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    //   if (specialCharsRegex.test(value)) {
-    //     throw new Error("Name cannot contain special characters");
-    //   }
 
-    //   // Return true to indicate validation passed
-    //   return true;
-    // }),
     body("file").custom((value, { req }) => {
       if (!req.file && !req.body.path) {
         throw new Error("Either file or Folder Name must be provided");
@@ -106,7 +78,6 @@ router.post(
     }),
   ],
   async (req, res) => {
-    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -116,6 +87,7 @@ router.post(
       if (req.file) {
         const file = req.file;
         const { patient_id, path, type } = req.body;
+        console.log(req.body);
 
         const uploadResult = await FileUpload.fileOnlyUpload(file, patient_id);
 

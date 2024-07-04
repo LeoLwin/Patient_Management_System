@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const config = require("./configurations/config");
 const index_endpoint = require("./endpoints/index_endpoint");
+
 const path = require("path");
 const fs = require("fs");
 
@@ -10,6 +11,7 @@ const app = express();
 PORT = config.PORT || 2000;
 
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "500mb" }));
 
 app.get("/uploads/:id/:filename", async (req, res) => {
