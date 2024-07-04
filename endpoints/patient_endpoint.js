@@ -407,7 +407,9 @@ router.post(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      // .optional({ nullable: true })
+      .notEmpty()
+      .withMessage("NRC is required")
+      .optional({ nullable: true })
       .custom((value) => {
         if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
           throw new Error("Invalid format for NRC");
@@ -452,7 +454,8 @@ router.post(
           new StatusCode.PERMISSION_DENIED("Uploaded file must be an image.")
         );
       }
-
+      console.log(req.body);
+      console.log(req.file);
       const { name, dob, nrc, passport, gender } = req.body;
       if (nrc == null && passport == null) {
         return res.json(
@@ -529,7 +532,9 @@ router.put(
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
     body("nrc")
-      // .optional({ nullable: true })
+      .notEmpty()
+      .withMessage("NRC is required")
+      .optional({ nullable: true })
       .custom((value) => {
         if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
           throw new Error("Invalid format for NRC");

@@ -160,6 +160,9 @@ router.post(
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
+      console.log(req.body);
+      console.log(req.file);
+
       const { name, dob, nrc, passport, gender, partner_id } = req.body;
       let imageUrl = null;
 
