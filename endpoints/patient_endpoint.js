@@ -406,17 +406,17 @@ router.post(
       .notEmpty()
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      .notEmpty()
-      .withMessage("NRC is required")
-      .optional({ nullable: true })
-      .custom((value) => {
-        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-          throw new Error("Invalid format for NRC");
-        }
+    body("nrc").custom((value) => {
+      if (value == "null" || value == "") {
         return true;
-      }),
+      }
+      if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+        throw new Error("Invalid format for NRC");
+      }
+      return true;
+    }),
     body("passport").custom((value) => {
+      console.log(typeof value);
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
@@ -457,7 +457,7 @@ router.post(
       console.log(req.body);
       console.log(req.file);
       const { name, dob, nrc, passport, gender } = req.body;
-      if (nrc == null && passport == null) {
+      if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
             "You need To fill  one of NRC and PASSPORT !"
@@ -482,8 +482,8 @@ router.post(
           const result = await Patient.patientCreate(
             name,
             dob,
-            nrc,
-            passport,
+            nrc === "" || nrc === "null" ? null : nrc,
+            passport === "" || passport === "null" ? null : passport,
             gender,
             imageUrl
           );
@@ -531,16 +531,15 @@ router.put(
       .notEmpty()
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      .notEmpty()
-      .withMessage("NRC is required")
-      .optional({ nullable: true })
-      .custom((value) => {
-        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-          throw new Error("Invalid format for NRC");
-        }
+    body("nrc").custom((value) => {
+      if (value == "null" || value == "") {
         return true;
-      }),
+      }
+      if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+        throw new Error("Invalid format for NRC");
+      }
+      return true;
+    }),
     body("passport").custom((value) => {
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
@@ -581,7 +580,7 @@ router.put(
       }
 
       const { name, dob, nrc, passport, gender, image: imageUrl } = req.body;
-      if (nrc == null && passport == null) {
+      if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
             "You need To fill  one of NRC and PASSPORT !"
@@ -634,8 +633,8 @@ router.put(
       const updateResult = await Patient.patientUpdate(
         name,
         dob,
-        nrc,
-        passport,
+        nrc === "" || nrc === "null" ? null : nrc,
+        passport === "" || passport === "null" ? null : passport,
         gender,
         newImageUrl,
         id
