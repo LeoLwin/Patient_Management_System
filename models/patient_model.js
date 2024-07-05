@@ -102,13 +102,13 @@ const patientNameSearch = async (name, page) => {
     const page_size = 10;
     const offset = (page - 1) * page_size;
     const sql = `
-      SELECT *, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, 
-      MATCH(name) AGAINST (?) AS relevance 
-      FROM patients 
-      WHERE MATCH(name) AGAINST (?) 
-      ORDER BY 
-        CASE WHEN name = ? THEN 1 ELSE 0 END DESC, 
-        relevance DESC LIMIT ?, ?; 
+      SELECT *, DATE_FORMAT(dob, '%Y/%m/%d') AS dob
+    FROM patients 
+    WHERE MATCH(name) AGAINST (?) 
+    ORDER BY 
+    CASE WHEN name = ? THEN 1 ELSE 0 END DESC, 
+      MATCH(name) AGAINST (?) DESC LIMIT ?, ?;
+ 
     `;
     const result = await DB.query(sql, [name, name, name, offset, page_size]);
     // const result = await DB.query(sql, [name]);

@@ -2,6 +2,7 @@ const StatusCode = require("./status_code_helper");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../configurations/config");
+const session = require("express-session");
 
 const loginHelper = async (getUser, password) => {
   try {
