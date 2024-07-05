@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Admin = require("../models/admin_model");
 const LoginHelper = require("../helper/login_helper");
+const bcrypt = require("bcrypt");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
 
@@ -31,9 +32,13 @@ router.post(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+      console.log(req.body);
       const { email, name, password } = req.body;
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      console.log(hashedPassword);
 
-      const result = await Admin.adminCreate(email, name, password);
+      const result = await Admin.adminCreate(email, name, hashedPassword);
       res.json(result);
     } catch (error) {
       res.status(error);
@@ -92,6 +97,7 @@ router.post(
     body("password").notEmpty().isLength({ min: 6 }),
   ],
   async (req, res) => {
+    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -100,7 +106,9 @@ router.post(
       const { email, password } = req.body;
 
       const getUser = await Admin.isAdminExist(email);
+      console.log(getUser);
       const result = await LoginHelper(getUser, password);
+      console.log(result);
       res.json(result);
     } catch (error) {
       res.status(error);
