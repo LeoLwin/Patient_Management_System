@@ -455,6 +455,14 @@ router.post(
           );
         }
       }
+      if (req.body.nrc == "null" && req.body.passport == "null") {
+        return res.json(
+          new StatusCode.PERMISSION_DENIED(
+            "You need To fill  one of NRC and PASSPORT !"
+          )
+        );
+      }
+
       if (req.body.image == "null" || req.body.image == "") {
         console.log(" True Situation  of req.body.image: ", req.body);
         const { name, dob, nrc, passport, gender, image } = req.body;
