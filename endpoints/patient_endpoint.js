@@ -60,6 +60,7 @@ router.post(
       }),
   ],
   async (req, res) => {
+    console.log("without photo : ", req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -324,6 +325,7 @@ router.post(
     param("page").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
+    console.log("Name Search : ", req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -387,6 +389,7 @@ router.post(
 //create with pic
 router.post(
   "/patientPicUpload",
+
   upload.single("image"),
   [
     body("name")
@@ -416,7 +419,6 @@ router.post(
       return true;
     }),
     body("passport").custom((value) => {
-      console.log(typeof value);
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
@@ -445,18 +447,34 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      if (!req.file) {
-        return res.json(new StatusCode.PERMISSION_DENIED("No file uploaded."));
+      if (req.file) {
+        if (!req.file.mimetype.startsWith("image")) {
+          return res.json(
+            new StatusCode.PERMISSION_DENIED("Uploaded file must be an image.")
+          );
+        }
+      }
+      if (req.body.image == "null" || req.body.image == "") {
+        console.log(" True Situation  of req.body.image: ", req.body);
+        const { name, dob, nrc, passport, gender, image } = req.body;
+
+        const result = await Patient.patientCreate(
+          name,
+          dob,
+          nrc === "" || nrc === "null" ? null : nrc,
+          passport === "" || passport === "null" ? null : passport,
+          gender,
+          image
+        );
+        console.log(result);
+        res.json(result);
+        return;
       }
 
-      if (!req.file.mimetype.startsWith("image")) {
-        return res.json(
-          new StatusCode.PERMISSION_DENIED("Uploaded file must be an image.")
-        );
-      }
       console.log(req.body);
       console.log(req.file);
       const { name, dob, nrc, passport, gender } = req.body;
+      console;
       if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
@@ -464,14 +482,12 @@ router.post(
           )
         );
       }
-      const image = req.file;
 
-      // console.log(image);
-      // console.log({ name, dob, nrc, gender });
+      const imageFile = req.file;
 
       const nextId = await Count.countStatus("patients");
       if (nextId.code == 200) {
-        const uploadResult = await fileUpload(image, nextId.data);
+        const uploadResult = await fileUpload(imageFile, nextId.data);
         if (uploadResult.code === "500") {
           return res.status(uploadResult.message);
         }
@@ -573,6 +589,7 @@ router.put(
     param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
+    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {

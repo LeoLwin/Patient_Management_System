@@ -109,14 +109,15 @@ router.post(
       .notEmpty()
       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      // .optional({ nullable: true })
-      .custom((value) => {
-        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-          throw new Error("Invalid format for NRC");
-        }
+    body("nrc").custom((value) => {
+      if (value == "null" || value == "") {
         return true;
-      }),
+      }
+      if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+        throw new Error("Invalid format for NRC");
+      }
+      return true;
+    }),
     body("passport").custom((value) => {
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
@@ -154,6 +155,7 @@ router.post(
       }),
   ],
   async (req, res) => {
+    console.log(req.body);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -187,8 +189,8 @@ router.post(
       const result = await Patient.patientCreate(
         name,
         dob,
-        nrc,
-        passport,
+        nrc === "" || nrc === "null" ? null : nrc,
+        passport === "" || passport === "null" ? null : passport,
         gender,
         imageUrl
       );

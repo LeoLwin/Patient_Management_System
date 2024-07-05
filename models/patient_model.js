@@ -5,7 +5,15 @@ const DB = require("../helper/database_helper");
 
 const patientCreate = async (name, dob, nrc, passport, gender, imageUrl) => {
   try {
-    console.log(name, dob, nrc, passport, gender, imageUrl);
+    console.log(
+      "Patient Create Model",
+      name,
+      dob,
+      nrc,
+      passport,
+      gender,
+      imageUrl
+    );
     // TODO: duplicate entry checking?
     const sql =
       "INSERT INTO patients (name, dob, nrc,passport, gender, imageUrl) VALUES(?,?,?,?,?,?)";
