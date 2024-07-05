@@ -64,5 +64,5 @@ app.get("/uploads/:filename", async (req, res) => {
 app.use("/", index_endpoint);
 
 app.listen(PORT, config.LOCALHOST, () => {
-  console.log(`Server is listening on http://192.168.100.17:${PORT}`);
+  console.log(`Server is listening on http://${config.LOCALHOST}:${PORT}`);
 });

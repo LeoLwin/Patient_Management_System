@@ -15,7 +15,7 @@ const loginHelper = async (getUser, password) => {
           },
         },
         config.JWT_SECRET,
-        { expiresIn: "2h" }
+        { expiresIn: "9h" }
       );
       return new StatusCode.OK(accessToken);
     }
