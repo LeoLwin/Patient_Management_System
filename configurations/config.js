@@ -17,6 +17,9 @@ define("Google_Client_Id", process.env.Google_Client_Id);
 define("Google_Client_Secret", process.env.Google_Client_Secret);
 define("REDIRECT_URI", process.env.REDIRECT_URI);
 
+define("LOGIN_PASS", process.env.LOGIN_PASS);
+define("LOGIN_UNAUTHORIZE", process.env.LOGIN_UNAUTHORIZE);
+
 define("PORT", process.env.PORT);
 define("LOCALHOST", process.env.LOCALHOST);
 define("JWT_SECRET", process.env.JWT_SECRET);

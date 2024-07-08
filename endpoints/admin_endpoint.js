@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
 const Middleware = require("../middlewares/middleware");
+const config = require("../configurations/config");
+const { json } = require("express");
 
 router.post(
   "/adminCreate",
@@ -101,25 +103,32 @@ router.post(
   ],
   async (req, res) => {
     try {
+      console.log(req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
       const { email, password } = req.body;
-
       const getUser = await Admin.isAdminExist(email);
       console.log(getUser);
+      console.log(getUser.code);
+      console.log("Testing : -->", getUser.code !== 200);
+      if (getUser.code != 200) {
+        console.log("Hello from true condition!");
+        res.json(getUser);
+      }
+
       const result = await LoginHelper.loginHelper(getUser, password, req);
 
-      console.log(req.session.uId);
+      // res.json(result);
 
+      console.log(result);
+      console.log(result.code);
       if (result.code === "200") {
-        res.json(new StatusCode.REDIRECT(`http://localhost:5173/admin`));
-
-        // http://localhost:5173/admin
-      } else {
-        res.json(result);
+        // return res.json("http://192.168.100.18:5000/admin/");
+        res.redirect("/http://192.168.100.18:5000/admin  ");
       }
+      res.redirect("http://192.168.100.18:5000/login");
     } catch (error) {
       res.status(error);
     }

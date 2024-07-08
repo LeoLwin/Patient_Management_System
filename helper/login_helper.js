@@ -15,7 +15,10 @@ const loginHelper = async (getUser, password, req) => {
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return new StatusCode.PERMISSION_DENIED();
+      console.log("Not equal");
+      return new StatusCode.PERMISSION_DENIED(
+        "Please check your email and pasword!"
+      );
     }
 
     req.session.loggedin = true;
