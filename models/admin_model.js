@@ -15,7 +15,7 @@ const adminList = async (page) => {
   try {
     const page_size = 10;
     const offset = (page - 1) * page_size;
-    const sql = `SELECT * FROM users ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
+    const sql = `SELECT id, name, email FROM users ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
     const list = await DB.query(sql);
 
     // Query to count total number of bundles

@@ -182,6 +182,7 @@ router.get(
       const page = req.params.page;
 
       const result = await Patient.patientList(page);
+      console.log(result.data.list[0]);
       res.json(result);
     } catch (error) {
       res.status(error);

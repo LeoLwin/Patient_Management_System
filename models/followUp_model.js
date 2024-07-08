@@ -304,7 +304,7 @@ const followUpDateSearch = async () => {
 
 const folllowUpdateReminder = async (id) => {
   try {
-    const result = await follow_Up_Helper.getUpdateReminder(now);
+    await follow_Up_Helper.getUpdateReminder(now);
 
     return new StatusCode.OK(follow_up_data);
   } catch (error) {
