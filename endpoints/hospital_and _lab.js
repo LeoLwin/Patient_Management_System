@@ -42,33 +42,73 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    // body("remark")
-    //   .notEmpty()
-    //   .withMessage("Remark is required")
-    //   .trim()
-    //   .escape()
-    //   .custom((value) => {
-    //     // Check if the name contains special characters
-    //     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    //     if (specialCharsRegex.test(value)) {
-    //       throw new Error("Remark cannot contain special characters");
-    //     }
-    //     // Return true to indicate validation passed
-    //     return true;
-    //   }),
+    body("doctor_name")
+      .notEmpty()
+      .withMessage("Doctor is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Doctor_Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("doctor_position")
+      .notEmpty()
+      .withMessage("Doctor_Position is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Doctor_Position cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("category")
+      .notEmpty()
+      .withMessage("Category is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Category cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
   ],
   async (req, res) => {
     try {
+      console.log("Endpoint : ", req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-      const { patient_id, date, location_name, remark } = req.body;
+      const {
+        patient_id,
+        date,
+        location_name,
+        doctor_name,
+        doctor_position,
+        category,
+        remark,
+      } = req.body;
 
       const result = await HospAndLab.hospAndLabCreate(
         patient_id,
         date,
         location_name,
+        doctor_name,
+        doctor_position,
+        category,
         remark
       );
       res.json(result);
@@ -168,20 +208,49 @@ router.put(
         // Return true to indicate validation passed
         return true;
       }),
-    // body("remark")
-    //   .notEmpty()
-    //   .withMessage("Remark is required")
-    //   .trim()
-    //   .escape()
-    //   .custom((value) => {
-    //     // Check if the name contains special characters
-    //     const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    //     if (specialCharsRegex.test(value)) {
-    //       throw new Error("Remark cannot contain special characters");
-    //     }
-    //     // Return true to indicate validation passed
-    //     return true;
-    //   }),
+    body("doctor_name")
+      .notEmpty()
+      .withMessage("Doctor is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Doctor_Name cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("doctor_position")
+      .notEmpty()
+      .withMessage("Doctor_Position is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Doctor_Position cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    body("category")
+      .notEmpty()
+      .withMessage("Category is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Category cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+
     param("id").notEmpty().isInt().toInt(),
   ],
   async (req, res) => {
@@ -190,13 +259,24 @@ router.put(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors));
       }
-      const { patient_id, date, location_name, remark } = req.body;
+      const {
+        patient_id,
+        date,
+        location_name,
+        doctor_name,
+        doctor_position,
+        category,
+        remark,
+      } = req.body;
       const { id } = req.params;
 
       const result = await HospAndLab.hospAndLabUpdate(
         patient_id,
         date,
         location_name,
+        doctor_name,
+        doctor_position,
+        category,
         remark,
         id
       );

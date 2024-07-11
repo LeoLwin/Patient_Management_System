@@ -160,6 +160,24 @@ const patientIdSearch = async (id) => {
   }
 };
 
+const patientPassportSearch = async (passport) => {
+  try {
+    const sql = `SELECT *,DATE_FORMAT(dob, '%Y/%m/%d') AS dob FROM patients WHERE passport= ?`;
+    const result = await DB.query(sql, [passport]);
+    if (result.length > 0) {
+      const sql = `SELECT COUNT (*) AS total FROM patients WHERE passport= ?`;
+      const total = await DB.query(sql, [passport]);
+      return new StatusCode.OK({ result, total });
+      // const patient = result[0];
+      // return new StatusCode.OK({ patient });
+    } else {
+      return new StatusCode.NOT_FOUND(null);
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 const patientCountStatus = async () => {
   try {
     const sql = `SHOW TABLE STATUS LIKE 'patients'`;
@@ -186,5 +204,6 @@ module.exports = {
   patientNameSearch,
   patientNrcSearch,
   patientIdSearch,
+  patientPassportSearch,
   patientCountStatus,
 };

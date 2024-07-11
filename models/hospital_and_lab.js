@@ -1,13 +1,39 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
 
-const hospAndLabCreate = async (patient_id, date, location_name, remark) => {
+const hospAndLabCreate = async (
+  patient_id,
+  date,
+  location_name,
+  doctor_name,
+  doctor_position,
+  category,
+  remark
+) => {
   try {
+    console.log({
+      patient_id,
+      date,
+      location_name,
+      doctor_name,
+      doctor_position,
+      category,
+      remark,
+    });
     const sql =
-      "INSERT INTO hospital_and_lab (patient_id, date,location_name,remark) VALUES(?,?,?,?)";
-    await DB.query(sql, [patient_id, date, location_name, remark]);
+      "INSERT INTO hospital_and_lab (patient_id, date, location_name, doctor_name, doctor_position, category, remark) VALUES(?,?,?,?,?,?,?)";
+    await DB.query(sql, [
+      patient_id,
+      date,
+      location_name,
+      doctor_name,
+      doctor_position,
+      category,
+      remark,
+    ]);
     return new StatusCode.OK(null, "New  Hospital and Lab is created!");
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
@@ -103,15 +129,31 @@ const hospAndLabUpdate = async (
   patient_id,
   date,
   location_name,
+  doctor_name,
+  doctor_position,
+  category,
   remark,
   id
 ) => {
+  console.log({
+    patient_id,
+    date,
+    location_name,
+    doctor_name,
+    doctor_position,
+    category,
+    remark,
+    id,
+  });
   try {
-    const sql = `UPDATE hospital_and_lab SET patient_id = ?, date = ?,location_name = ?,remark = ? WHERE id=?`;
+    const sql = `UPDATE hospital_and_lab SET patient_id = ?, date = ?,location_name = ?, doctor_name=? , doctor_position=? , category=? ,remark = ? WHERE id=?`;
     const result = await DB.query(sql, [
       patient_id,
       date,
       location_name,
+      doctor_name,
+      doctor_position,
+      category,
       remark,
       id,
     ]);

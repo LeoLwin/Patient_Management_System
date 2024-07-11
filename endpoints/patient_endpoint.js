@@ -309,6 +309,42 @@ router.post(
   }
 );
 
+//passportSearch
+router.post(
+  "/passportSearch",
+  [
+    body("passport")
+      .notEmpty()
+      .withMessage("Passport is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Passport cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+  ],
+  async (req, res) => {
+    console.log("Passport Search : ", req.body);
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      const { passport } = req.body;
+      const result = await Patient.patientPassportSearch(passport);
+      console.log("Patient Name Search : ", result);
+      res.json(result);
+    } catch (error) {
+      res.json(new StatusCode.UNKNOWN(error.message));
+    }
+  }
+);
+
 //create with pic
 router.post(
   "/patientPicUpload",
