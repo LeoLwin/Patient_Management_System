@@ -296,7 +296,6 @@ router.post(
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
     console.log(req.params);
-    console.log(req.session);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
