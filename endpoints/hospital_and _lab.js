@@ -114,7 +114,7 @@ router.get(
       const result = await HospAndLab.hospAndLabList(page, page_size);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -125,7 +125,7 @@ router.get("/HosAndLabOnlyList", async (req, res) => {
     const result = await HospAndLab.hospAndLabOnlyList();
     res.json(result);
   } catch (error) {
-    res.status(error);
+    res.json(new StatusCode.UNKNOWN(error.message));
   }
 });
 
@@ -203,7 +203,7 @@ router.put(
 
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -224,7 +224,7 @@ router.delete(
     res.json(result);
     try {
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -262,7 +262,7 @@ router.post(
       const result = await HospAndLab.hospAndLabPatientIdSearch(patient_id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -281,7 +281,7 @@ router.get(
       const result = await HospAndLab.hospAndLabIdSearch(id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -334,7 +334,7 @@ router.post(
       );
       return res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );

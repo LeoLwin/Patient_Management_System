@@ -69,7 +69,7 @@ router.post(
       );
       res.json(result);
     } catch (error) {
-      res.json(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -110,7 +110,7 @@ router.get(
       const result = await followUp.followUpList(page, page_size);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -128,7 +128,7 @@ router.get(
       const result = await followUp.followUpOnlyList();
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -210,7 +210,7 @@ router.put(
       );
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -231,7 +231,7 @@ router.delete(
     res.json(result);
     try {
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -269,7 +269,7 @@ router.post(
       const result = await followUp.followUpPatientIdSearch(patient_id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -288,7 +288,7 @@ router.get(
       const result = await followUp.folllowUpIdSearch(id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -317,7 +317,7 @@ router.get(
       const result = await followUp.followUpDateSearch();
       return res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -367,7 +367,7 @@ router.get(
         res.json(result);
       }
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );

@@ -5,8 +5,26 @@ const bcrypt = require("bcrypt");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
 const Middleware = require("../middlewares/middleware");
-const config = require("../configurations/config");
-const { json } = require("express");
+
+router.get("/adminTest", (req, res) => {
+  try {
+    req.session.shwe = "Hello";
+    console.log(req.session.shwe);
+    res.json("req.session.shwe : " + req.session.shwe);
+    return;
+  } catch (error) {
+    res.json(new StatusCode.UNKNOWN(error.message));
+  }
+});
+
+router.get("/adminGet", (req, res) => {
+  try {
+    res.json("req.session.shwe  get get: " + req.session.shwe);
+    return;
+  } catch (error) {
+    res.json(new StatusCode.UNKNOWN(error.message));
+  }
+});
 
 router.post(
   "/adminCreate",
@@ -44,7 +62,7 @@ router.post(
       const result = await Admin.adminCreate(email, name, hashedPassword);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -54,6 +72,7 @@ router.get(
   Middleware.authorization,
   [param("page").notEmpty().isInt().toInt()],
   async (req, res) => {
+    console.log("Hello from admin list", req.session.uId);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -62,7 +81,7 @@ router.get(
       const result = await Admin.adminList(req.params.page);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -79,7 +98,7 @@ router.delete(
       const result = await Admin.adminDelete(req.params.id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -90,6 +109,7 @@ router.post(
   [
     body("email")
       .notEmpty()
+      .withMessage("Please fill the email.")
       .isEmail()
       .normalizeEmail()
       .custom((value) => {
@@ -99,11 +119,16 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("password").notEmpty().isLength({ min: 6 }),
+    body("password")
+      .notEmpty()
+      .withMessage("Please fill the password.")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 words!"),
   ],
   async (req, res) => {
     try {
       console.log(req.body);
+      console.log(req.session);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
@@ -116,21 +141,23 @@ router.post(
       if (getUser.code != 200) {
         console.log("Hello from true condition!");
         res.json(getUser);
+        return;
       }
-
       const result = await LoginHelper.loginHelper(getUser, password, req);
-
-      // res.json(result);
-
-      console.log(result);
+      console.log("Testing :", result);
       console.log(result.code);
       if (result.code === "200") {
-        // return res.json("http://192.168.100.18:5000/admin/");
-        res.redirect("/http://192.168.100.18:5000/admin  ");
+        // res.redirect("http://192.168.100.18:5000/admin");
+        res.json(new StatusCode.REDIRECT("/admin/dashboard"));
+        return;
+        // return res.json({ redirectUrl: "http://192.168.100.18:5000/admin" });
       }
-      res.redirect("http://192.168.100.18:5000/login");
+      res.json(result);
+      // res.redirect("https://ysx-mm.com");
+      return;
+      // res.redirect("http://192.168.100.18:5000/login");
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -147,7 +174,7 @@ router.delete(
       const result = await LoginHelper.logOutHelper(uId, req);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -177,7 +204,7 @@ router.delete(
 //       const result = await Admin.isAdminExist(email);
 //       res.json(result);
 //     } catch (error) {
-//       res.status(error);
+//       res.json(new StatusCode.UNKNOWN(error.message));
 //     }
 //   }
 // );

@@ -33,7 +33,7 @@ router.post(
       );
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -50,7 +50,7 @@ router.get(
       const result = await FormData.formDataList(req.params.page);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -85,7 +85,7 @@ router.put(
       );
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -102,7 +102,7 @@ router.delete(
       const result = await FormData.formDataDelete(req.params.id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -155,7 +155,7 @@ router.post(
         res.json(getData);
       }
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );

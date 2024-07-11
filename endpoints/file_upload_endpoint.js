@@ -3,8 +3,6 @@ const FileUpload = require("../helper/file_upload_helper");
 const File = require("../models/file_model");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
-const progress = require("progress-stream");
-const fs = require("fs");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -42,9 +40,13 @@ router.post(
       .withMessage("Patient_id is required")
       .trim()
       .escape()
-      .custom((value) => {
+      .custom((value, { req, res }) => {
         // Check if the value is an integer
+        console.log(value);
         if (!Number.isInteger(Number(value))) {
+          // console.log(value);
+          // res.json(new StatusCode.UNKNOWN("Patient_id must be an integer"));
+          // return;
           throw new Error("Patient_id must be an integer");
         }
         // Check if the name contains special characters
@@ -140,7 +142,7 @@ router.get(
       const result = await File.fileList(page);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -291,7 +293,7 @@ router.put(
       );
       return res.json(updateResult);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -324,11 +326,10 @@ router.delete(
             file.data[0].name
           );
           console.log("Delete Result", deleteResult);
-
-          res.json(deleteResult);
         }
         const result = await File.fileDelete(id);
         res.json(result);
+        return;
       } else {
         console.log("File_Path", file.data[0].path);
         console.log("File Name", file.data[0].name);
@@ -339,11 +340,13 @@ router.delete(
 
         if (FolderData.code === "403") {
           res.json(FolderData);
+          return;
         }
 
         if (FolderData.code === "404") {
           const result = await File.fileDelete(id);
           res.json(result);
+          return;
         }
 
         console.log("Folder Data", FolderData);
@@ -355,9 +358,11 @@ router.delete(
             console.log(deletePromise);
           });
         }
+
+        res.json(new StatusCode.OK("File is deleted!"));
       }
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -376,7 +381,7 @@ router.get(
       const result = await File.fileIdSearch(req.params.id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -438,6 +443,7 @@ router.get("/mainfFolderSearch", async (req, res) => {
     const result = await File.fileSearch(patient_id, path);
     // console.log("End point", result);
     res.json(result);
+    return;
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({ message: "Server Error" });
@@ -481,7 +487,7 @@ module.exports = router;
 //       return res.json(result);
 //     } catch (error) {
 //       console.log(error);
-//       res.status(error);
+//       res.json(new StatusCode.UNKNOWN(error.message));
 //     }
 //   }
 // );
@@ -525,7 +531,7 @@ module.exports = router;
 //       const result = await File.fileUpdate(patient_id, file_name, id);
 //       res.json(result);
 //     } catch (error) {
-//       res.status(error);
+//       res.json(new StatusCode.UNKNOWN(error.message));
 //     }
 //   }
 // );

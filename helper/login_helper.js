@@ -16,9 +16,7 @@ const loginHelper = async (getUser, password, req) => {
 
     if (!passwordMatch) {
       console.log("Not equal");
-      return new StatusCode.PERMISSION_DENIED(
-        "Please check your email and pasword!"
-      );
+      return new StatusCode.PERMISSION_DENIED("Wrong password!");
     }
 
     req.session.loggedin = true;
@@ -27,7 +25,7 @@ const loginHelper = async (getUser, password, req) => {
     // req.session.email = getUser.data[0].email;
     await Middleware.saveLoggedInUser(req.session.uId, req.session.id);
 
-    return new StatusCode.OK("Login");
+    return new StatusCode.OK(req.session);
   } catch (error) {
     return new StatusCode.UNKNOWN(error);
   }

@@ -7,86 +7,7 @@ const multer = require("multer");
 const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-router.post(
-  "/patientCreate",
-  [
-    body("name")
-      .notEmpty()
-      .withMessage("Name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("dob")
-      .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      // .optional({ nullable: true })
-      .custom((value) => {
-        if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-          throw new Error("Invalid format for NRC");
-        }
-        return true;
-      }),
-    body("passport").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Passport cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-    body("gender")
-      .notEmpty()
-      .withMessage("Gender is required.")
-      .custom((value) => {
-        const validGenders = ["male", "female"];
-        if (!validGenders.includes(value.toLowerCase())) {
-          throw new Error(
-            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-          );
-        }
-        return true; // Validation passed
-      }),
-  ],
-  async (req, res) => {
-    console.log("without photo : ", req.body);
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const { name, dob, nrc, passport, gender } = req.body;
-      if (nrc == null && passport == null) {
-        return res.json(
-          new StatusCode.PERMISSION_DENIED(
-            "You need To fill  one of NRC and PASSPORT !"
-          )
-        );
-      }
-      const result = await Patient.patientCreate(
-        name,
-        dob,
-        nrc,
-        passport,
-        gender
-      );
-      res.json(result);
-    } catch (error) {
-      res.status(error);
-    }
-  }
-);
+const Middleware = require("../middlewares/middleware");
 
 // router.post(
 //   "/patientCreateWithPic",
@@ -164,7 +85,7 @@ router.post(
 //       }
 //       res.json(new StatusCode.UNKNOWN(fileurl));
 //     } catch (error) {
-//       res.status(error);
+//       res.json(new StatusCode.UNKNOWN(error.message));
 //     }
 //   }
 // );
@@ -185,7 +106,7 @@ router.get(
       console.log(result.data.list[0]);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -274,7 +195,7 @@ router.put(
       // const result = await Patient.patientUpdate(name, dob, nrc, gender, id);
       // res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -300,7 +221,7 @@ router.delete(
       }
       res.json(patient);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -332,14 +253,13 @@ router.post(
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-
       const { name } = req.body;
       const page = req.params.page;
       const result = await Patient.patientNameSearch(name, page);
       console.log("Patient Name Search : ", result);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -365,7 +285,7 @@ router.post(
       const result = await Patient.patientNrcSearch(nrc);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -375,6 +295,8 @@ router.post(
   "/patientIdSearch/:id",
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
+    console.log(req.params);
+    console.log(req.session);
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -383,7 +305,7 @@ router.post(
       const result = await Patient.patientIdSearch(req.params.id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -529,7 +451,7 @@ router.post(
 
       res.json(nextId);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -670,7 +592,7 @@ router.put(
 
       // res.json(patient);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -699,7 +621,7 @@ router.delete(
       }
       res.json(patient);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -719,7 +641,7 @@ router.delete(
           res.json(error);
         });
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -737,6 +659,86 @@ router.get("/patientsCountStatus", async (req, res) => {
 });
 
 module.exports = router;
+
+// router.post(
+//   "/patientCreate",
+//   [
+//     body("name")
+//       .notEmpty()
+//       .withMessage("Name is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("dob")
+//       .notEmpty()
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
+//     body("nrc")
+//       // .optional({ nullable: true })
+//       .custom((value) => {
+//         if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+//           throw new Error("Invalid format for NRC");
+//         }
+//         return true;
+//       }),
+//     body("passport").custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("Passport cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//     body("gender")
+//       .notEmpty()
+//       .withMessage("Gender is required.")
+//       .custom((value) => {
+//         const validGenders = ["male", "female"];
+//         if (!validGenders.includes(value.toLowerCase())) {
+//           throw new Error(
+//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
+//           );
+//         }
+//         return true; // Validation passed
+//       }),
+//   ],
+//   async (req, res) => {
+//     console.log("without photo : ", req.body);
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const { name, dob, nrc, passport, gender } = req.body;
+//       if (nrc == null && passport == null) {
+//         return res.json(
+//           new StatusCode.PERMISSION_DENIED(
+//             "You need To fill  one of NRC and PASSPORT !"
+//           )
+//         );
+//       }
+//       const result = await Patient.patientCreate(
+//         name,
+//         dob,
+//         nrc,
+//         passport,
+//         gender
+//       );
+//       res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
 // router.post(
 //   "/patientFirebaseUpload",
@@ -899,7 +901,7 @@ module.exports = router;
 
 //       res.json(patient);
 //     } catch (error) {
-//       res.status(error);
+//       res.json(new StatusCode.UNKNOWN(error.message));
 //     }
 //   }
 // );

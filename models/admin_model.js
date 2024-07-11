@@ -50,7 +50,7 @@ const isAdminExist = async (email) => {
     if (result.length > 0) {
       return new StatusCode.OK(result);
     } else {
-      return new StatusCode.NOT_FOUND("Admin does not exist");
+      return new StatusCode.NOT_FOUND("Your email does not exist");
     }
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);

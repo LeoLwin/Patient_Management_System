@@ -144,7 +144,7 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    const sql = `SELECT id, name, DATE_FORMAT(dob, '%Y/%m/%d') AS dob, nrc,passport, gender,imageUrl FROM patients WHERE id=?`;
+    const sql = `SELECT * FROM patients WHERE id= ?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
       const sql = `SELECT COUNT (*) AS total FROM patients WHERE id= ?`;

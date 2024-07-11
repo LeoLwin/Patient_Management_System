@@ -1,15 +1,27 @@
 const StatusCode = require("../helper/status_code_helper");
-const config = require("../configurations/config");
 
 let loggedInUsers = {};
 
+// Function to retrieve a cookie by name
+// function getCookie(name) {
+//   const cookieValue = document.cookie.match(
+//     "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+//   );
+//   return cookieValue ? cookieValue.pop() : "";
+// }
+
+// Example usage:
+
 const authorization = async (req, res, next) => {
   try {
-    console.log(req.session);
+    console.log("Testing for for", req.session);
     if (req.session.loggedin) {
       if (!req.session.uId) {
         req.session = null;
-        res.redirect("/login");
+        // res.redirect("/login");
+        res.json(
+          new StatusCode.PERMISSION_DENIED("Permission Denied For sesion null")
+        );
         return;
       }
 
@@ -19,15 +31,28 @@ const authorization = async (req, res, next) => {
       }
 
       if (loggedInUsers[req.session.uId] != req.session.id) {
+        console.log("session id is not equal UID ");
         // login session available. but replaced by another login.
         req.session = null;
-        res.redirect("/login");
+        // res.redirect("/login");
+        res.json(
+          new StatusCode.PERMISSION_DENIED(
+            "Permission Denied for session id is not equal UID"
+          )
+        );
+
         return;
       }
 
       next();
     } else {
-      res.redirect("/login");
+      res.json(
+        new StatusCode.PERMISSION_DENIED(
+          "Permission Denied for session.loggedin false"
+        )
+      );
+
+      // res.redirect("/login");
     }
   } catch (error) {
     console.log(error);

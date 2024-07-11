@@ -5,7 +5,7 @@ const config = require("./configurations/config");
 const index_endpoint = require("./endpoints/index_endpoint");
 const session = require("express-session");
 const mySQLStore = require("express-mysql-session")(session);
-const cookieParser = require("cookie-parser");
+const Middleware = require("./middlewares/middleware");
 
 const path = require("path");
 const fs = require("fs");
@@ -21,22 +21,32 @@ let options = {
 
 let sessionStore = new mySQLStore(options);
 PORT = config.PORT || 2000;
+let host = config.LOCALHOST;
 
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
+const corsOptions = {
+  origin: "http://192.168.100.18:5000",
+  credentials: true, // Access-Control-Allow-Credentials: true
+};
+
+app.use(cors(corsOptions));
+
+// app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "500mb" }));
-app.use(cookieParser());
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
   session({
     key: config.LOGIN_KEY,
     secret: config.LOGIN_SECRET_KEY,
     store: sessionStore,
-    resave: false,
+    resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
+    cookie: { maxAge: 24 * 60 * 60 * 1000, secure: false, sameSite: "None" }, // 24 hours
   })
 );
+
+// app.get("/uploads/:id/:filename", Middleware.authorization);
 
 app.get("/uploads/:id/:filename", async (req, res) => {
   const id = req.params.id;
@@ -87,6 +97,6 @@ app.get("/uploads/:filename", async (req, res) => {
 
 app.use("/", index_endpoint);
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is listening on http://0.0.0.0:${PORT}`);
+app.listen(PORT, host, () => {
+  console.log(`Server is listening on http://${host}:${PORT}`);
 });

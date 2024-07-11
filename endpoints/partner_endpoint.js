@@ -219,7 +219,7 @@ router.post(
         new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
       );
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -306,7 +306,7 @@ router.post(
         new StatusCode.ALREADY_EXISTS("New Partner is alreay connected!")
       );
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -326,7 +326,7 @@ router.get(
       const result = await Partner.partnerList(page);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -389,7 +389,7 @@ router.put(
       );
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
@@ -407,7 +407,7 @@ router.delete(
       const result = await Partner.partnerDelete(req.params.id);
       res.json(result);
     } catch (error) {
-      res.status(error);
+      res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
 );
