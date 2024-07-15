@@ -42,34 +42,24 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-    body("doctor_name")
-      .notEmpty()
-      .withMessage("Doctor is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Doctor_Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("doctor_position")
-      .notEmpty()
-      .withMessage("Doctor_Position is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Doctor_Position cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    body("doctor_name").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Doctor_Name cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
+    body("doctor_position").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Doctor_Position cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("category")
       .notEmpty()
       .withMessage("Category is required")
@@ -208,34 +198,24 @@ router.put(
         // Return true to indicate validation passed
         return true;
       }),
-    body("doctor_name")
-      .notEmpty()
-      .withMessage("Doctor is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Doctor_Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("doctor_position")
-      .notEmpty()
-      .withMessage("Doctor_Position is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Doctor_Position cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    body("doctor_name").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Doctor_Name cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
+    body("doctor_position").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("Doctor_Position cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("category")
       .notEmpty()
       .withMessage("Category is required")

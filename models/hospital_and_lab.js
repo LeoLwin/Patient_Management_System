@@ -38,27 +38,6 @@ const hospAndLabCreate = async (
   }
 };
 
-// async (page) => {
-//     try {
-//       const page_size = 10;
-//       const offset = (page - 1) * page_size;
-//       const sql = `SELECT * FROM partner ORDER BY id DESC LIMIT ${page_size} OFFSET ${offset}`;
-//       const list = await DB.query(sql, [page_size, offset]);
-
-//       // Query to count total number of bundles
-//       const countSql = "SELECT COUNT(*) AS total FROM partner";
-//       const countResult = await DB.query(countSql);
-//       const total = countResult[0].total;
-
-//       if (list.length > 0) {
-//         return new StatusCode.OK({ list, total });
-//       } else {
-//         return new StatusCode.NOT_FOUND(null);
-//       }
-//     } catch (error) {
-//       return new StatusCode.UNKNOWN(error.message);
-//     }
-
 // include page and page_size
 const hospAndLabList = async (page, page_size) => {
   try {
@@ -81,6 +60,7 @@ const hospAndLabList = async (page, page_size) => {
       return new StatusCode.NOT_FOUND(null);
     }
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };

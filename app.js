@@ -5,7 +5,6 @@ const config = require("./configurations/config");
 const index_endpoint = require("./endpoints/index_endpoint");
 const session = require("express-session");
 const mySQLStore = require("express-mysql-session")(session);
-const Middleware = require("./middlewares/middleware");
 
 const path = require("path");
 const fs = require("fs");
@@ -24,7 +23,7 @@ PORT = config.PORT || 2000;
 let host = config.LOCALHOST;
 
 const corsOptions = {
-  origin: "http://192.168.100.18:5000",
+  origin: "http://192.168.100.18:5173",
   credentials: true, // Access-Control-Allow-Credentials: true
 };
 
@@ -47,6 +46,11 @@ app.use(
 );
 
 // app.get("/uploads/:id/:filename", Middleware.authorization);
+
+app.get("/", (req, res) => {
+  console.log("hello");
+  res.send("hello");
+});
 
 app.get("/uploads/:id/:filename", async (req, res) => {
   const id = req.params.id;
