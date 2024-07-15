@@ -110,6 +110,7 @@ router.post(
       res.json(result);
       // res.json(req.body);
     } catch (error) {
+      console.log(error);
       res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
@@ -213,12 +214,12 @@ router.post(
   }
 );
 
-router.post(
-  "/followUpList",
+router.put(
+  "/followUpUpdate/:id",
   [
     body("patient_id")
       .notEmpty()
-      .withMessage("ID is required")
+      .withMessage("Patinet ID is required")
       .trim()
       .escape()
       .custom((value) => {
@@ -234,54 +235,19 @@ router.post(
         // Return true to indicate validation passed
         return true;
       }),
-  ],
-  async (req, res) => {
-    console.log(req.body);
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const patient_id = req.body.patient_id;
-      const result = await followUp.followUpList(patient_id);
-      res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
-
-router.put(
-  "/followUpUpdate/:id",
-  [
-    // Validate patient_id
-    body("patient_id")
-      .notEmpty()
-      .withMessage("Patient ID is required")
-      .isInt()
-      .withMessage("Patient ID must be an integer"),
-
-    // Validate date_time
     body("date_time")
       .notEmpty()
-      .withMessage("Date and time is required")
-      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i)
+      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i) // Matches format yyyy/mm/dd hh:mm
       .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
-
-    body("location_name")
-      .notEmpty()
-      .withMessage("location_name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("location_name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+    body("location_name").custom((value) => {
+      // Check if the name contains special characters
+      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+      if (specialCharsRegex.test(value)) {
+        throw new Error("location_name cannot contain special characters");
+      }
+      // Return true to indicate validation passed
+      return true;
+    }),
     body("doctor_name").custom((value) => {
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
@@ -300,43 +266,29 @@ router.put(
       // Return true to indicate validation passed
       return true;
     }),
-    // Validate category
     body("category")
       .notEmpty()
       .withMessage("Category is required")
-      .matches(/^[a-zA-Z ]+$/)
-      .withMessage("Category can only contain letters and spaces"),
-    // Validate remark (if needed)
-    // body("remark")
-    //   .optional()
-    //   .matches(/^[a-zA-Z0-9 ]*$/)
-    //   .withMessage("Remark can only contain letters, numbers, and spaces"),
-
-    // Validate remainder_2
-    body("reminder_3")
-      .optional({ nullable: true }) // Allows null or empty string
-      .if(body("remainder_2").exists()) // Check if remainder_2 exists
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/)
-      .withMessage("remainder_2 must be in yyyy/mm/dd format"),
-    body("reminder_2")
-      .optional({ nullable: true }) // Allows null or empty string
-      .if(body("remainder_2").exists()) // Check if remainder_2 exists
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/)
-      .withMessage("remainder_2 must be in yyyy/mm/dd format"),
-
-    // Validate remainder_1 or allow null
-    body("reminder_1")
-      .optional({ nullable: true }) // Allows null or empty string
-      .if(body("remainder_1").exists()) // Check if remainder_1 exists
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/)
-      .withMessage("remainder_1 must be in yyyy/mm/dd format"),
-
-    // Validate id parameter
-    param("id")
-      .notEmpty()
-      .withMessage("ID parameter is required")
-      .isInt()
-      .withMessage("ID parameter must be an integer"),
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new Error("Category cannot contain special characters");
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    // body("remark").custom((value) => {
+    //   // Check if the name contains special characters
+    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    //   if (specialCharsRegex.test(value)) {
+    //     throw new Error("Remark cannot contain special characters");
+    //   }
+    //   // Return true to indicate validation passed
+    //   return true;
+    // }),
   ],
   async (req, res) => {
     try {
@@ -443,6 +395,7 @@ router.get(
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
     try {
+      console.log(req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
@@ -504,32 +457,59 @@ router.get(
         fu_data.data.date_time
       );
 
-      if (getReminder.data == 1) {
-        let getDate = await follow_Up_Helper.getCurrentDate();
+      let getDate = new Date();
+
+      if (getReminder.data == 2) {
+        console.log("GO to 2");
         const result = await followUp.followUpUpdate(
           fu_data.data.patient_id,
           fu_data.data.date_time,
           fu_data.data.category,
+          fu_data.data.location_name,
+          fu_data.data.doctor_name,
+          fu_data.data.doctor_position,
           fu_data.data.remark,
-          getDate.data,
+          getDate,
+          null,
           null,
           id
         );
         res.json({ result });
-      } else {
-        let getBeforeDate = await follow_Up_Helper.getBeforeOneDay();
+      } else if (getReminder.data == 1) {
+        console.log("GO to 1");
         const result = await followUp.followUpUpdate(
           fu_data.data.patient_id,
           fu_data.data.date_time,
           fu_data.data.category,
+          fu_data.data.location_name,
+          fu_data.data.doctor_name,
+          fu_data.data.doctor_position,
           fu_data.data.remark,
           null,
-          getBeforeDate.data,
+          getDate,
+          null,
+          id
+        );
+        res.json(result);
+      } else {
+        console.log("GO to 0");
+        const result = await followUp.followUpUpdate(
+          fu_data.data.patient_id,
+          fu_data.data.date_time,
+          fu_data.data.category,
+          fu_data.data.location_name,
+          fu_data.data.doctor_name,
+          fu_data.data.doctor_position,
+          fu_data.data.remark,
+          null,
+          null,
+          getDate,
           id
         );
         res.json(result);
       }
     } catch (error) {
+      console.log(error);
       res.json(new StatusCode.UNKNOWN(error.message));
     }
   }

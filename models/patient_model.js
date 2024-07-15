@@ -196,6 +196,138 @@ const patientCountStatus = async () => {
   }
 };
 
+const overAllPatientData = async (patient_id) => {
+  try {
+    // const sql = `SELECT
+    //            patients.id,
+    //            patients.name,
+    //            patients.dob,
+    //            patients.nrc,
+    //            patients.passport,
+    //            patients.gender,
+    //            patients.imageUrl,
+    //            (SELECT JSON_OBJECT(
+    //               'patient_1', partner.patient_id_1,
+    //               'patient_2', partner.patient_id_2
+    //             )
+    //             FROM partner
+    //             WHERE partner.patient_id_1 = patients.id OR partner.patient_id_2 = patients.id
+    //            ) AS partner,
+    //             (SELECT JSON_OBJECT(
+    //            'partner_id' , patients.id,
+    //            'partner_name' , patients.name,
+    //            'partner_dob' , patients.dob,
+    //            'partner_nrc' , patients.nrc,
+    //            'partner_passport', patients.passport,
+    //            'partner_gender', patients.gender,
+    //            'partner_imageUrl', patients.imageUrl) FROM patients
+    //             WHERE patients.id = patient_1 OR patients.id = patient_2 )AS partner_data,
+    //            JSON_ARRAYAGG(
+    //              JSON_OBJECT(
+    //                'remark', follow_up.remark,
+    //                'date_time', follow_up.date_time,
+    //                'category', follow_up.category,
+    //                'location_name', follow_up.location_name,
+    //                'doctor_name', follow_up.doctor_name,
+    //                'doctor_position', follow_up.doctor_position
+    //              )
+    //            ) AS follow_up,
+    //            (SELECT JSON_ARRAYAGG(form_data.data)
+    //             FROM form_data
+    //             WHERE form_data.patient_id = patients.id
+    //            ) AS form_data
+    //          FROM
+    //            patients
+    //          LEFT JOIN follow_up ON patients.id = follow_up.patient_id
+    //          WHERE patients.id = ?
+    //          GROUP BY patients.id`;
+
+    const sql = `SELECT
+                  patients.id,
+                  patients.name,
+                  patients.dob,
+                  patients.nrc,
+                  patients.passport,
+                  patients.gender,
+                  patients.imageUrl,
+                  IFNULL(
+                    (
+                      SELECT JSON_OBJECT(
+                        'patient_1', partner.patient_id_1,
+                        'patient_2', partner.patient_id_2
+                      ) AS partner
+                      FROM partner
+                      WHERE partner.patient_id_1 = patients.id OR partner.patient_id_2 = patients.id
+                      LIMIT 1
+                    ),
+                    JSON_OBJECT('partner', NULL)
+                  ) AS partner,
+                  IFNULL(
+                    (
+                      SELECT JSON_OBJECT(
+                        'partner_id', p.id,
+                        'partner_name', p.name,
+                        'partner_dob', p.dob,
+                        'partner_nrc', p.nrc,
+                        'partner_passport', p.passport,
+                        'partner_gender', p.gender,
+                        'partner_imageUrl', p.imageUrl
+                      )
+                      FROM patients AS p
+                      WHERE p.id = (
+                        SELECT partner.patient_id_1 FROM partner
+                        WHERE partner.patient_id_2 = patients.id
+                        LIMIT 1
+                      ) OR p.id = (
+                        SELECT partner.patient_id_2 FROM partner
+                        WHERE partner.patient_id_1 = patients.id
+                        LIMIT 1
+                      )
+                      LIMIT 1
+                    ),
+                    JSON_OBJECT(
+                      'partner_id', NULL,
+                      'partner_name', NULL,
+                      'partner_dob', NULL,
+                      'partner_nrc', NULL,
+                      'partner_passport', NULL,
+                      'partner_gender', NULL,
+                      'partner_imageUrl', NULL
+                    )
+                  ) AS partner_data,
+                  JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                      'remark', follow_up.remark,
+                      'date_time', follow_up.date_time,
+                      'category', follow_up.category,
+                      'location_name', follow_up.location_name,
+                      'doctor_name', follow_up.doctor_name,
+                      'doctor_position', follow_up.doctor_position
+                    )
+                  ) AS follow_up,
+                  (
+                    SELECT JSON_ARRAYAGG(form_data.data)
+                    FROM form_data
+                    WHERE form_data.patient_id = patients.id
+                  ) AS form_data
+                FROM
+                  patients
+                LEFT JOIN follow_up ON patients.id = follow_up.patient_id
+                WHERE patients.id = ?
+                GROUP BY patients.id;
+                `;
+
+    const result = await DB.query(sql, [patient_id]);
+
+    console.log(result);
+
+    return new StatusCode.OK(result[0]);
+  } catch (error) {
+    console.log(error);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   patientCreate,
   patientList,
@@ -206,4 +338,5 @@ module.exports = {
   patientIdSearch,
   patientPassportSearch,
   patientCountStatus,
+  overAllPatientData,
 };

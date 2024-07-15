@@ -58,6 +58,7 @@ const partnerSearch = async (patient_id) => {
   try {
     const sql = `SELECT * FROM partner WHERE (patient_id_1=?) OR (patient_id_2=?)`;
     const result = await DB.query(sql, [patient_id, patient_id]);
+    console.log("Model Result : ", result);
     return result.length > 0
       ? result[0].patient_id_1 == patient_id
         ? new StatusCode.OK(

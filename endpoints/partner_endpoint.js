@@ -412,6 +412,7 @@ router.delete(
   }
 );
 
+//partner search
 router.post(
   "/partnerSearch",
   [
@@ -442,6 +443,7 @@ router.post(
       }
       const { patient_id } = req.body;
       const result = await Partner.partnerSearch(patient_id);
+      console.log(result.data.data);
       res.json(result);
     } catch (error) {
       res.status(500).json({ error: error.message });

@@ -6,6 +6,9 @@ const getCurrentDate = () => {
     const year = now.getFullYear();
     let month = now.getMonth() + 1;
     let day = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let ampm = "AM";
 
     // Ensure month and day are two digits
     if (month < 10) {
@@ -15,8 +18,29 @@ const getCurrentDate = () => {
       day = `0${day}`;
     }
 
-    // Format: YYYY-MM-DD
-    const currentDate = `${year}/${month}/${day}`;
+    // Convert 24-hour format to 12-hour format and determine AM/PM
+    if (hours >= 12) {
+      ampm = "PM";
+      if (hours > 12) {
+        hours -= 12;
+      }
+    }
+    if (hours === 0) {
+      hours = 12;
+    }
+
+    // Ensure hours and minutes are two digits
+    if (hours < 10) {
+      hours = `0${hours}`;
+    }
+    if (minutes < 10) {
+      minutes = `0${minutes}`;
+    }
+
+    // Format: YYYY/MM/DD HH:MM AM/PM
+    const currentDate = `${year}/${month}/${day} ${hours}:${minutes} ${ampm}`;
+    // const currentDate = `${year}/${month}/${day}`;
+
     return new StatusCode.OK(currentDate);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
@@ -48,8 +72,33 @@ const getBeforeOneDay = () => {
   }
 };
 
+const getDate = () => {
+  try {
+    const now = new Date();
+    const year = now.getFullYear();
+    let month = now.getMonth() + 1;
+    let day = now.getDate();
+    let oneD = now.getDate() + 1;
+    let TwoD = now.getDate() + 2;
+    if (month < 10) {
+      month = `0${month}`;
+    }
+    if (day < 10) {
+      day = `0${day}`;
+    }
+
+    const currentDate = `${year}/${month}/${day}`;
+    const BeforeOneDay = `${year}/${month}/${oneD}`;
+    const BeforeTwoDay = `${year}/${month}/${TwoD}`;
+    return new StatusCode.OK({ currentDate, BeforeOneDay, BeforeTwoDay });
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 const getUpdateReminder = (setDate) => {
   try {
+    console.log("SetDate : ", setDate);
     const now = new Date();
     const setDateParts = setDate.split(" ")[0].split("/");
     const nowParts = now.toISOString().split("T")[0].split("-");
@@ -61,10 +110,23 @@ const getUpdateReminder = (setDate) => {
     );
     const nowFormatted = new Date(nowParts[0], nowParts[1] - 1, nowParts[2]);
 
+    console.log("getDate ; ", nowFormatted);
+
     if (setDateFormatted.getTime() === nowFormatted.getTime()) {
-      return new StatusCode.OK(1); // Return 1 if setDate is equal to now
-    } else {
-      return new StatusCode.OK(0); // Return 0 if setDate is not equal to now
+      console.log("Return 0");
+      return new StatusCode.OK(0); // Return 0 if setDate is equal to current date
+    } else if (
+      setDateFormatted.getTime() ===
+      nowFormatted.getTime() + 86400000
+    ) {
+      console.log("Return 1");
+      return new StatusCode.OK(1); // Return 1 if setDate is one day after the current date
+    } else if (
+      setDateFormatted.getTime() ===
+      nowFormatted.getTime() + 2 * 86400000
+    ) {
+      console.log("Return 2");
+      return new StatusCode.OK(2); // Return 2 if setDate is two days after the current date
     }
   } catch (error) {
     console.error("Error in getUpdateReminder:", error);
@@ -75,5 +137,6 @@ const getUpdateReminder = (setDate) => {
 module.exports = {
   getCurrentDate,
   getBeforeOneDay,
+  getDate,
   getUpdateReminder,
 };
