@@ -6,6 +6,7 @@ const getCurrentDate = () => {
     const year = now.getFullYear();
     let month = now.getMonth() + 1;
     let day = now.getDate();
+    console.log("let day", day);
     let hours = now.getHours();
     let minutes = now.getMinutes();
     let ampm = "AM";
@@ -38,8 +39,8 @@ const getCurrentDate = () => {
     }
 
     // Format: YYYY/MM/DD HH:MM AM/PM
-    const currentDate = `${year}/${month}/${day} ${hours}:${minutes} ${ampm}`;
-    // const currentDate = `${year}/${month}/${day}`;
+    // const currentDate = `${year}/${month}/${day} ${hours}:${minutes} ${ampm}`;
+    const currentDate = `${year}/${month}/${day}`;
 
     return new StatusCode.OK(currentDate);
   } catch (error) {
@@ -114,19 +115,19 @@ const getUpdateReminder = (setDate) => {
 
     if (setDateFormatted.getTime() === nowFormatted.getTime()) {
       console.log("Return 0");
-      return new StatusCode.OK(0); // Return 0 if setDate is equal to current date
+      return new StatusCode.OK("0"); // Return 0 if setDate is equal to current date
     } else if (
       setDateFormatted.getTime() ===
       nowFormatted.getTime() + 86400000
     ) {
       console.log("Return 1");
-      return new StatusCode.OK(1); // Return 1 if setDate is one day after the current date
+      return new StatusCode.OK("1"); // Return 1 if setDate is one day after the current date
     } else if (
       setDateFormatted.getTime() ===
       nowFormatted.getTime() + 2 * 86400000
     ) {
       console.log("Return 2");
-      return new StatusCode.OK(2); // Return 2 if setDate is two days after the current date
+      return new StatusCode.OK("2"); // Return 2 if setDate is two days after the current date
     }
   } catch (error) {
     console.error("Error in getUpdateReminder:", error);

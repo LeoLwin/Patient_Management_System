@@ -3,7 +3,6 @@ const router = require("express").Router();
 const patientController = require("./patient_endpoint");
 const authContoller = require("./google_login_endpoint");
 const adminController = require("./admin_endpoint");
-// const informationController = require("./information_endpoint");
 const formDataController = require("./form_data_endpoint");
 const fileUpload = require("./file_upload_endpoint");
 const partner = require("./partner_endpoint");

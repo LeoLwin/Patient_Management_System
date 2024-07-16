@@ -23,7 +23,10 @@ PORT = config.PORT || 2000;
 let host = config.LOCALHOST;
 
 const corsOptions = {
-  origin: "http://192.168.100.18:5173",
+  origin: [
+    "http://192.168.137.82:5173",
+    "http://192.168.100.17:5173/admin/dashboard",
+  ],
   credentials: true, // Access-Control-Allow-Credentials: true
 };
 
