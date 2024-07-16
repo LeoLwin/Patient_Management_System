@@ -42,11 +42,7 @@ router.post(
       .escape()
       .custom((value, { req, res }) => {
         // Check if the value is an integer
-        console.log(value);
         if (!Number.isInteger(Number(value))) {
-          // console.log(value);
-          // res.json(new StatusCode.UNKNOWN("Patient_id must be an integer"));
-          // return;
           throw new Error("Patient_id must be an integer");
         }
         // Check if the name contains special characters

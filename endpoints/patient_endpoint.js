@@ -7,219 +7,30 @@ const multer = require("multer");
 const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-const Middleware = require("../middlewares/middleware");
-
-// router.post(
-//   "/patientCreateWithPic",
-//   upload.single("file"),
-//   [
-//     body("name")
-//       .notEmpty()
-//       .withMessage("Name is required")
-//       .trim()
-//       .escape()
-//       .custom((value) => {
-//         // Check if the name contains special characters
-//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//         if (specialCharsRegex.test(value)) {
-//           throw new Error("Name cannot contain special characters");
-//         }
-//         // Return true to indicate validation passed
-//         return true;
-//       }),
-//     body("dob")
-//       .notEmpty()
-//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-//     body("nrc")
-//       .notEmpty()
-//       .matches(
-//         /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-//       )
-//       .withMessage("Invalid format for NRC."),
-//     body("gender")
-//       .notEmpty()
-//       .withMessage("Gender is required.")
-//       .custom((value) => {
-//         const validGenders = ["male", "female"];
-//         if (!validGenders.includes(value.toLowerCase())) {
-//           throw new Error(
-//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-//           );
-//         }
-//         return true; // Validation passed
-//       }),
-//     body("file").custom((value, { req }) => {
-//       // Check if a file was uploaded
-//       if (!req.file) {
-//         throw new Error("File is required");
-//       }
-
-//       // Check if the uploaded file is an image
-//       if (!req.file.mimetype.startsWith("image")) {
-//         throw new Error("Uploaded file must be an image");
-//       }
-
-//       return true; // Validation passed
-//     }),
-//   ],
-//   async (req, res) => {
-//     try {
-//       const errors = validationResult(req);
-//       if (!errors.isEmpty()) {
-//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-//       }
-//       const { name, dob, nrc, gender } = req.body;
-//       const file = req.file;
-//       const fileurl = await fileUpload(file);
-//       if (fileurl.code == 200) {
-//         const imageUrl = fileurl.data;
-//         const result = await Patient.patientCreate(
-//           name,
-//           dob,
-//           nrc,
-//           gender,
-//           imageUrl
-//         );
-//         res.json(new StatusCode.OK(result));
-//       }
-//       res.json(new StatusCode.UNKNOWN(fileurl));
-//     } catch (error) {
-//       res.json(new StatusCode.UNKNOWN(error.message));
-//     }
-//   }
-// );
 
 router.get(
   "/patientList/:page",
-  [param("page").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
+  [
+    param("page")
+      .notEmpty()
+      .isInt()
+      .withMessage("Page must be integer.")
+      .toInt(),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const page = req.params.page;
 
       const result = await Patient.patientList(page);
       console.log(result.data.list[0]);
       res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
-
-router.put(
-  "/patientUpdate/:id",
-  upload.single("file"),
-  [
-    body("name")
-      .notEmpty()
-      .withMessage("Name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("dob")
-      .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("nrc")
-      .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
-    body("gender")
-      .notEmpty()
-      .custom((value) => {
-        const validGenders = ["male", "female"];
-        if (!validGenders.includes(value.toLowerCase())) {
-          throw new Error(
-            `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-          );
-        }
-        return true; // Validation passed
-      }),
-    param("id").notEmpty().isInt().toInt(),
-    body("file").custom((value, { req }) => {
-      // Check if a file was uploaded
-      if (!req.file) {
-        throw new Error("File is required");
-      }
-
-      // Check if the uploaded file is an image
-      if (!req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
-      }
-
-      return true; // Validation passed
-    }),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-
-      const { name, dob, nrc, gender } = req.body;
-      const { id } = req.params;
-      const file = req.file;
-
-      const fileurl = await fileUpload(file);
-
-      if (fileurl.code == 200) {
-        const imageUrl = fileurl.data;
-        const result = await Patient.patientUpdate(
-          name,
-          dob,
-          nrc,
-          gender,
-          imageUrl,
-          id
-        );
-        res.json(new StatusCode.OK(result));
-      }
-      res.json(new StatusCode.UNKNOWN(fileurl));
-
-      // const result = await Patient.patientUpdate(name, dob, nrc, gender, id);
-      // res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
-
-router.delete(
-  "/patientDelete/:id",
-  [param("id").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const id = req.params.id;
-      const patient = await Patient.patientIdSearch(id);
-      if (patient.code == 200) {
-        const fileDelete = await filedelete(patient.data.result[0].imageUrl);
-        if (fileDelete.code == 200) {
-          const result = await Patient.patientDelete(id);
-          res.json(result);
-        }
-        res.json(fileDelete);
-      }
-      res.json(patient);
     } catch (error) {
       res.json(new StatusCode.UNKNOWN(error.message));
     }
@@ -239,20 +50,27 @@ router.post(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
     param("page").notEmpty().isInt().toInt(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     console.log("Name Search : ", req.body);
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
       const { name } = req.body;
       const page = req.params.page;
       const result = await Patient.patientNameSearch(name, page);
@@ -270,17 +88,26 @@ router.post(
   [
     body("nrc")
       .notEmpty()
-      .matches(
-        /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-      )
-      .withMessage("Invalid format for NRC."),
+      .custom((value) => {
+        const regex =
+          /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/;
+        if (!regex.test(value)) {
+          throw new StatusCode.UNKNOWN("Invalid format for NRC.");
+        }
+        return true;
+      }),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
       const { nrc } = req.body;
       const result = await Patient.patientNrcSearch(nrc);
       res.json(result);
@@ -293,14 +120,19 @@ router.post(
 //patientIdSearch/:id
 router.post(
   "/patientIdSearch/:id",
-  [param("id").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    console.log(req.params);
-    try {
+  [
+    param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+      next();
+    },
+  ],
+  async (req, res) => {
+    console.log(req.params);
+    try {
       const result = await Patient.patientIdSearch(req.params.id);
       res.json(result);
     } catch (error) {
@@ -322,19 +154,26 @@ router.post(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Passport cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Passport cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     console.log("Passport Search : ", req.body);
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
       const { passport } = req.body;
       const result = await Patient.patientPassportSearch(passport);
       console.log("Patient Name Search : ", result);
@@ -348,7 +187,6 @@ router.post(
 //create with pic
 router.post(
   "/patientPicUpload",
-
   upload.single("image"),
   [
     body("name")
@@ -362,7 +200,8 @@ router.post(
         if (specialCharsRegex.test(value)) {
           throw new Error("Name cannot contain special characters");
         }
-        return true; // Validation passed
+        // Return true to indicate validation passed
+        return true;
       }),
     body("dob")
       .notEmpty()
@@ -388,7 +227,6 @@ router.post(
     }),
     body("gender")
       .notEmpty()
-      .withMessage("Gender is required.")
       .custom((value) => {
         const validGenders = ["male", "female"];
         if (!validGenders.includes(value.toLowerCase())) {
@@ -398,12 +236,22 @@ router.post(
         }
         return true; // Validation passed
       }),
+    body("image").custom((value, { req }) => {
+      if (!req.file && !req.body.image) {
+        throw new Error("Either image file or image URL must be provided");
+      }
+      if (req.file && !req.file.mimetype.startsWith("image")) {
+        throw new Error("Uploaded file must be an image");
+      }
+
+      return true;
+    }),
   ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
 
       if (req.file) {
@@ -441,7 +289,6 @@ router.post(
       console.log(req.body);
       console.log(req.file);
       const { name, dob, nrc, passport, gender } = req.body;
-      console;
       if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
@@ -476,9 +323,11 @@ router.post(
             const deleteResult = await fileDelete(imageUrl);
             console.group("deleteResult", deleteResult);
             res.json(result);
+            return;
           }
 
           res.json(result);
+          return;
         }
         // Continue with your business logic here (e.g., saving the image and data to the database)
         res.json(uploadResult);
@@ -635,7 +484,17 @@ router.put(
 //delete with pic
 router.delete(
   "/patientPicDelete/:id",
-  [param("id").notEmpty().isInt().toInt()],
+  [
+    param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      next();
+    },
+  ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -644,17 +503,27 @@ router.delete(
       }
       const id = req.params.id;
       const patient = await Patient.patientIdSearch(id);
+
       if (patient.code == 200) {
-        console.log(patient.data);
-        const deletResult = await fileDelete(patient.data.result[0].imageUrl);
-        console.log(deletResult);
-        if (deletResult.code == 200) {
-          const result = await Patient.patientDelete(id);
-          res.json(result);
+        console.log(patient.code == 200, "595");
+        console.log(patient.data.result[0].imageUrl == "null", "596");
+
+        if (patient.data.result[0].imageUrl != "null") {
+          console.log("Patient Data: 599", patient.data);
+          const deleteResult = await fileDelete(
+            patient.data.result[0].imageUrl
+          );
+          console.log("603 : ", deleteResult);
         }
-        res.json(deletResult);
+
+        console.log(patient.data.result[0].imageUrl == null, "607");
+
+        const result = await Patient.patientDelete(id);
+        console.log(result);
+        return res.json(result);
+      } else {
+        return res.json(patient);
       }
-      res.json(patient);
     } catch (error) {
       res.json(new StatusCode.UNKNOWN(error.message));
     }
@@ -732,251 +601,5 @@ router.post(
 );
 
 module.exports = router;
-
-// router.post(
-//   "/patientCreate",
-//   [
-//     body("name")
-//       .notEmpty()
-//       .withMessage("Name is required")
-//       .trim()
-//       .escape()
-//       .custom((value) => {
-//         // Check if the name contains special characters
-//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//         if (specialCharsRegex.test(value)) {
-//           throw new Error("Name cannot contain special characters");
-//         }
-//         // Return true to indicate validation passed
-//         return true;
-//       }),
-//     body("dob")
-//       .notEmpty()
-//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-//     body("nrc")
-//       // .optional({ nullable: true })
-//       .custom((value) => {
-//         if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-//           throw new Error("Invalid format for NRC");
-//         }
-//         return true;
-//       }),
-//     body("passport").custom((value) => {
-//       // Check if the name contains special characters
-//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//       if (specialCharsRegex.test(value)) {
-//         throw new Error("Passport cannot contain special characters");
-//       }
-//       // Return true to indicate validation passed
-//       return true;
-//     }),
-//     body("gender")
-//       .notEmpty()
-//       .withMessage("Gender is required.")
-//       .custom((value) => {
-//         const validGenders = ["male", "female"];
-//         if (!validGenders.includes(value.toLowerCase())) {
-//           throw new Error(
-//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-//           );
-//         }
-//         return true; // Validation passed
-//       }),
-//   ],
-//   async (req, res) => {
-//     console.log("without photo : ", req.body);
-//     try {
-//       const errors = validationResult(req);
-//       if (!errors.isEmpty()) {
-//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-//       }
-//       const { name, dob, nrc, passport, gender } = req.body;
-//       if (nrc == null && passport == null) {
-//         return res.json(
-//           new StatusCode.PERMISSION_DENIED(
-//             "You need To fill  one of NRC and PASSPORT !"
-//           )
-//         );
-//       }
-//       const result = await Patient.patientCreate(
-//         name,
-//         dob,
-//         nrc,
-//         passport,
-//         gender
-//       );
-//       res.json(result);
-//     } catch (error) {
-//       res.json(new StatusCode.UNKNOWN(error.message));
-//     }
-//   }
-// );
-
-// router.post(
-//   "/patientFirebaseUpload",
-//   upload.single("file"),
-//   async (req, res) => {
-//     try {
-//       if (!req.file) {
-//         return res.status(400).send("No file uploaded.");
-//       }
-//       const { name } = req.body;
-//       const fileBuffer = req.file.buffer;
-//       const originalFileName = req.file.originalname;
-//       // const uniqueFileName = Date.now() + "-" + originalFileName; // Generate a unique file name
-//       await bucket.file(originalFileName).save(fileBuffer);
-//       // Send the uploaded file path as a response
-
-//       // Get the download URL of the uploaded file
-//       const [url] = await bucket
-//         .file(originalFileName)
-//         .getSignedUrl({ action: "read", expires: "01-01-2030" });
-//       res.status(200).send(`${url}`);
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).send(error);
-//     }
-//   }
-// );
-
-// router.post("/patientFirebaseDelete", async (req, res) => {
-//   try {
-//     const fileUrl = req.body.file;
-//     if (!fileUrl) {
-//       return res.status(400).send("No file URL provided.");
-//     }
-//     const { pathname } = new URL(fileUrl);
-//     let filePath = decodeURIComponent(pathname.substring(1)); // Remove leading '/' and decode URI components
-//     const bucketNameIndex = filePath.indexOf("/");
-//     if (bucketNameIndex !== -1) {
-//       filePath = filePath.substring(bucketNameIndex + 1);
-//       console.log(" filePath : ", filePath);
-//     }
-
-//     // // Create a reference to the file to delete
-//     const fileRef = bucket.file(filePath);
-
-//     // Delete the file
-//     await fileRef.delete();
-//     res.json(new StatusCode.OK("Deleting"));
-//     // res.json(fileRef);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(new StatusCode.UNKNOWN(error.message));
-//   }
-// });
-
-//update with pic
-// router.put(
-//   "/patientPicUpdate/:id",
-//   upload.single("image"),
-//   [
-//     body("name")
-//       .notEmpty()
-//       .withMessage("Name is required")
-//       .trim()
-//       .escape()
-//       .custom((value) => {
-//         // Check if the name contains special characters
-//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-//         if (specialCharsRegex.test(value)) {
-//           throw new Error("Name cannot contain special characters");
-//         }
-//         // Return true to indicate validation passed
-//         return true;
-//       }),
-//     body("dob")
-//       .notEmpty()
-//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
-//     body("nrc")
-//       .notEmpty()
-//       .matches(
-//         /^(\d{1}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{6}\(\w\)\w{6}|\d{2}\/\w{7}\(\w\)\w{6}|\d{1}\/\w{7}\(\w\)\w{6}|\d{2}\/\w{7}\/\w{6}|\d{1}\/\w{7}\/\w{6}|\d{2}\/\w{8}\(\w\)\w{6}|\d{1}\/\w{8}\(\w\)\w{6}|\d{2}\/\w{9}\(\w\)\w{6}|\d{1}\/\w{9}\(\w\)\w{6})$/
-//       )
-//       .withMessage("Invalid format for NRC."),
-//     body("gender")
-//       .notEmpty()
-//       .custom((value) => {
-//         const validGenders = ["male", "female"];
-//         if (!validGenders.includes(value.toLowerCase())) {
-//           throw new Error(
-//             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
-//           );
-//         }
-//         return true; // Validation passed
-//       }),
-//     param("id").notEmpty().isInt().toInt(),
-//     body("image").custom((value, { req }) => {
-//       // Check if a file was uploaded
-//       if (!req.file) {
-//         throw new Error("Image is required");
-//       }
-
-//       // Check if the uploaded file is an image
-//       if (!req.file.mimetype.startsWith("image")) {
-//         throw new Error("Uploaded file must be an image");
-//       }
-
-//       return true; // Validation passed
-//     }),
-//   ],
-//   async (req, res) => {
-//     try {
-//       const errors = validationResult(req);
-//       if (!errors.isEmpty()) {
-//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-//       }
-
-//       const { name, dob, nrc, gender } = req.body;
-//       const { id } = req.params;
-//       const image = req.file;
-//       console.log("Image", image);
-
-//       const patient = await Patient.patientIdSearch(id);
-//       console.log("Patient", patient);
-//       if (patient.code == 200) {
-//         console.log("Patient", patient.data.result[0].imageUrl);
-//         const deletResult = await fileDelete(patient.data.result[0].imageUrl);
-//         console.log("DeleteReslt", deletResult);
-//         if (deletResult.code == 200) {
-//           const file = await fileUpload(image, nrc);
-//           console.log("ImamgeUrl", file);
-//           const imageUrl = file.data;
-//           if (file.code == 200) {
-//             const result = await Patient.patientUpdate(
-//               name,
-//               dob,
-//               nrc,
-//               gender,
-//               imageUrl,
-//               id
-//             );
-//             await res.json(result);
-//           }
-//           res.json(fileurl);
-//         }
-//         if (fileurl.code == 200) {
-//           const imageUrl = fileurl.data;
-//           const result = await Patient.patientUpdate(
-//             name,
-//             dob,
-//             nrc,
-//             gender,
-//             imageUrl,
-//             id
-//           );
-//           res.json(new StatusCode.OK(result));
-//         }
-//         res.json(new StatusCode.UNKNOWN(fileurl));
-//       }
-
-//       res.json(patient);
-//     } catch (error) {
-//       res.json(new StatusCode.UNKNOWN(error.message));
-//     }
-//   }
-// );
 
 module.exports = router;

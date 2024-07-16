@@ -3,7 +3,6 @@ const { param, body, validationResult } = require("express-validator");
 const followUp = require("../models/followUp_model");
 const StatusCode = require("../helper/status_code_helper");
 const follow_Up_Helper = require("../helper/follow_up_helper");
-const { route } = require("./patient_endpoint");
 
 router.post(
   "/followUpCreate",
@@ -506,34 +505,57 @@ router.post(
     body("start_date")
       .notEmpty()
       .withMessage("Start_Date is required")
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Start_Date  must be in yyyy/mm/dd format"),
-  ],
-  body("end_date")
-    .notEmpty()
-    .withMessage("End_Date is required")
-    .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-    .withMessage("End_Date must be in yyyy/mm/dd format"),
-  body("location_name")
-    .notEmpty()
-    .withMessage("location_name is required")
-    .trim()
-    .escape()
-    .custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("location_name cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-  async (req, res) => {
-    try {
+      .custom((value) => {
+        // Validate the format using regex
+        const dateTimeRegex = /^\d{4}\/\d{2}\/\d{2}$/;
+        if (!dateTimeRegex.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "Start_Date and time must be in yyyy/mm/dd format"
+          );
+        }
+        return true;
+      }),
+    body("end_date")
+      .notEmpty()
+      .withMessage("End_Date is required")
+      .custom((value) => {
+        // Validate the format using regex
+        const dateTimeRegex = /^\d{4}\/\d{2}\/\d{2}$/;
+        if (!dateTimeRegex.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "End_Date and time must be in yyyy/mm/dd format"
+          );
+        }
+        return true;
+      }),
+    body("location_name")
+      .notEmpty()
+      .withMessage("location_name is required")
+      .trim()
+      .escape()
+      .custom((value) => {
+        // Check if the name contains special characters
+        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (specialCharsRegex.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "location_name cannot contain special characters"
+          );
+        }
+        // Return true to indicate validation passed
+        return true;
+      }),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
       }
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const { start_date, end_date, location_name } = req.body;
       console.log(req.body);
 
