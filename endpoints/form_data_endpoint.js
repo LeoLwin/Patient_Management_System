@@ -18,14 +18,16 @@ router.post(
       .withMessage("Patient_ID is required")
       .isInt({ min: 1 })
       .withMessage("Patient_ID must be a positive integer"),
-  ],
-  async (req, res) => {
-    try {
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const { data, patient_id } = req.body;
       const result = await FormData.fromDataCreate(
         JSON.stringify(data),
@@ -40,13 +42,22 @@ router.post(
 
 router.get(
   "/formDataList/:page",
-  [param("page").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
+  [
+    param("page")
+      .notEmpty()
+      .isInt()
+      .withMessage("Page must be integer.")
+      .toInt(),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const result = await FormData.formDataList(req.params.page);
       res.json(result);
     } catch (error) {
@@ -62,20 +73,24 @@ router.put(
       .notEmpty()
       .withMessage("data is required")
       .isObject()
-      .withMessage("Data must be an object"),
+      .withMessage("Data must be an Object"),
     body("patient_id")
       .notEmpty()
       .withMessage("Patient_ID is required")
       .isInt({ min: 1 })
       .withMessage("Patient_ID must be a positive integer"),
-    param("id").notEmpty().isInt().toInt(),
-  ],
-  async (req, res) => {
-    try {
+    param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+      next();
+    },
+  ],
+
+  async (req, res) => {
+    try {
       const { data, patient_id } = req.body;
       const { id } = req.params;
       const result = await FormData.formDataUpdate(
@@ -92,13 +107,18 @@ router.put(
 
 router.delete(
   "/formDataDelete/:id",
-  [param("id").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
+  [
+    param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const result = await FormData.formDataDelete(req.params.id);
       res.json(result);
     } catch (error) {
@@ -119,7 +139,9 @@ router.post(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
@@ -133,19 +155,23 @@ router.post(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
-  ],
-  async (req, res) => {
-    try {
+    (req, res, next) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
       }
-
+      next();
+    },
+  ],
+  async (req, res) => {
+    try {
       const { patient_id, history } = req.body;
       const getData = await FormData.formDataPatientSearch(patient_id);
       if (getData.code == 200) {

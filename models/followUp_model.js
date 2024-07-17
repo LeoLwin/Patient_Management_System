@@ -171,19 +171,19 @@ const followUpUpdate = async (
   });
   try {
     const sql = `UPDATE 
-                                            follow_up
-                                          SET 
-                                              patient_id = ?, 
-                                              date_time = ?, 
-                                              category= ?, 
-                                              location_name=?,
-                                              doctor_name=?,
-                                              doctor_position=?, 
-                                              remark = ?,  
-                                              reminder_3=?,                  
-                                              reminder_2 = ?,
-                                              reminder_1=?
-                                          WHERE id=?`;
+                  follow_up
+                  SET 
+                  patient_id = ?, 
+                  date_time = ?, 
+                  category= ?, 
+                  location_name=?,
+                  doctor_name=?,
+                  doctor_position=?, 
+                  remark = ?,  
+                  reminder_3=?,                  
+                  reminder_2 = ?,
+                  reminder_1=?
+                WHERE id=?`;
     const result = await DB.query(sql, [
       patient_id,
       date_time,

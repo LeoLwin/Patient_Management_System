@@ -1,22 +1,9 @@
 const config = require("../configurations/config");
-const multer = require("multer");
 const path = require("path");
 const StatusCode = require("../helper/status_code_helper");
 const fs = require("fs-extra");
-const { v4: uuidv4 } = require("uuid");
 
 // Define storage for uploaded files
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/")); // Destination folder for uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Rename the file to include the timestamp
-  },
-});
-
-// Initialize Multer with the storage configuration
-const upload = multer({ storage: storage });
 
 const fileUpload = async (file, id) => {
   try {
@@ -166,6 +153,7 @@ const getnameUrl = async (data) => {
     };
   }
   const parts = data.name.split("/uploads/");
+
   if (parts.length === 2) {
     const filename = parts[1];
 
@@ -186,7 +174,6 @@ const getnameUrl = async (data) => {
 };
 
 module.exports = {
-  upload,
   fileDelete,
   fileUpload,
   fileOnlyUpload,

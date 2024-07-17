@@ -207,25 +207,36 @@ router.put(
       .custom((value) => {
         // Check if the value is an integer
         if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
+          throw new StatusCode.UNKNOWN("ID must be an integer");
         }
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
-        // Return true to indicate validation passed
         return true;
       }),
     body("date_time")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i) // Matches format yyyy/mm/dd hh:mm
-      .withMessage("Date and time must be in yyyy/mm/dd hh:mm format"),
+      .custom((value) => {
+        // Validate the format using regex
+        const dateTimeRegex = /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2} (AM|PM)$/i;
+        if (!dateTimeRegex.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "Date and time must be in yyyy/mm/dd hh:mm AM/PM format"
+          );
+        }
+        return true;
+      }),
     body("location_name").custom((value) => {
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
-        throw new Error("location_name cannot contain special characters");
+        throw new StatusCode.UNKNOWN(
+          "location_name cannot contain special characters"
+        );
       }
       // Return true to indicate validation passed
       return true;
@@ -234,7 +245,9 @@ router.put(
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Name cannot contain special characters");
+        throw new StatusCode.UNKNOWN(
+          "Doctor_Name cannot contain special characters"
+        );
       }
       // Return true to indicate validation passed
       return true;
@@ -243,7 +256,9 @@ router.put(
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Position cannot contain special characters");
+        throw new StatusCode.UNKNOWN(
+          "Doctor_Position cannot contain special characters"
+        );
       }
       // Return true to indicate validation passed
       return true;
@@ -257,28 +272,27 @@ router.put(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Category cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Category cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
-    // body("remark").custom((value) => {
-    //   // Check if the name contains special characters
-    //   const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-    //   if (specialCharsRegex.test(value)) {
-    //     throw new Error("Remark cannot contain special characters");
-    //   }
-    //   // Return true to indicate validation passed
-    //   return true;
-    // }),
+
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     try {
       console.log(req.body);
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors));
-      }
       const {
         patient_id,
         date_time,
@@ -287,9 +301,6 @@ router.put(
         doctor_name,
         doctor_position,
         remark,
-        reminder_3,
-        reminder_2,
-        reminder_1,
       } = req.body;
       const { id } = req.params;
       const result = await followUp.followUpUpdate(
@@ -300,9 +311,9 @@ router.put(
         doctor_name,
         doctor_position,
         remark,
-        reminder_3,
-        reminder_2,
-        reminder_1,
+        null,
+        null,
+        null,
         id
       );
       res.json(result);
@@ -314,7 +325,16 @@ router.put(
 
 router.delete(
   "/followUpDelete/:id",
-  [param("id").notEmpty().isInt().toInt().withMessage("Must Be Number")],
+  [
+    param("id").notEmpty().isInt().withMessage("ID must be number").toInt(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+      }
+      next();
+    },
+  ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -468,7 +488,7 @@ router.get(
           fu_data.data.remark,
           null,
           getDate.data,
-          null,
+          fu_data.data.reminder_1,
           id
         );
         res.json(result);
@@ -484,8 +504,8 @@ router.get(
           fu_data.data.doctor_position,
           fu_data.data.remark,
           getDate.data,
-          null,
-          null,
+          fu_data.data.reminder_2,
+          fu_data.data.reminder_1,
           id
         );
         res.json(result);

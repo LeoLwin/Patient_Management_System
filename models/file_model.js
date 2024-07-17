@@ -114,20 +114,23 @@ const typeSearch = async (type) => {
 };
 
 //path Search
-const pathSearch = async (path) => {
+const pathSearch = async (path, orgFileName) => {
   try {
     const sql = `SELECT * FROM file WHERE path = ? ORDER BY id DESC`;
     const list = await DB.query(sql, [path]);
+
+    console.log("Listttttt from model : ", list);
+    console.log(list.length > 0);
 
     if (list.length > 0) {
       for (const data of list) {
         console.log(data.type);
         if (data.type === "folder") {
           console.log(
-            `You must delete ${data.id}of ${data.name} Folder before deleting this folder`
+            `You must delete${orgFileName} ${data.name} Folder before deleting this folder`
           );
           return new StatusCode.PERMISSION_DENIED(
-            `You must delete  ${data.id}  of ${data.name} Folder before deleting this folder`
+            `You must delete "${orgFileName}" of "${data.name}" Folder before deleting this folder`
           );
         }
       }
@@ -230,39 +233,6 @@ const dFolderCreate = async (patient_id, path) => {
     return new StatusCode.UNKNOWN(error.message);
   }
 };
-
-// const getnameUrl = async (data) => {
-//   if (data.type == "folder") {
-//     return {
-//       id: data.id,
-
-//       patient_id: data.patient_id,
-//       name: data.name,
-//       path: data.path,
-//       size: data.size,
-//       upload_dateTime: data.upload_dateTime,
-//       type: data.type,
-//     };
-//   }
-//   const parts = data.name.split("/uploads/");
-//   if (parts.length === 2) {
-//     const filename = parts[1];
-
-//     return {
-//       id: data.id,
-//       patient_id: data.patient_id,
-//       name: filename,
-//       nameURL: data.name,
-//       path: data.path,
-//       size: data.size,
-//       upload_dateTime: data.upload_dateTime,
-//       type: data.type,
-//     };
-//   } else {
-//     console.error("URL format is not correct");
-//     return null; // or throw an error, depending on your use case
-//   }
-// };
 
 module.exports = {
   fileCreate,

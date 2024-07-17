@@ -56,6 +56,7 @@ const partnerDelete = async (id) => {
 
 const partnerSearch = async (patient_id) => {
   try {
+    console.log(patient_id);
     const sql = `SELECT * FROM partner WHERE (patient_id_1=?) OR (patient_id_2=?)`;
     const result = await DB.query(sql, [patient_id, patient_id]);
     console.log("Model Result : ", result);

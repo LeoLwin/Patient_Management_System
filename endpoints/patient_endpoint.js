@@ -198,21 +198,29 @@ router.post(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
+      .custom((value) => {
+        if (!/^\d{4}\/\d{2}\/\d{2}$/.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "Date of birth must be in yyyy/mm/dd format"
+          );
+        }
+        return true;
+      }),
     body("nrc").custom((value) => {
       if (value == "null" || value == "") {
         return true;
       }
-      if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-        throw new Error("Invalid format for NRC");
+      if (!/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+        throw new StatusCode.UNKNOWN("Invalid format for NRC");
       }
       return true;
     }),
@@ -220,7 +228,9 @@ router.post(
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
-        throw new Error("Passport cannot contain special characters");
+        throw new StatusCode.UNKNOWN(
+          "Passport cannot contain special characters"
+        );
       }
       // Return true to indicate validation passed
       return true;
@@ -230,7 +240,7 @@ router.post(
       .custom((value) => {
         const validGenders = ["male", "female"];
         if (!validGenders.includes(value.toLowerCase())) {
-          throw new Error(
+          throw new StatusCode.UNKNOWN(
             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
           );
         }
@@ -238,22 +248,28 @@ router.post(
       }),
     body("image").custom((value, { req }) => {
       if (!req.file && !req.body.image) {
-        throw new Error("Either image file or image URL must be provided");
+        throw new StatusCode.UNKNOWN(
+          "Either image file or image URL must be provided"
+        );
       }
       if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+        throw new StatusCode.UNKNOWN("Uploaded file must be an image");
       }
 
       return true;
     }),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-
       if (req.file) {
         if (!req.file.mimetype.startsWith("image")) {
           return res.json(
@@ -354,21 +370,29 @@ router.put(
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
+          throw new StatusCode.UNKNOWN(
+            "Name cannot contain special characters"
+          );
         }
         // Return true to indicate validation passed
         return true;
       }),
     body("dob")
       .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
+      .custom((value) => {
+        if (!/^\d{4}\/\d{2}\/\d{2}$/.test(value)) {
+          throw new StatusCode.UNKNOWN(
+            "Date of birth must be in yyyy/mm/dd format"
+          );
+        }
+        return true;
+      }),
     body("nrc").custom((value) => {
       if (value == "null" || value == "") {
         return true;
       }
-      if (value && !/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
-        throw new Error("Invalid format for NRC");
+      if (!/^\d{1,2}\/\w{6,9}\(\w\)\w{6}$/.test(value)) {
+        throw new StatusCode.UNKNOWN("Invalid format for NRC");
       }
       return true;
     }),
@@ -376,7 +400,9 @@ router.put(
       // Check if the name contains special characters
       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
       if (specialCharsRegex.test(value)) {
-        throw new Error("Passport cannot contain special characters");
+        throw new StatusCode.UNKNOWN(
+          "Passport cannot contain special characters"
+        );
       }
       // Return true to indicate validation passed
       return true;
@@ -386,7 +412,7 @@ router.put(
       .custom((value) => {
         const validGenders = ["male", "female"];
         if (!validGenders.includes(value.toLowerCase())) {
-          throw new Error(
+          throw new StatusCode.UNKNOWN(
             `Invalid gender. It must be one of: ${validGenders.join(", ")}`
           );
         }
@@ -394,24 +420,29 @@ router.put(
       }),
     body("image").custom((value, { req }) => {
       if (!req.file && !req.body.image) {
-        throw new Error("Either image file or image URL must be provided");
+        throw new StatusCode.UNKNOWN(
+          "Either image file or image URL must be provided"
+        );
       }
       if (req.file && !req.file.mimetype.startsWith("image")) {
-        throw new Error("Uploaded file must be an image");
+        throw new StatusCode.UNKNOWN("Uploaded file must be an image");
       }
-
       return true;
     }),
     param("id").notEmpty().isInt().toInt(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     console.log("Patient Update endpoint : ", req.body);
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-
       const { name, dob, nrc, passport, gender, image: imageUrl } = req.body;
       if (nrc == "null" && passport == "null") {
         return res.json(
@@ -497,10 +528,6 @@ router.delete(
   ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
       const id = req.params.id;
       const patient = await Patient.patientIdSearch(id);
 
@@ -533,7 +560,18 @@ router.delete(
 //delete only pic
 router.delete(
   "/deleteOnlyPic",
-  [body("fileUrl").notEmpty().withMessage("Url is required")],
+  [
+    body("fileUrl").notEmpty().withMessage("Url is required"),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
+  ],
   async (req, res) => {
     try {
       const { fileUrl } = req.body;
@@ -573,23 +611,28 @@ router.post(
       .custom((value) => {
         // Check if the value is an integer
         if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
+          throw new StatusCode.UNKNOWN("ID must be an integer");
         }
         // Check if the name contains special characters
         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (specialCharsRegex.test(value)) {
-          throw new Error("ID cannot contain special characters");
+          throw new StatusCode.UNKNOWN("ID cannot contain special characters");
         }
         // Return true to indicate validation passed
         return true;
       }),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json(
+          new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg.message)
+        );
+      }
+      next();
+    },
   ],
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
       const id = req.body.patient_id;
       const result = await Patient.overAllPatientData(id);
       console.log(result);
