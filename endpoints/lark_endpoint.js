@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const StatusCode = require("../helper/status_code_helper");
 const config = require("../configurations/config");
+const login_helper = require("../helper/login_helper");
 const axios = require("axios");
 
 const allowedEmail = [
@@ -28,7 +29,6 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/callback", async (req, res) => {
-  console.log("req.body : ", req.query);
   try {
     const code = req.query.code;
     const larkHost = "https://open.larksuite.com";
@@ -86,21 +86,14 @@ router.get("/callback", async (req, res) => {
     let id = userInfo.open_id;
     let email = userInfo.email;
     let name = userInfo.name;
-    let unique_id = userInfo.union_id;
-    const result = {
-      id,
-      email,
-      name,
-      unique_id,
-    };
+
     const found = allowedEmail.includes(email);
     if (found) {
-      res.send(new StatusCode.OK(result));
+      const result = await login_helper.loginHelper(id, email, name);
+      res.send(result);
     } else {
       res.send(new StatusCode.PERMISSION_DENIED("User don't have access"));
     }
-    res.json({ id, email, name, unique_id });
-    // res.json(userAccessTokenResult.data);
   } catch (error) {}
 });
 
