@@ -242,9 +242,12 @@ const followUpDateSearch = async () => {
     let BeforeOneD = getDate.data.BeforeOneDay;
     let BeforeTwoD = getDate.data.BeforeTwoDay;
 
+    // follow_up.date_time AS date_time,
+    // SUBSTRING(follow_up.date_time, 1, 10) AS date_time,
+
     // Step 1: Search follow_up records for a specific date
     const sql = `
-      SELECT 
+      SELECT
         follow_up.id AS id,
         patients.id AS patient_id,
         patients.name AS name,
@@ -259,6 +262,7 @@ const followUpDateSearch = async () => {
       LEFT JOIN patients ON follow_up.patient_id = patients.id
       WHERE SUBSTRING(follow_up.date_time, 1, 10) IN (?, ?, ?);
     `;
+
     const params = [date, BeforeOneD, BeforeTwoD];
     const list = await DB.query(sql, params);
     console.log(list);

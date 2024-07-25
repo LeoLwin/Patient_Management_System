@@ -26,3 +26,8 @@ define("JWT_SECRET", process.env.JWT_SECRET);
 
 define("LOGIN_SECRET_KEY", process.env.LOGIN_SECRET_KEY);
 define("LOGIN_KEY", process.env.LOGIN_KEY);
+
+define("Lark_App_ID", process.env.Lark_App_ID);
+define("Lark_App_Secret", process.env.Lark_App_Secret);
+define("Lark_App_Scope", process.env.Lark_App_Scope);
+define("Lark_App_State", process.env.Lark_App_State);

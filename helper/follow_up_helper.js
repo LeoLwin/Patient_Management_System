@@ -99,7 +99,7 @@ const getDate = () => {
 
 const getUpdateReminder = (setDate) => {
   try {
-    console.log("SetDate : ", setDate);
+    console.log("SetDate: ", setDate);
     const now = new Date();
     const setDateParts = setDate.split(" ")[0].split("/");
     const nowParts = now.toISOString().split("T")[0].split("-");
@@ -111,29 +111,83 @@ const getUpdateReminder = (setDate) => {
     );
     const nowFormatted = new Date(nowParts[0], nowParts[1] - 1, nowParts[2]);
 
-    console.log("getDate ; ", nowFormatted);
+    console.log("NowDate: ", nowFormatted);
 
+    // Check if setDate is equal to current date
     if (setDateFormatted.getTime() === nowFormatted.getTime()) {
       console.log("Return 0");
-      return new StatusCode.OK("0"); // Return 0 if setDate is equal to current date
-    } else if (
-      setDateFormatted.getTime() ===
-      nowFormatted.getTime() + 86400000
-    ) {
+      return new StatusCode.OK("0");
+    }
+    // Check if setDate is one day after the current date
+    else if (setDateFormatted.getTime() === nowFormatted.getTime() + 86400000) {
       console.log("Return 1");
-      return new StatusCode.OK("1"); // Return 1 if setDate is one day after the current date
-    } else if (
+      return new StatusCode.OK("1");
+    }
+    // Check if setDate is two days after the current date
+    else if (
       setDateFormatted.getTime() ===
       nowFormatted.getTime() + 2 * 86400000
     ) {
       console.log("Return 2");
-      return new StatusCode.OK("2"); // Return 2 if setDate is two days after the current date
+      return new StatusCode.OK("2");
+    } else {
+      return new StatusCode.CANCELLED("No set Date.");
     }
   } catch (error) {
     console.error("Error in getUpdateReminder:", error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };
+
+// const getUpdateReminder = (setDate) => {
+//   try {
+//     console.log("SetDate : ", setDate);
+//     const now = new Date();
+//     const setDateParts = setDate.split(" ")[0].split("/");
+//     const nowParts = now.toISOString().split("T")[0].split("-");
+
+//     const setDateFormatted = new Date(
+//       setDateParts[0],
+//       setDateParts[1] - 1,
+//       setDateParts[2]
+//     );
+//     const nowFormatted = new Date(nowParts[0], nowParts[1] - 1, nowParts[2]);
+
+//     console.log("getDate ; ", nowFormatted);
+//     console.log(
+//       "Condition 0 : ",
+//       setDateFormatted.getTime() === nowFormatted.getTime()
+//     );
+//     console.log(
+//       "Condition 1 : ",
+//       setDateFormatted.getTime() === nowFormatted.getTime() + 86400000
+//     );
+//     console.log(
+//       "Condition  : ",
+//       setDateFormatted.getTime() === nowFormatted.getTime() + 2 * 86400000
+//     );
+
+//     if (setDateFormatted.getTime() === nowFormatted.getTime()) {
+//       console.log("Return 0");
+//       return new StatusCode.OK("0"); // Return 0 if setDate is equal to current date
+//     } else if (
+//       setDateFormatted.getTime() ===
+//       nowFormatted.getTime() + 86400000
+//     ) {
+//       console.log("Return 1");
+//       return new StatusCode.OK("1"); // Return 1 if setDate is one day after the current date
+//     } else if (
+//       setDateFormatted.getTime() ===
+//       nowFormatted.getTime() + 2 * 86400000
+//     ) {
+//       console.log("Return 2");
+//       return new StatusCode.OK("2"); // Return 2 if setDate is two days after the current date
+//     }
+//   } catch (error) {
+//     console.error("Error in getUpdateReminder:", error);
+//     return new StatusCode.UNKNOWN(error.message);
+//   }
+// };
 
 module.exports = {
   getCurrentDate,

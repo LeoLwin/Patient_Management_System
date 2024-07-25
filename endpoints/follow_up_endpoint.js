@@ -456,8 +456,11 @@ router.get(
         fu_data.data.date_time
       );
 
+      console.log(getReminder);
+
       let getDate = await follow_Up_Helper.getCurrentDate();
       console.log("Current Date", getDate);
+      console.log(getReminder);
 
       if (getReminder.data == 2) {
         console.log("GO to 2");
@@ -510,6 +513,8 @@ router.get(
         );
         res.json(result);
         return;
+      } else {
+        res.json(getReminder);
       }
     } catch (error) {
       console.log(error);

@@ -3,30 +3,18 @@ const express = require("express");
 const cors = require("cors");
 const config = require("./configurations/config");
 const index_endpoint = require("./endpoints/index_endpoint");
-const session = require("express-session");
-const mySQLStore = require("express-mysql-session")(session);
 
 const path = require("path");
 const fs = require("fs");
 
 const app = express();
-let options = {
-  host: config.HOST,
-  port: config.DB_PORT,
-  user: config.USER,
-  password: config.PASSWORD,
-  database: config.DATABASE,
-};
 
-let sessionStore = new mySQLStore(options);
 PORT = config.PORT || 2000;
-let host = config.LOCALHOST;
+let host = "0.0.0.0";
 
 const corsOptions = {
-  origin: [
-    "http://192.168.137.82:5173",
-    "http://192.168.100.17:5173/admin/dashboard",
-  ],
+  // origin: ["http://192.168.100.44:5000", "http://192.168.100.18:5173"],
+  origin: "*",
   credentials: true, // Access-Control-Allow-Credentials: true
 };
 
@@ -36,19 +24,6 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: "500mb" }));
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(
-  session({
-    key: config.LOGIN_KEY,
-    secret: config.LOGIN_SECRET_KEY,
-    store: sessionStore,
-    resave: true,
-    saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000, secure: false, sameSite: "None" }, // 24 hours
-  })
-);
-
-// app.get("/uploads/:id/:filename", Middleware.authorization);
 
 app.get("/", (req, res) => {
   console.log("hello");
