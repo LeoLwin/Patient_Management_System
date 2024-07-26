@@ -15,8 +15,6 @@ const validateToken = async (req, res, next) => {
           return;
         }
         res.locals.user = decoded.user;
-        // console.log("res.locals.user : ", res.locals.user);
-        // req.user = decoded.user;
         next();
       });
     } else {
@@ -57,3 +55,4 @@ const admin = async (req, res, next) => {
 };
 
 module.exports = { validateToken, admin };
+  

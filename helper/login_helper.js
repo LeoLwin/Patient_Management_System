@@ -22,4 +22,22 @@ const loginHelper = async (id, email, name) => {
   }
 };
 
-module.exports = { loginHelper };
+const tokenFortest = async () => {
+  try {
+    const accessToken = jwt.sign(
+      {
+        user: {
+          name: "kaung htet liwn",
+          email: "kaung.htet.lwin@team.studioamk.com",
+          id: 1,
+        },
+      },
+      config.JWT_SECRET,
+      { expiresIn: "9h" }
+    );
+    return new StatusCode.OK(accessToken);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error);
+  }
+};
+module.exports = { loginHelper, tokenFortest };

@@ -30,6 +30,9 @@ router.get("/login", (req, res) => {
         config.Lark_App_Scope
       }&state=${config.Lark_App_State}`
     );
+    // res.redirect(
+    //   `https://open.larksuite.com/open-apis/authen/v1/authorize?app_id=${config.Lark_App_ID}`
+    // );
     // return res.json(new StatusCode.OK({ url }));
   } catch (error) {
     res.json(new StatusCode.UNKNOWN(error.message));
@@ -105,6 +108,17 @@ router.post("/callback", async (req, res) => {
     }
   } catch (error) {
     res.json(new StatusCode.UNKNOWN(error.message));
+  }
+});
+
+router.get("/testToken", async (req, res) => {
+  console.log("Test token");
+  try {
+    const token = await login_helper.tokenFortest();
+    console.log(token);
+    res.json(token);
+  } catch (error) {
+    res.json(error);
   }
 });
 
