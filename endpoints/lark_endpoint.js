@@ -112,7 +112,8 @@ router.post("/callback", async (req, res) => {
 });
 
 router.get("/testToken", async (req, res) => {
-  console.log("Test token");
+  console.log("Testing for endpoint.");
+
   try {
     const token = await login_helper.tokenFortest();
     console.log(token);

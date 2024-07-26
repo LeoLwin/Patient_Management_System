@@ -16,21 +16,6 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`patient_management_system` /*!40100 DEF
 
 USE `patient_management_system`;
 
-/*Table structure for table `admin` */
-
-DROP TABLE IF EXISTS `admin`;
-
-CREATE TABLE `admin` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `permission` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-/*Data for the table `admin` */
-
 /*Table structure for table `file` */
 
 DROP TABLE IF EXISTS `file`;
@@ -46,7 +31,7 @@ CREATE TABLE `file` (
   PRIMARY KEY (`id`),
   KEY `idx_patient_id` (`patient_id`),
   KEY `idx_path` (`path`(255))
-) ENGINE=InnoDB AUTO_INCREMENT=539 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=549 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `file` */
 
@@ -160,7 +145,16 @@ insert  into `file`(`id`,`patient_id`,`name`,`path`,`size`,`upload_dateTime`,`ty
 (533,5521,'Information','main','oMB','2024-07-17 14:49:13','folder'),
 (534,5521,'Passport','main','oMB','2024-07-17 14:49:13','folder'),
 (535,5521,'Medical_Record','main','oMB','2024-07-17 14:49:13','folder'),
-(536,5521,'Others','main','oMB','2024-07-17 14:49:13','folder');
+(536,5521,'Others','main','oMB','2024-07-17 14:49:13','folder'),
+(539,735,'Information','main','oMB','2024-07-25 13:46:41','folder'),
+(540,735,'Passport','main','oMB','2024-07-25 13:46:41','folder'),
+(541,735,'Medical_Record','main','oMB','2024-07-25 13:46:41','folder'),
+(542,735,'Others','main','oMB','2024-07-25 13:46:41','folder'),
+(543,2307,'Information','main','oMB','2024-07-26 15:13:12','folder'),
+(544,2307,'Passport','main','oMB','2024-07-26 15:13:12','folder'),
+(545,2307,'Medical_Record','main','oMB','2024-07-26 15:13:12','folder'),
+(546,2307,'Others','main','oMB','2024-07-26 15:13:12','folder'),
+(547,12,'','main>Informations','0MB','2024-07-26 15:50:49','file');
 
 /*Table structure for table `follow_up` */
 
@@ -182,7 +176,7 @@ CREATE TABLE `follow_up` (
   KEY `fk_follow_up_patient_id` (`patient_id`),
   KEY `idx_date_time` (`date_time`),
   CONSTRAINT `fk_follow_up_patient_id` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `follow_up` */
 
@@ -195,7 +189,23 @@ insert  into `follow_up`(`id`,`patient_id`,`date_time`,`category`,`location_name
 (91,5,'2024/07/17 08:00 AM','dfdd','Ningar Hospital','dfdf','dfsdf','Server Test do not delete','2024-07-17',NULL,NULL),
 (92,1047,'2024/07/19 06:00 AM','hospital',NULL,NULL,NULL,'Treatment for liver ok',NULL,NULL,'2024-07-17'),
 (98,3616,'2024/07/19 08:00 AM','hospital','Jetanin','Dr Tun Tun Oo','HOH','treatment',NULL,NULL,'2024-07-17'),
-(99,3616,'2024/07/18 08:00 AM','online','Chaing Mai','Dr Tun Tun Oo','HOH','hi hgjhk',NULL,'2024-07-17',NULL);
+(99,3616,'2024/07/18 08:00 AM','online','Chaing Mai','Dr Tun Tun Oo','HOH','hi hgjhk',NULL,'2024-07-17',NULL),
+(105,3617,'2024/07/26 12:00 AM','Medacine',NULL,NULL,NULL,'Hello',NULL,'2024-07-25',NULL),
+(108,5499,'2024/07/27 08:00 AM','Medacine',NULL,NULL,NULL,'Hi how are you?',NULL,NULL,'2024-07-25'),
+(111,2310,'2024/07/27 08:00 AM','Test Follow Up',NULL,NULL,NULL,'Hello test',NULL,NULL,'2024-07-25'),
+(112,251,'2024/07/26 09:00 AM','hospital','Jetanin','Dr John Smith','General Health','piorruotrgldf',NULL,'2024-07-25',NULL),
+(115,1048,'2024/07/27 09:00 AM','Test',NULL,NULL,NULL,'Hello hi are you ?',NULL,NULL,'2024-07-25'),
+(116,5309,'2024/07/27 08:00 AM','Bone Treatment',NULL,NULL,NULL,'Hi hello',NULL,NULL,'2024-07-25'),
+(119,3616,'2024/07/27 08:00 AM','Medical Check up',NULL,NULL,NULL,'hgfghuy',NULL,NULL,'2024-07-25'),
+(120,3616,'2024/07/26 12:00 AM','hospital','Jetanin','Sdr uiyfjhjhk','iguj','iuiugkj',NULL,'2024-07-25',NULL),
+(121,417,'2024/07/27 08:00 AM','Medical Check up',NULL,NULL,NULL,'hello kjldshfljds',NULL,NULL,'2024-07-25'),
+(122,417,'2024/07/26 09:00 AM','Surgical Treatment',NULL,NULL,NULL,'Hello Go rerjldksd',NULL,'2024-07-25',NULL),
+(123,418,'2024/07/27 07:00 AM','Test',NULL,NULL,NULL,'uyituuiti',NULL,NULL,'2024-07-25'),
+(124,418,'2024/07/26 08:00 AM','Medical Check up',NULL,NULL,NULL,'tireyteriotre',NULL,'2024-07-25',NULL),
+(125,419,'2024/07/26 09:00 AM','Test',NULL,NULL,NULL,'hello bug',NULL,'2024-07-25',NULL),
+(126,423,'2024/07/25 08:00 AM','Test13',NULL,NULL,NULL,'u9yuytyutyjg','2024-07-25',NULL,NULL),
+(127,423,'2024/07/27 09:00 AM','Medacine',NULL,NULL,NULL,'jhkhfjdgj',NULL,NULL,'2024-07-25'),
+(128,5304,'2024/07/27 13:45 PM','dfdd','','','','In-person follow-up at the hospital',NULL,'2024-07-26',NULL);
 
 /*Table structure for table `form_data` */
 
@@ -208,7 +218,7 @@ CREATE TABLE `form_data` (
   PRIMARY KEY (`id`),
   KEY `idx_id` (`id`),
   KEY `idx_patient_id` (`patient_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `form_data` */
 
@@ -278,8 +288,8 @@ insert  into `form_data`(`id`,`data`,`patient_id`) values
 (90,'{\"social_history\": {\"smoke\": \"yes\", \"alcohol\": \"yes\", \"smoke packs\": 3, \"alcohol unit\": \"2\", \"alcohol long time\": \"cvcxzv\", \"smoking long time\": \"jfksd\"}}',5495),
 (91,'{\"family_history\": {\"problem_explain\": \"12\", \"genetic_problems\": \"yes\"}}',5495),
 (92,'{\"personal_info\": {\"email\": \"phoophoo@gmail.com\", \"phone\": 9778542136, \"decimal\": \"110lb\"}}',5499),
-(93,'{\"surgical_his\": [{\"data\": \"20200505\"}, {\"datat\": \"htethtethtet\"}, {\"procedure\": \"kaunghtetlwin\"}]}',5330),
-(94,'{\"personal_info\": {\"email\": \"naychishoonlak13@gmail.com\", \"phone\": 978766565, \"decimal\": \"120lb\"}}',5520);
+(94,'{\"personal_info\": {\"email\": \"naychishoonlak13@gmail.com\", \"phone\": 978766565, \"decimal\": \"120lb\"}}',5520),
+(95,'{\"surgical_his\": [{\"data\": \"20200505\"}, {\"datat\": \"datat\"}, {\"procedure\": \"dfjkdfjkasdkfjd\"}]}',5330);
 
 /*Table structure for table `hospital_and_lab` */
 
@@ -327,6 +337,27 @@ insert  into `hospital_and_lab`(`id`,`patient_id`,`date`,`location_name`,`doctor
 (39,5497,'2024-07-15','Samitevij','','','hospital','Treatment'),
 (40,5497,'2024-07-14','N Health','','','hospital','Test');
 
+/*Table structure for table `logs` */
+
+DROP TABLE IF EXISTS `logs`;
+
+CREATE TABLE `logs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `date_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+/*Data for the table `logs` */
+
+insert  into `logs`(`id`,`user_id`,`date_time`) values 
+(5,1,'2024-07-26 10:30:00'),
+(6,2,'2024-07-27 14:45:00'),
+(7,1,'2024-07-28 09:15:00'),
+(8,2,'2024-07-29 16:00:00');
+
 /*Table structure for table `partner` */
 
 DROP TABLE IF EXISTS `partner`;
@@ -339,7 +370,7 @@ CREATE TABLE `partner` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `patient_id_1_UNIQUE` (`patient_id_1`),
   UNIQUE KEY `patient_id_2_UNIQUE` (`patient_id_2`)
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `partner` */
 
@@ -373,7 +404,9 @@ insert  into `partner`(`id`,`patient_id_1`,`patient_id_2`) values
 (59,122,114),
 (60,5276,14),
 (61,5307,415),
-(62,5522,5521);
+(62,5522,5521),
+(63,5114,5111),
+(64,5526,255);
 
 /*Table structure for table `patients` */
 
@@ -394,7 +427,7 @@ CREATE TABLE `patients` (
   KEY `idx_name` (`name`),
   KEY `id` (`id`),
   FULLTEXT KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5523 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5527 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `patients` */
 
@@ -5796,20 +5829,9 @@ insert  into `patients`(`id`,`name`,`dob`,`nrc`,`passport`,`gender`,`imageUrl`) 
 (5518,'Thiri Yadanar Moe','1993-08-27','12/DaPaNa(N)908543',NULL,'female','http://192.168.137.1:3000/uploads/5515/Patient-5515-pexels-mkvisuals-2884842.jpg'),
 (5520,'Thiri Yadanar Moe','1997-07-18','12/BaTaHta(N)455334',NULL,'female','http://192.168.137.1:3000/uploads/5519/Patient-5519-pexels-olly-3781545.jpg'),
 (5521,'kkjjhhh','2001-07-03',NULL,'d','male','http://192.168.137.1:3000/uploads/5521/Patient-5521-progress.png'),
-(5522,'ererfdfd','1989-07-07',NULL,'dfdsfd','female','http://192.168.137.1:3000/uploads/5522/Patient-5522-BG.png');
-
-/*Table structure for table `sessions` */
-
-DROP TABLE IF EXISTS `sessions`;
-
-CREATE TABLE `sessions` (
-  `session_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `expires` int unsigned NOT NULL,
-  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
-  PRIMARY KEY (`session_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
-/*Data for the table `sessions` */
+(5522,'ererfdfd','1989-07-07',NULL,'dfdsfd','female','http://192.168.137.1:3000/uploads/5522/Patient-5522-BG.png'),
+(5525,'Aye AYe CHO edit','1985-05-03',NULL,'2000dd','female','http://localhost:5000/uploads/5525/Patient-5525-WIN_20240726_15_36_16_Pro.jpg'),
+(5526,'Kyaw','1995-05-05','07/natala(n)112233','ii','male','http://localhost:5000/uploads/5526/Patient-5526-WIN_20240726_15_36_16_Pro.jpg');
 
 /*Table structure for table `users` */
 
@@ -5818,19 +5840,17 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`email`,`name`,`password`) values 
-(39,'kadhkdlkftet38149@gmail.com','kaunghtetlwin','123lkdfkjdkfsdkljfs'),
-(40,'a@gmail.com','kaunghtetlwin','123456'),
-(42,'2@gmail.com','kaunghtetlwin','$2b$10$NZXsnHQkTATFG9w7DntDGOGubqsbg7eyIijySqJ.fwaKOqzRvPSTe'),
-(43,'3@gmail.com','kaunghtetlwin','$2b$10$O/DaJSgY1Xt7PfTvwZRA0u2NPUJlkfaiAieWyFLpI/fM8BKdGgQTC');
+insert  into `users`(`id`,`email`,`name`,`role`) values 
+(1,'kaung.htet.lwin@team.studioamk.com','Kaung Htet Lwin','Admin'),
+(2,'myo.myat.zaw@team.studioamk.com','Myo Myat Zaw','Admin');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
