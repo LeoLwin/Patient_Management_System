@@ -4,7 +4,6 @@ const LoginHelper = require("../helper/login_helper");
 const bcrypt = require("bcrypt");
 const StatusCode = require("../helper/status_code_helper");
 const { param, body, validationResult } = require("express-validator");
-const Middleware = require("../middlewares/middleware");
 
 router.get("/adminTest", (req, res) => {
   try {
@@ -69,7 +68,7 @@ router.post(
 
 router.get(
   "/adminList/:page",
-  Middleware.authorization,
+
   [param("page").notEmpty().isInt().toInt()],
   async (req, res) => {
     console.log("Hello from admin list", req.session.uId);

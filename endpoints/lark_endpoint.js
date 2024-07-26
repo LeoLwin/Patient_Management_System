@@ -9,6 +9,7 @@ const allowedEmail = [
   "nyi.nyi@studioamk.com",
   "ammk@team.studioamk.com",
   "kaung.htet.lwin@team.studioamk.com",
+  "myo.myat.zaw@team.studioamk.com",
 ];
 
 router.get("/login", (req, res) => {
@@ -22,13 +23,22 @@ router.get("/login", (req, res) => {
       config.Lark_App_Scope
     }&state=${config.Lark_App_State}`;
 
-    return res.json(url);
+    res.redirect(
+      `https://open.larksuite.com/open-apis/authen/v1/authorize?app_id=${
+        config.Lark_App_ID
+      }&redirect_uri=${encodeURIComponent(config.REDIRECT_URI)}&scope=${
+        config.Lark_App_Scope
+      }&state=${config.Lark_App_State}`
+    );
+    // return res.json(new StatusCode.OK({ url }));
   } catch (error) {
     res.json(new StatusCode.UNKNOWN(error.message));
   }
 });
 
-router.get("/callback", async (req, res) => {
+router.post("/callback", async (req, res) => {
+  console.log("40", config.Lark_App_ID);
+  console.log("41", config.Lark_App_Secret);
   try {
     const code = req.query.code;
     const larkHost = "https://open.larksuite.com";
@@ -37,11 +47,9 @@ router.get("/callback", async (req, res) => {
       larkHost + "/open-apis/auth/v3/app_access_token/internal";
     const userInfoUrl = larkHost + "/open-apis/authen/v1/user_info";
 
-    console.log(process.env.Lark_App_ID);
-    console.log(process.env.Lark_App_Secret);
     const appAccessResult = await axios.post(appAccessTokenUrl, {
-      app_id: process.env.Lark_App_ID,
-      app_secret: process.env.Lark_App_Secret,
+      app_id: config.Lark_App_ID,
+      app_secret: config.Lark_App_Secret,
     });
 
     if (appAccessResult.data.msg !== "ok") {
@@ -90,11 +98,14 @@ router.get("/callback", async (req, res) => {
     const found = allowedEmail.includes(email);
     if (found) {
       const result = await login_helper.loginHelper(id, email, name);
-      res.send(result);
+      console.log("AccessToken : ", result.data);
+      res.json(result);
     } else {
-      res.send(new StatusCode.PERMISSION_DENIED("User don't have access"));
+      res.json(new StatusCode.PERMISSION_DENIED("User don't have access."));
     }
-  } catch (error) {}
+  } catch (error) {
+    res.json(new StatusCode.UNKNOWN(error.message));
+  }
 });
 
 module.exports = router;

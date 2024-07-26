@@ -7,9 +7,12 @@ const multer = require("multer");
 const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const { validateToken, admin } = require("../middlewares/middleware");
 
 router.get(
   "/patientList/:page",
+  validateToken,
+  admin,
   [
     param("page")
       .notEmpty()
@@ -27,9 +30,7 @@ router.get(
   async (req, res) => {
     try {
       const page = req.params.page;
-
       const result = await Patient.patientList(page);
-      console.log(result.data.list[0]);
       res.json(result);
     } catch (error) {
       res.json(new StatusCode.UNKNOWN(error.message));
@@ -40,6 +41,8 @@ router.get(
 //patientNameSearch
 router.post(
   "/patientNameSearch/:page",
+  validateToken,
+  admin,
   [
     body("name")
       .notEmpty()
@@ -85,6 +88,8 @@ router.post(
 //patientNrcSearch
 router.post(
   "/patientNrcSearch",
+  validateToken,
+  admin,
   [
     body("nrc")
       .notEmpty()
@@ -120,6 +125,8 @@ router.post(
 //patientIdSearch/:id
 router.post(
   "/patientIdSearch/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
     (req, res, next) => {
@@ -144,6 +151,8 @@ router.post(
 //passportSearch
 router.post(
   "/passportSearch",
+  validateToken,
+  admin,
   [
     body("passport")
       .notEmpty()
@@ -187,6 +196,7 @@ router.post(
 //create with pic
 router.post(
   "/patientPicUpload",
+  validateToken,
   upload.single("image"),
   [
     body("name")
@@ -359,6 +369,8 @@ router.post(
 //update with pic
 router.put(
   "/patientPicUpdate/:id",
+  validateToken,
+  admin,
   upload.single("image"),
   [
     body("name")
@@ -515,6 +527,8 @@ router.put(
 //delete with pic
 router.delete(
   "/patientPicDelete/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
     (req, res, next) => {
@@ -530,6 +544,7 @@ router.delete(
     try {
       const id = req.params.id;
       const patient = await Patient.patientIdSearch(id);
+      console.log(patient);
 
       if (patient.code == 200) {
         console.log(patient.code == 200, "595");
@@ -552,6 +567,7 @@ router.delete(
         return res.json(patient);
       }
     } catch (error) {
+      console.log(error);
       res.json(new StatusCode.UNKNOWN(error.message));
     }
   }
@@ -560,6 +576,8 @@ router.delete(
 //delete only pic
 router.delete(
   "/deleteOnlyPic",
+  validateToken,
+  admin,
   [
     body("fileUrl").notEmpty().withMessage("Url is required"),
     (req, res, next) => {
@@ -602,6 +620,8 @@ router.get("/patientsCountStatus", async (req, res) => {
 
 router.post(
   "/overAllPatientData",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -642,7 +662,5 @@ router.post(
     }
   }
 );
-
-module.exports = router;
 
 module.exports = router;

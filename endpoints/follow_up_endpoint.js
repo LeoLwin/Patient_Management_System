@@ -3,9 +3,12 @@ const { param, body, validationResult } = require("express-validator");
 const followUp = require("../models/followUp_model");
 const StatusCode = require("../helper/status_code_helper");
 const follow_Up_Helper = require("../helper/follow_up_helper");
+const { validateToken, admin } = require("../middlewares/middleware");
 
 router.post(
   "/followUpCreate",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -134,6 +137,8 @@ router.post(
 //not include page_size
 router.get(
   "/followUpOnlyList",
+  validateToken,
+  admin,
   // [param("page").notEmpty().isInt().toInt()],
   async (req, res) => {
     try {
@@ -152,6 +157,8 @@ router.get(
 //hospital and lab list
 router.post(
   "/hospitalList",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -198,6 +205,8 @@ router.post(
 
 router.put(
   "/followUpUpdate/:id",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -325,6 +334,8 @@ router.put(
 
 router.delete(
   "/followUpDelete/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be number").toInt(),
     (req, res, next) => {
@@ -356,6 +367,8 @@ router.delete(
 //get with patient_id
 router.post(
   "/followUpPatientIdSearch",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -405,6 +418,8 @@ router.post(
 // Id Search
 router.get(
   "/followUpIDSearch/:id",
+  validateToken,
+  admin,
   [param("id").notEmpty().isInt().withMessage("ID Must be integer !").toInt()],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -427,7 +442,7 @@ router.get(
 );
 
 //Date Search
-router.get("/followUpDateSearch", async (req, res) => {
+router.get("/followUpDateSearch", validateToken, admin, async (req, res) => {
   try {
     const result = await followUp.followUpDateSearch();
     return res.json(result);
@@ -439,6 +454,8 @@ router.get("/followUpDateSearch", async (req, res) => {
 //updateReminder
 router.get(
   "/updateReminder/:id",
+  validateToken,
+  admin,
   [param("id").notEmpty().isInt().toInt()],
   async (req, res) => {
     try {
@@ -448,8 +465,11 @@ router.get(
       }
       const id = req.params.id;
       const fu_data = await followUp.folllowUpIdSearch(id);
+      console.log("fu_data", fu_data);
+      console.log(fu_data.code !== "200");
       if (fu_data.code !== "200") {
         res.json(fu_data);
+        return;
       }
 
       const getReminder = await follow_Up_Helper.getUpdateReminder(
@@ -526,6 +546,8 @@ router.get(
 //from date to date search
 router.post(
   "/HosAndLabDateSearch",
+  validateToken,
+  admin,
   [
     body("start_date")
       .notEmpty()

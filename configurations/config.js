@@ -31,3 +31,5 @@ define("Lark_App_ID", process.env.Lark_App_ID);
 define("Lark_App_Secret", process.env.Lark_App_Secret);
 define("Lark_App_Scope", process.env.Lark_App_Scope);
 define("Lark_App_State", process.env.Lark_App_State);
+
+define("REDIRECT_URI_UI", process.env.REDIRECT_URI_UI);

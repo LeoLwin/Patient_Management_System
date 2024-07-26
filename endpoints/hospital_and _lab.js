@@ -1,408 +1,408 @@
-///////////
+// ///////////
 
-//NO MORE USe
+// //NO MORE USE
 
-//////
+// //////
 
-const router = require("express").Router();
-const { param, body, validationResult } = require("express-validator");
-const StatusCode = require("../helper/status_code_helper");
-const HospAndLab = require("../models/hospital_and_lab");
+// const router = require("express").Router();
+// const { param, body, validationResult } = require("express-validator");
+// const StatusCode = require("../helper/status_code_helper");
+// const HospAndLab = require("../models/hospital_and_lab");
 
-router.post(
-  "/HosAndLabCreate",
-  [
-    body("patient_id")
-      .notEmpty()
-      .withMessage("Patinet ID is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("date")
-      .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("location_name")
-      .notEmpty()
-      .withMessage("location_name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("location_name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("doctor_name").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Name cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-    body("doctor_position").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Position cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-    body("category")
-      .notEmpty()
-      .withMessage("Category is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Category cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-  ],
-  async (req, res) => {
-    try {
-      console.log("Endpoint : ", req.body);
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const {
-        patient_id,
-        date,
-        location_name,
-        doctor_name,
-        doctor_position,
-        category,
-        remark,
-      } = req.body;
+// router.post(
+//   "/HosAndLabCreate",
+//   [
+//     body("patient_id")
+//       .notEmpty()
+//       .withMessage("Patinet ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("ID must be an integer");
+//         }
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("date")
+//       .notEmpty()
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
+//     body("location_name")
+//       .notEmpty()
+//       .withMessage("location_name is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("location_name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("doctor_name").custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("Doctor_Name cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//     body("doctor_position").custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("Doctor_Position cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//     body("category")
+//       .notEmpty()
+//       .withMessage("Category is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Category cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//   ],
+//   async (req, res) => {
+//     try {
+//       console.log("Endpoint : ", req.body);
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const {
+//         patient_id,
+//         date,
+//         location_name,
+//         doctor_name,
+//         doctor_position,
+//         category,
+//         remark,
+//       } = req.body;
 
-      const result = await HospAndLab.hospAndLabCreate(
-        patient_id,
-        date,
-        location_name,
-        doctor_name,
-        doctor_position,
-        category,
-        remark
-      );
-      res.json(result);
-    } catch (error) {
-      res.json(error);
-    }
-  }
-);
+//       const result = await HospAndLab.hospAndLabCreate(
+//         patient_id,
+//         date,
+//         location_name,
+//         doctor_name,
+//         doctor_position,
+//         category,
+//         remark
+//       );
+//       res.json(result);
+//     } catch (error) {
+//       res.json(error);
+//     }
+//   }
+// );
 
-//include page and page_size
-router.get(
-  "/HosAndLabList/:page",
-  [
-    body("page_size")
-      .notEmpty()
-      .withMessage("Page_size ID is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("Page_size must be an integer");
-        }
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Page_size cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    param("page").notEmpty().isInt().toInt(),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
+// //include page and page_size
+// router.get(
+//   "/HosAndLabList/:page",
+//   [
+//     body("page_size")
+//       .notEmpty()
+//       .withMessage("Page_size ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("Page_size must be an integer");
+//         }
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Page_size cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     param("page").notEmpty().isInt().toInt(),
+//   ],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
 
-      const { page_size } = req.body;
-      const { page } = req.params;
-      const result = await HospAndLab.hospAndLabList(page, page_size);
-      res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+//       const { page_size } = req.body;
+//       const { page } = req.params;
+//       const result = await HospAndLab.hospAndLabList(page, page_size);
+//       res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-//does not include page and page_size
-router.get("/HosAndLabOnlyList", async (req, res) => {
-  try {
-    const result = await HospAndLab.hospAndLabOnlyList();
-    res.json(result);
-  } catch (error) {
-    res.json(new StatusCode.UNKNOWN(error.message));
-  }
-});
+// //does not include page and page_size
+// router.get("/HosAndLabOnlyList", async (req, res) => {
+//   try {
+//     const result = await HospAndLab.hospAndLabOnlyList();
+//     res.json(result);
+//   } catch (error) {
+//     res.json(new StatusCode.UNKNOWN(error.message));
+//   }
+// });
 
-router.put(
-  "/HosAndLabUpdate/:id",
-  [
-    body("patient_id")
-      .notEmpty()
-      .withMessage("Patinet ID is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("date")
-      .notEmpty()
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Date of birth must be in yyyy/mm/dd format"),
-    body("location_name")
-      .notEmpty()
-      .withMessage("location_name is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("location_name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-    body("doctor_name").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Name cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-    body("doctor_position").custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("Doctor_Position cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-    body("category")
-      .notEmpty()
-      .withMessage("Category is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Category cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
+// router.put(
+//   "/HosAndLabUpdate/:id",
+//   [
+//     body("patient_id")
+//       .notEmpty()
+//       .withMessage("Patinet ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("ID must be an integer");
+//         }
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("date")
+//       .notEmpty()
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Date of birth must be in yyyy/mm/dd format"),
+//     body("location_name")
+//       .notEmpty()
+//       .withMessage("location_name is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("location_name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//     body("doctor_name").custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("Doctor_Name cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//     body("doctor_position").custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("Doctor_Position cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//     body("category")
+//       .notEmpty()
+//       .withMessage("Category is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Category cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
 
-    param("id").notEmpty().isInt().toInt(),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors));
-      }
-      const {
-        patient_id,
-        date,
-        location_name,
-        doctor_name,
-        doctor_position,
-        category,
-        remark,
-      } = req.body;
-      const { id } = req.params;
+//     param("id").notEmpty().isInt().toInt(),
+//   ],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors));
+//       }
+//       const {
+//         patient_id,
+//         date,
+//         location_name,
+//         doctor_name,
+//         doctor_position,
+//         category,
+//         remark,
+//       } = req.body;
+//       const { id } = req.params;
 
-      const result = await HospAndLab.hospAndLabUpdate(
-        patient_id,
-        date,
-        location_name,
-        doctor_name,
-        doctor_position,
-        category,
-        remark,
-        id
-      );
+//       const result = await HospAndLab.hospAndLabUpdate(
+//         patient_id,
+//         date,
+//         location_name,
+//         doctor_name,
+//         doctor_position,
+//         category,
+//         remark,
+//         id
+//       );
 
-      res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+//       res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-router.delete(
-  "/HosAndLabDelete/:id",
-  [param("id").notEmpty().isInt().toInt().withMessage("Must Be Number")],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-    }
+// router.delete(
+//   "/HosAndLabDelete/:id",
+//   [param("id").notEmpty().isInt().toInt().withMessage("Must Be Number")],
+//   async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//     }
 
-    const { id } = req.params;
-    console.log(id);
+//     const { id } = req.params;
+//     console.log(id);
 
-    const result = await HospAndLab.hospAndLabDelete(id);
-    res.json(result);
-    try {
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+//     const result = await HospAndLab.hospAndLabDelete(id);
+//     res.json(result);
+//     try {
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-//get with patient_id
-router.post(
-  "/HosAndLabPatientIdSearch",
-  [
-    body("patient_id")
-      .notEmpty()
-      .withMessage("ID is required")
-      .trim()
-      .escape()
-      .custom((value) => {
-        // Check if the value is an integer
-        if (!Number.isInteger(Number(value))) {
-          throw new Error("ID must be an integer");
-        }
-        // Check if the name contains special characters
-        const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (specialCharsRegex.test(value)) {
-          throw new Error("Name cannot contain special characters");
-        }
-        // Return true to indicate validation passed
-        return true;
-      }),
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const patient_id = req.body.patient_id;
-      const result = await HospAndLab.hospAndLabPatientIdSearch(patient_id);
-      res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+// //get with patient_id
+// router.post(
+//   "/HosAndLabPatientIdSearch",
+//   [
+//     body("patient_id")
+//       .notEmpty()
+//       .withMessage("ID is required")
+//       .trim()
+//       .escape()
+//       .custom((value) => {
+//         // Check if the value is an integer
+//         if (!Number.isInteger(Number(value))) {
+//           throw new Error("ID must be an integer");
+//         }
+//         // Check if the name contains special characters
+//         const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//         if (specialCharsRegex.test(value)) {
+//           throw new Error("Name cannot contain special characters");
+//         }
+//         // Return true to indicate validation passed
+//         return true;
+//       }),
+//   ],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const patient_id = req.body.patient_id;
+//       const result = await HospAndLab.hospAndLabPatientIdSearch(patient_id);
+//       res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-// Id Search
-router.get(
-  "/HosAndLabIdSearch/:id",
-  [param("id").notEmpty().isInt().toInt()],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const id = req.params.id;
-      const result = await HospAndLab.hospAndLabIdSearch(id);
-      res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+// // Id Search
+// router.get(
+//   "/HosAndLabIdSearch/:id",
+//   [param("id").notEmpty().isInt().toInt()],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const id = req.params.id;
+//       const result = await HospAndLab.hospAndLabIdSearch(id);
+//       res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-//from date to date search
-router.post(
-  "/HosAndLabDateSearch",
-  [
-    body("start_date")
-      .notEmpty()
-      .withMessage("Start_Date is required")
-      .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-      .withMessage("Start_Date  must be in yyyy/mm/dd format"),
-  ],
-  body("end_date")
-    .notEmpty()
-    .withMessage("End_Date is required")
-    .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
-    .withMessage("End_Date must be in yyyy/mm/dd format"),
-  body("location_name")
-    .notEmpty()
-    .withMessage("location_name is required")
-    .trim()
-    .escape()
-    .custom((value) => {
-      // Check if the name contains special characters
-      const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
-      if (specialCharsRegex.test(value)) {
-        throw new Error("location_name cannot contain special characters");
-      }
-      // Return true to indicate validation passed
-      return true;
-    }),
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      }
-      const { start_date, end_date, location_name } = req.body;
-      console.log(req.body);
+// //from date to date search
+// router.post(
+//   "/HosAndLabDateSearch",
+//   [
+//     body("start_date")
+//       .notEmpty()
+//       .withMessage("Start_Date is required")
+//       .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//       .withMessage("Start_Date  must be in yyyy/mm/dd format"),
+//   ],
+//   body("end_date")
+//     .notEmpty()
+//     .withMessage("End_Date is required")
+//     .matches(/^\d{4}\/\d{2}\/\d{2}$/) // Matches format yyyy/mm/dd
+//     .withMessage("End_Date must be in yyyy/mm/dd format"),
+//   body("location_name")
+//     .notEmpty()
+//     .withMessage("location_name is required")
+//     .trim()
+//     .escape()
+//     .custom((value) => {
+//       // Check if the name contains special characters
+//       const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/;
+//       if (specialCharsRegex.test(value)) {
+//         throw new Error("location_name cannot contain special characters");
+//       }
+//       // Return true to indicate validation passed
+//       return true;
+//     }),
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
+//       }
+//       const { start_date, end_date, location_name } = req.body;
+//       console.log(req.body);
 
-      const formattedStartDate = start_date.split("/").join("-");
-      const formattedEndDate = end_date.split("/").join("-");
+//       const formattedStartDate = start_date.split("/").join("-");
+//       const formattedEndDate = end_date.split("/").join("-");
 
-      const result = await HospAndLab.hospAndLabDateSearch(
-        formattedStartDate,
-        formattedEndDate,
-        location_name
-      );
-      return res.json(result);
-    } catch (error) {
-      res.json(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+//       const result = await HospAndLab.hospAndLabDateSearch(
+//         formattedStartDate,
+//         formattedEndDate,
+//         location_name
+//       );
+//       return res.json(result);
+//     } catch (error) {
+//       res.json(new StatusCode.UNKNOWN(error.message));
+//     }
+//   }
+// );
 
-module.exports = router;
+// module.exports = router;

@@ -2,11 +2,14 @@ const FormData = require("../models/form_data_model");
 const StatusCode = require("../helper/status_code_helper");
 const Search = require("../helper/search_helper");
 const { param, body, validationResult } = require("express-validator");
+const { validateToken, admin } = require("../middlewares/middleware");
 
 const router = require("express").Router();
 
 router.post(
   "/formDataCreate",
+  validateToken,
+  admin,
   [
     body("data")
       .notEmpty()
@@ -42,6 +45,8 @@ router.post(
 
 router.get(
   "/formDataList/:page",
+  validateToken,
+  admin,
   [
     param("page")
       .notEmpty()
@@ -68,6 +73,8 @@ router.get(
 
 router.put(
   "/formDataUpdate/:id",
+  validateToken,
+  admin,
   [
     body("data")
       .notEmpty()
@@ -107,6 +114,8 @@ router.put(
 
 router.delete(
   "/formDataDelete/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
     (req, res, next) => {
@@ -129,6 +138,8 @@ router.delete(
 
 router.post(
   "/formDataSearchPatient",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()

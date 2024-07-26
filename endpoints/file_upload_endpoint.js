@@ -6,20 +6,27 @@ const { query, param, body, validationResult } = require("express-validator");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const { validateToken, admin } = require("../middlewares/middleware");
 
 //file Only upload
-router.post("/fileOnlyUpload", upload.single("file"), async (req, res) => {
-  try {
-    const file = req.file;
-    const url = await fileUpload.fileOnlyUpload(file);
-    res.json(new StatusCode.OK(url));
-  } catch (error) {
-    return res.status(new StatusCode.UNKNOWN(error.message));
+router.post(
+  "/fileOnlyUpload",
+  validateToken,
+  admin,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const file = req.file;
+      const url = await fileUpload.fileOnlyUpload(file);
+      res.json(new StatusCode.OK(url));
+    } catch (error) {
+      return res.status(new StatusCode.UNKNOWN(error.message));
+    }
   }
-});
+);
 
 //file only delete
-router.delete("/delete", async (req, res) => {
+router.delete("/delete", validateToken, admin, async (req, res) => {
   try {
     const path = req.body;
     console.log(path.filePath);
@@ -32,6 +39,8 @@ router.delete("/delete", async (req, res) => {
 
 router.post(
   "/fileCreate",
+  validateToken,
+  admin,
   upload.single("name"),
   [
     body("path").notEmpty().withMessage("Path is required"),
@@ -137,6 +146,8 @@ router.post(
 
 router.get(
   "/fileList/:page",
+  validateToken,
+  admin,
   [
     param("page")
       .notEmpty()
@@ -168,6 +179,8 @@ router.get(
 
 router.put(
   "/fileUpdate/:id",
+  validateToken,
+  admin,
   upload.single("name"),
   [
     body("path").notEmpty().withMessage("Path is required"),
@@ -315,6 +328,8 @@ router.put(
 
 router.delete(
   "/fileDelete/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
     (req, res, next) => {
@@ -384,6 +399,8 @@ router.delete(
 // file Id Search
 router.get(
   "/fileIDSearch/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer .").toInt(),
     (req, res, next) => {
@@ -410,6 +427,8 @@ router.get(
 //folder search
 router.post(
   "/typeSearch",
+  validateToken,
+  admin,
   [
     body("type")
       .notEmpty()
@@ -451,6 +470,8 @@ router.post(
 //mainFolder Search
 router.get(
   "/mainfFolderSearch",
+  validateToken,
+  admin,
   [
     query("path").notEmpty().withMessage("Path is required"),
     query("patient_id")

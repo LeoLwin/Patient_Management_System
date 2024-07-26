@@ -57,4 +57,24 @@ const isAdminExist = async (email) => {
   }
 };
 
-module.exports = { adminCreate, adminDelete, isAdminExist, adminList };
+const userRole = async (email) => {
+  try {
+    const sql = `SELECT * FROM users WHERE email=?`;
+    const result = await DB.query(sql, [email]);
+    if (result.length > 0) {
+      return new StatusCode.OK(result[0]);
+    } else {
+      return new StatusCode.NOT_FOUND("Your email does not exist");
+    }
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+module.exports = {
+  adminCreate,
+  adminDelete,
+  isAdminExist,
+  adminList,
+  userRole,
+};

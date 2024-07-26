@@ -111,6 +111,7 @@ const patientNameSearch = async (name, page) => {
  
     `;
     const result = await DB.query(sql, [name, name, name, offset, page_size]);
+    console.log({ result });
     // const result = await DB.query(sql, [name]);
     if (result.length > 0) {
       // const total = result.length;
@@ -144,7 +145,7 @@ const patientNrcSearch = async (nrc) => {
 
 const patientIdSearch = async (id) => {
   try {
-    const ssql = `SELECT *,DATE_FORMAT(dob, '%Y/%m/%d') AS dob FROM patients WHERE id= ?`;
+    const sql = `SELECT *,DATE_FORMAT(dob, '%Y/%m/%d') AS dob FROM patients WHERE id= ?`;
     const result = await DB.query(sql, [id]);
     if (result.length > 0) {
       const sql = `SELECT COUNT (*) AS total FROM patients WHERE id= ?`;

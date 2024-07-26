@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const config = require("./configurations/config");
 const index_endpoint = require("./endpoints/index_endpoint");
 
@@ -19,6 +20,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "500mb" }));
@@ -26,8 +28,8 @@ app.use(express.json({ limit: "500mb" }));
 // app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-  console.log("hello");
-  res.send("hello");
+  res.cookie("user", "John Doe", { maxAge: 900000, httpOnly: true });
+  res.send("Cookie has been set");
 });
 
 app.get("/uploads/:id/:filename", async (req, res) => {

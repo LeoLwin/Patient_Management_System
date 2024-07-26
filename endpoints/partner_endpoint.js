@@ -8,10 +8,13 @@ const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const { validateToken, admin } = require("../middlewares/middleware");
 
 //if partner is already exist , we use this endpoint
 router.post(
   "/partnerJoin",
+  validateToken,
+  admin,
   [
     body("patient_id_1")
       .notEmpty()
@@ -97,6 +100,8 @@ router.post(
 // And to create new patient , we use createPatient model from Patient model
 router.post(
   "/partnerCreateWithPic",
+  validateToken,
+  admin,
   upload.single("image"),
   [
     body("name")
@@ -251,6 +256,8 @@ router.post(
 
 router.get(
   "/partnerList/:page",
+  validateToken,
+  admin,
   [
     param("page")
       .notEmpty()
@@ -279,6 +286,8 @@ router.get(
 
 router.put(
   "/partnertUpdate/:id",
+  validateToken,
+  admin,
   [
     body("patient_id_1")
       .notEmpty()
@@ -351,6 +360,8 @@ router.put(
 
 router.delete(
   "/partnerDelete/:id",
+  validateToken,
+  admin,
   [
     param("id").notEmpty().isInt().withMessage("ID must be integer.").toInt(),
     (req, res, next) => {
@@ -374,6 +385,8 @@ router.delete(
 //partner search
 router.post(
   "/partnerSearch",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
@@ -420,6 +433,8 @@ router.post(
 //check partner if needed
 router.post(
   "/partnerCheck",
+  validateToken,
+  admin,
   [
     body("patient_id")
       .notEmpty()
