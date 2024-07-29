@@ -8,6 +8,7 @@ const { fileUpload, fileDelete } = require("../helper/file_upload_helper");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { validateToken, admin } = require("../middlewares/middleware");
+const log = require("../models/logs_models");
 
 router.get(
   "/patientList/:page",
@@ -323,7 +324,7 @@ router.post(
         );
       }
 
-      const created_by = await res.locals.user.email;
+      const created_by = await res.locals.user.id;
       const lastID = await Count.patientCountID();
       const last_p_ID = lastID.data;
 
@@ -346,8 +347,7 @@ router.post(
             passport === "" || passport === "null" ? null : passport,
             gender,
             imageUrl,
-            created_by,
-            last_p_ID
+            created_by
           );
           if (result.code !== "200") {
             console.log("imageUrl", imageUrl);
@@ -357,11 +357,35 @@ router.post(
             res.json(result);
             return;
           }
+          const calculatedNrc = nrc === "" || nrc === "null" ? null : nrc;
+          const calculatedPassport =
+            passport === "" || passport === "null" ? null : passport;
 
+          const data = {
+            name: name,
+            dob: dob,
+            nrc: calculatedNrc,
+            passport: calculatedPassport,
+            gender: gender,
+            imageUrl: imageUrl,
+          };
+
+          console.log("374 : ", data);
+          const description = "New Patient Created";
+          const addLog = await log.addLog(
+            created_by,
+            last_p_ID,
+            description,
+            JSON.stringify(data)
+          );
+          console.log(addLog);
+          if (addLog.code !== "200") {
+            res.json(new StatusCode.UNKNOWN(addLog));
+            return;
+          }
           res.json(result);
           return;
         }
-        // Continue with your business logic here (e.g., saving the image and data to the database)
         res.json(uploadResult);
       }
 
@@ -462,7 +486,7 @@ router.put(
     console.log("Patient Update endpoint : ", req.body);
     try {
       const { name, dob, nrc, passport, gender, image: imageUrl } = req.body;
-      const updated_by = await res.locals.user.email;
+      const updated_by = await res.locals.user.id;
       if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
@@ -523,7 +547,40 @@ router.put(
         updated_by,
         id
       );
-      return res.json(updateResult);
+      console.log("534", updateResult);
+
+      if (updateResult.code !== "200") {
+        return res.json(updateResult);
+      }
+
+      const descriptin = "Updated Patient.";
+      const calculatedNrc = nrc === "" || nrc === "null" ? null : nrc;
+      const calculatedPassport =
+        passport === "" || passport === "null" ? null : passport;
+
+      const data = {
+        name: name,
+        dob: dob,
+        nrc: calculatedNrc,
+        passport: calculatedPassport,
+        gender: gender,
+        imageUrl: imageUrl,
+        id: id,
+      };
+
+      const addLog = await log.addLog(
+        updated_by,
+        id,
+        descriptin,
+        JSON.stringify(data)
+      );
+      console.log(addLog);
+      if (addLog.code !== "200") {
+        res.json(new StatusCode.UNKNOWN(addLog));
+        return;
+      }
+      res.json(updateResult);
+      return;
 
       // res.json(patient);
     } catch (error) {
@@ -552,7 +609,7 @@ router.delete(
     try {
       const id = req.params.id;
       const patient = await Patient.patientIdSearch(id);
-      const deleted_by = await res.locals.user.email;
+      const deleted_by = await res.locals.user.id;
       console.log(patient);
 
       if (patient.code == 200) {
@@ -569,8 +626,17 @@ router.delete(
 
         console.log(patient.data.result[0].imageUrl == null, "607");
 
-        const result = await Patient.patientDelete(id, deleted_by);
+        const result = await Patient.patientDelete(id);
         console.log(result);
+        if (result.code !== "200") {
+          return res.json(result);
+        }
+
+        const descriptin = "Deleted Patient.";
+        let addlog = await log.addLog(deleted_by, id, descriptin);
+        if (addlog.log !== "200") {
+          return res.json(addlog);
+        }
         return res.json(result);
       } else {
         return res.json(patient);

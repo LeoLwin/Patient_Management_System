@@ -7,23 +7,7 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { validateToken, admin } = require("../middlewares/middleware");
-
-//file Only upload
-router.post(
-  "/fileOnlyUpload",
-  validateToken,
-  admin,
-  upload.single("file"),
-  async (req, res) => {
-    try {
-      const file = req.file;
-      const url = await fileUpload.fileOnlyUpload(file);
-      res.json(new StatusCode.OK(url));
-    } catch (error) {
-      return res.status(new StatusCode.UNKNOWN(error.message));
-    }
-  }
-);
+const log = require("../models/logs_models");
 
 //file only delete
 router.delete("/delete", validateToken, admin, async (req, res) => {
@@ -111,6 +95,7 @@ router.post(
         if (uploadResult.code === "500") {
           return res.status(uploadResult.message);
         }
+
         const mb = await FileUpload.fileByteToSize(file.size);
 
         const name = uploadResult.data;
@@ -122,7 +107,13 @@ router.post(
           size,
           type
         );
-        res.json(result);
+        if (result.code !== "200") {
+          res.json(result);
+          return;
+        }
+
+        const descriptin = "New File Created";
+        const addLog = await log.addLog(created_by, last_p_ID, descriptin);
       } else {
         const { patient_id, name, path, type } = req.body;
         console.log(req.body);

@@ -23,6 +23,7 @@ define("LOGIN_UNAUTHORIZE", process.env.LOGIN_UNAUTHORIZE);
 define("PORT", process.env.PORT);
 define("LOCALHOST", process.env.LOCALHOST);
 define("JWT_SECRET", process.env.JWT_SECRET);
+define("JWT_For_Lark_Bot", process.env.JWT_For_Lark_Bot);
 
 define("LOGIN_SECRET_KEY", process.env.LOGIN_SECRET_KEY);
 define("LOGIN_KEY", process.env.LOGIN_KEY);

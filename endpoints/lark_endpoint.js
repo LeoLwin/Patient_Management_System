@@ -2,6 +2,7 @@ const router = require("express").Router();
 const StatusCode = require("../helper/status_code_helper");
 const config = require("../configurations/config");
 const login_helper = require("../helper/login_helper");
+const admin = require("../models/admin_model");
 const axios = require("axios");
 
 const allowedEmail = [
@@ -100,7 +101,14 @@ router.get("/callback", async (req, res) => {
 
     const found = allowedEmail.includes(email);
     if (found) {
-      const result = await login_helper.loginHelper(id, email, name);
+      const getUserID = await admin.emailSearch(email);
+      console.log("105", getUserID);
+      console.log("106", getUserID.data);
+      const result = await login_helper.loginHelper(
+        getUserID.data.id,
+        email,
+        name
+      );
       console.log("AccessToken : ", result.data);
       res.json(result);
     } else {
@@ -111,15 +119,44 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-router.get("/testToken", async (req, res) => {
+router.get("/testToken", async (req, res) => {git
   console.log("Testing for endpoint.");
-
   try {
     const token = await login_helper.tokenFortest();
     console.log(token);
     res.json(token);
+    // res.json(new StatusCode.UNAUTHENTICATED());
   } catch (error) {
     res.json(error);
+  }
+});
+
+router.get("/larkBot", async (req, res) => {
+  try {
+    const email = "kaung.htet.lwin@team.studioamk.com";
+    // const email = "phoekaung.3819@gmail.com";
+
+    const text = "hello hello";
+
+    // Construct the URL
+    const callUrl = `https://dev.ywar.com/larkBot/sendMessage`;
+    console.log("Call URL:", callUrl);
+
+    const test = {
+      headers: {
+        Authorization: "Bearer " + config.JWT_For_Lark_Bot, // Ensure JWT_For_Lark_Bot is defined
+        "Content-Type": "application/json",
+      },
+    };
+
+    // Make the POST request
+    const response = await axios.post(callUrl, { email, text }, test); // Sending an empty body
+
+    // Log and send the response
+    console.log("Response:", response.data);
+  } catch (error) {
+    console.error("Error occurred:", error);
+    res.json(new StatusCode.UNKNOWN(error.message));
   }
 });
 

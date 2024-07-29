@@ -27,9 +27,9 @@ const tokenFortest = async () => {
     const accessToken = jwt.sign(
       {
         user: {
-          name: "Kaung",
-          email: "kaung.htet.lwin@team.studioamk.com",
-          id: 1,
+          name: "myo",
+          email: "myo.myat.zaw@team.studioamk.com",
+          id: 2,
         },
       },
       config.JWT_SECRET,
@@ -40,4 +40,5 @@ const tokenFortest = async () => {
     return new StatusCode.UNKNOWN(error);
   }
 };
+
 module.exports = { loginHelper, tokenFortest };

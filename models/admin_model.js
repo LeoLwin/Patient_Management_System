@@ -11,6 +11,32 @@ const adminCreate = async (email, name, password) => {
   }
 };
 
+const emailSearch = async (email) => {
+  try {
+    const sql = `SELECT id FROM users WHERE email = ?`;
+    const result = await DB.query(sql, [email]);
+    if (result.length == 0) {
+      return new StatusCode.NOT_FOUND("Not found");
+    }
+    return new StatusCode.OK(result[0]);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
+const idSearch = async (id) => {
+  try {
+    const sql = `SELECT * FROM users WHERE id = ?`;
+    const result = await DB.query(sql, [id]);
+    if (result.length == 0) {
+      return new StatusCode.NOT_FOUND("Not found");
+    }
+    return new StatusCode.OK(result[0]);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 const adminList = async (page) => {
   try {
     const page_size = 10;
@@ -77,4 +103,6 @@ module.exports = {
   isAdminExist,
   adminList,
   userRole,
+  emailSearch,
+  idSearch,
 };

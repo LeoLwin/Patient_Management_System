@@ -1,7 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
 const moment = require("moment-timezone");
-const { Result } = require("express-validator");
 const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
 
 const logList = async (page) => {
@@ -58,20 +57,20 @@ const listByemail = async (page, email) => {
   }
 };
 
-const addLog = async (user_email, patient_id, description) => {
+const addLog = async (user_id, patient_id, description, data) => {
+  console.log("model data", { user_id, patient_id, description, data });
   try {
-    const sql = `
-    INSERT INTO logs (user_email, patient_id, date_time, description) 
-    VALUES (?, ?, ? , ?)
-  `;
+    const sql = `INSERT INTO logs (user_id, patient_id, date_time, description, data) VALUES (?, ?, ?, ?, ?)`;
     let addlog = await DB.query(sql, [
-      user_email,
+      user_id,
       patient_id,
-      nowMyanmar,
+      nowMyanmar, // Assuming nowMyanmar is a valid datetime string
       description,
+      data, // Store JSON as a string
     ]);
     return new StatusCode.OK(addlog);
   } catch (error) {
+    console.log(error);
     return new StatusCode.UNKNOWN(error.message);
   }
 };

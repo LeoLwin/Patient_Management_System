@@ -102,10 +102,6 @@ router.post(
   async (req, res) => {
     try {
       console.log(req.body);
-      // const errors = validationResult(req);
-      // if (!errors.isEmpty()) {
-      //   return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-      // }
       const {
         patient_id,
         date_time,

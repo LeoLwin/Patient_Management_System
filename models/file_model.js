@@ -234,6 +234,25 @@ const dFolderCreate = async (patient_id, path) => {
   }
 };
 
+const fileCountID = async () => {
+  try {
+    const sql = "SELECT id FROM file ORDER BY  id DESC LIMIT 1";
+    const result = await DB.query(sql);
+    const data = result[0].id + 1;
+
+    if (result.length >= 0 || result == "") {
+      if (result == "") {
+        return new StatusCode.OK(1);
+      } else {
+        return new StatusCode.OK(data);
+      }
+    }
+  } catch (error) {
+    console.error("Error executing query:", error.message);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   fileCreate,
   fileList,
@@ -245,4 +264,5 @@ module.exports = {
   pathSearch,
   dFolderCreate,
   getnameUrl,
+  fileCountID,
 };
