@@ -1,5 +1,6 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
+const log = require("./logs_models");
 const moment = require("moment-timezone");
 const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
 
@@ -32,24 +33,17 @@ const patientCreate = async (
     console.log(result);
     let addlog;
     if (result.affectedRows == 1) {
-      const sql = `
-      INSERT INTO logs (user_email, patient_id, date_time, description) 
-      VALUES (?, ?, ? , ?)
-    `;
-      let addlog = await DB.query(sql, [
-        created_by,
-        last_p_ID,
-        nowMyanmar,
-        "New Patient Created",
-      ]);
+      const descriptin = "New Patient Created";
+      let addlog = await log.addLog(created_by, last_p_ID, descriptin);
       addlog = addlog;
+      return new StatusCode.OK(
+        result,
+        addlog,
+        "New patient registration successful."
+      );
     }
 
-    return new StatusCode.OK(
-      result,
-      addlog,
-      "New patient registration successful."
-    );
+    return new StatusCode.OK(ressult);
   } catch (error) {
     console.log("error", error);
     return new StatusCode.UNKNOWN(error.message);
@@ -114,29 +108,29 @@ const patientUpdate = async (
     console.log(result);
     let addlog;
     if (result.affectedRows == 1) {
-      const sql = `
-      INSERT INTO logs (user_email, patient_id, date_time, description) 
-      VALUES (?, ?, ? , ?)
-    `;
-      let addlog = await DB.query(sql, [
-        updated_by,
-        id,
-        nowMyanmar,
-        "Updated Patient.",
-      ]);
+      const descriptin = "Updated Patient.";
+      let addlog = await log.addLog(updated_by, id, descriptin);
       addlog = addlog;
-      return new StatusCode.UNKNOWN(result, addlog);
+      return new StatusCode.OK(result, addlog);
     }
+    return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
 };
 
-const patientDelete = async (id) => {
+const patientDelete = async (id, deleted_by) => {
+  console.log({ id, deleted_by });
   try {
     const sql = `DELETE FROM patients WHERE id=?`;
-    await DB.query(sql, [id]);
-    return new StatusCode.OK(null, `${id} id deleted.`);
+    const result = await DB.query(sql, [id]);
+    console.log("Result : ", result);
+    if (result.affectedRows == 1) {
+      const descriptin = "Deleted Patient.";
+      let addlog = await log.addLog(deleted_by, id, descriptin);
+      return new StatusCode.OK(null, `${id} id deleted.`);
+    }
+    return new StatusCode.OK(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }

@@ -9,7 +9,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { validateToken, admin } = require("../middlewares/middleware");
 
-
 router.get(
   "/patientList/:page",
   validateToken,
@@ -553,6 +552,7 @@ router.delete(
     try {
       const id = req.params.id;
       const patient = await Patient.patientIdSearch(id);
+      const deleted_by = await res.locals.user.email;
       console.log(patient);
 
       if (patient.code == 200) {
@@ -569,7 +569,7 @@ router.delete(
 
         console.log(patient.data.result[0].imageUrl == null, "607");
 
-        const result = await Patient.patientDelete(id);
+        const result = await Patient.patientDelete(id, deleted_by);
         console.log(result);
         return res.json(result);
       } else {

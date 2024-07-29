@@ -1,6 +1,8 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
-const { Model } = require("firebase-admin/machine-learning");
+const moment = require("moment-timezone");
+const { Result } = require("express-validator");
+const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
 
 const logList = async (page) => {
   try {
@@ -56,7 +58,26 @@ const listByemail = async (page, email) => {
   }
 };
 
+const addLog = async (user_email, patient_id, description) => {
+  try {
+    const sql = `
+    INSERT INTO logs (user_email, patient_id, date_time, description) 
+    VALUES (?, ?, ? , ?)
+  `;
+    let addlog = await DB.query(sql, [
+      user_email,
+      patient_id,
+      nowMyanmar,
+      description,
+    ]);
+    return new StatusCode.OK(addlog);
+  } catch (error) {
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   logList,
   listByemail,
+  addLog,
 };
