@@ -1,5 +1,7 @@
 const { Model } = require("firebase-admin/machine-learning");
 const StatusCode = require("../helper/status_code_helper");
+const config = require("../configurations/config");
+const axios = require("axios");
 
 const larkBot = async (email, text) => {
   try {

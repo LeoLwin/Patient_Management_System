@@ -119,7 +119,7 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-router.get("/testToken", async (req, res) => {git
+router.get("/testToken", async (req, res) => {
   console.log("Testing for endpoint.");
   try {
     const token = await login_helper.tokenFortest();

@@ -4,6 +4,12 @@ const followUp = require("../models/followUp_model");
 const StatusCode = require("../helper/status_code_helper");
 const follow_Up_Helper = require("../helper/follow_up_helper");
 const { validateToken, admin } = require("../middlewares/middleware");
+const { addLog } = require("../models/logs_models");
+const { larkBot } = require("../helper/lark_bot_helper");
+const moment = require("moment-timezone");
+const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
+
+const email = "kaung.htet.lwin@team.studioamk.com";
 
 router.post(
   "/followUpCreate",
@@ -112,6 +118,10 @@ router.post(
         remark,
       } = req.body;
 
+      const created_by = await res.locals.user.id;
+      console.log("116", created_by);
+      const lastID = await followUp.follo_upCountID();
+
       const result = await followUp.followUpCreate(
         patient_id,
         date_time,
@@ -119,9 +129,44 @@ router.post(
         location_name,
         doctor_name,
         doctor_position,
-        remark
+        remark,
+        created_by
       );
+
+      if (result.code !== "200") {
+        res.json(result);
+        return;
+      }
+      const data = {
+        patient_id: patient_id,
+        date_time: date_time,
+        category: category,
+        location_name: location_name,
+        doctor_name: doctor_name,
+        doctor_position: doctor_position,
+        remark: doctor_position,
+      };
+
+      const description = "New Follow Up is Created!";
+      const addlog = await addLog(
+        created_by,
+        patient_id,
+        description,
+        JSON.stringify(data)
+      );
+
+      if (addlog.code !== "200") {
+        res.json(addlog);
+        return;
+      }
+      const message = `New follow_up is created at ${nowMyanmar} time  for patient ${patient_id} at ${location_name}`;
+      const sendMessage = await larkBot(email, message);
+      if (sendMessage.code !== "200") {
+        res.json(sendMessage);
+        return;
+      }
       res.json(result);
+
       // res.json(req.body);
     } catch (error) {
       console.log(error);

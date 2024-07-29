@@ -9,7 +9,8 @@ const followUpCreate = async (
   location_name,
   doctor_name,
   doctor_position,
-  remark
+  remark,
+  created_by
 ) => {
   try {
     console.log({
@@ -20,9 +21,10 @@ const followUpCreate = async (
       doctor_name,
       doctor_position,
       remark,
+      created_by,
     });
     const sql =
-      "INSERT INTO follow_up (patient_id, date_time, category, location_name, doctor_name, doctor_position, remark) VALUES(?,?,?,?,?,?,?)";
+      "INSERT INTO follow_up (patient_id, date_time, category, location_name, doctor_name, doctor_position, remark, created_by) VALUES(?,?,?,?,?,?,?,?)";
     DB.query(sql, [
       patient_id,
       date_time,
@@ -31,6 +33,7 @@ const followUpCreate = async (
       doctor_name,
       doctor_position,
       remark,
+      created_by,
     ]);
     return new StatusCode.OK(null, "New Follow Up is created!");
   } catch (error) {
@@ -351,6 +354,25 @@ const hospAndLabDateSearch = async (start_date, end_date, location_name) => {
   }
 };
 
+const follo_upCountID = async () => {
+  try {
+    const sql = "SELECT id FROM follow_up ORDER BY  id DESC LIMIT 1";
+    const result = await DB.query(sql);
+    const data = result[0].id + 1;
+
+    if (result.length >= 0 || result == "") {
+      if (result == "") {
+        return new StatusCode.OK(1);
+      } else {
+        return new StatusCode.OK(data);
+      }
+    }
+  } catch (error) {
+    console.error("Error executing query:", error.message);
+    return new StatusCode.UNKNOWN(error.message);
+  }
+};
+
 module.exports = {
   followUpCreate,
   followUpUpdate,
@@ -362,4 +384,5 @@ module.exports = {
   folllowUpdateReminder,
   hospitalList,
   hospAndLabDateSearch,
+  follo_upCountID,
 };
