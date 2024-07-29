@@ -9,6 +9,9 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { validateToken, admin } = require("../middlewares/middleware");
+const moment = require("moment-timezone");
+
+const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
 
 //if partner is already exist , we use this endpoint
 router.post(

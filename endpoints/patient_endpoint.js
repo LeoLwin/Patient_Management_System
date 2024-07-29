@@ -9,6 +9,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { validateToken, admin } = require("../middlewares/middleware");
 
+
 router.get(
   "/patientList/:page",
   validateToken,
@@ -323,6 +324,10 @@ router.post(
         );
       }
 
+      const created_by = await res.locals.user.email;
+      const lastID = await Count.patientCountID();
+      const last_p_ID = lastID.data;
+
       const imageFile = req.file;
 
       const nextId = await Count.countStatus("patients");
@@ -341,7 +346,9 @@ router.post(
             nrc === "" || nrc === "null" ? null : nrc,
             passport === "" || passport === "null" ? null : passport,
             gender,
-            imageUrl
+            imageUrl,
+            created_by,
+            last_p_ID
           );
           if (result.code !== "200") {
             console.log("imageUrl", imageUrl);
@@ -456,6 +463,7 @@ router.put(
     console.log("Patient Update endpoint : ", req.body);
     try {
       const { name, dob, nrc, passport, gender, image: imageUrl } = req.body;
+      const updated_by = await res.locals.user.email;
       if (nrc == "null" && passport == "null") {
         return res.json(
           new StatusCode.PERMISSION_DENIED(
@@ -513,6 +521,7 @@ router.put(
         passport === "" || passport === "null" ? null : passport,
         gender,
         newImageUrl,
+        updated_by,
         id
       );
       return res.json(updateResult);

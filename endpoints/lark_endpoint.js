@@ -39,7 +39,7 @@ router.get("/login", (req, res) => {
   }
 });
 
-router.post("/callback", async (req, res) => {
+router.get("/callback", async (req, res) => {
   console.log("40", config.Lark_App_ID);
   console.log("41", config.Lark_App_Secret);
   try {

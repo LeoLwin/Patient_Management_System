@@ -27,7 +27,7 @@ const tokenFortest = async () => {
     const accessToken = jwt.sign(
       {
         user: {
-          name: "kaung htet liwn",
+          name: "Kaung",
           email: "kaung.htet.lwin@team.studioamk.com",
           id: 1,
         },

@@ -7,6 +7,7 @@ const partner = require("./partner_endpoint");
 const followUp = require("./follow_up_endpoint");
 const file = require("./file_upload_endpoint");
 const lark = require("./lark_endpoint");
+const log = require("./logs_endpoint");
 
 router.use("/patient", patientController);
 router.use("/admin", adminController);
@@ -16,5 +17,6 @@ router.use("/partner", partner);
 router.use("/followUp", followUp);
 router.use("/file", file);
 router.use("/lark", lark);
+router.use("/logs", log);
 
 module.exports = router;

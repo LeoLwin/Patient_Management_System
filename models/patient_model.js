@@ -1,22 +1,24 @@
 const StatusCode = require("../helper/status_code_helper");
 const DB = require("../helper/database_helper");
+const moment = require("moment-timezone");
+const nowMyanmar = moment.tz("Asia/Yangon").format("YYYY-MM-DD HH:mm:ss");
 
 // TODO: to follow coding standard
 
-const patientCreate = async (name, dob, nrc, passport, gender, imageUrl) => {
+const patientCreate = async (
+  name,
+  dob,
+  nrc,
+  passport,
+  gender,
+  imageUrl,
+  created_by,
+  last_p_ID
+) => {
   try {
-    console.log(
-      "Patient Create Model",
-      name,
-      dob,
-      nrc,
-      passport,
-      gender,
-      imageUrl
-    );
     // TODO: duplicate entry checking?
-    const sql =
-      "INSERT INTO patients (name, dob, nrc,passport, gender, imageUrl) VALUES(?,?,?,?,?,?)";
+    const sql = `INSERT INTO patients (name, dob, nrc,passport, gender, imageUrl, created_by) VALUES(?,?,?,?,?,?,?)
+      `;
     const result = await DB.query(sql, [
       name,
       dob,
@@ -24,8 +26,30 @@ const patientCreate = async (name, dob, nrc, passport, gender, imageUrl) => {
       passport,
       gender,
       imageUrl,
+      created_by,
     ]);
-    return new StatusCode.OK(result, "New patient registration successful.");
+
+    console.log(result);
+    let addlog;
+    if (result.affectedRows == 1) {
+      const sql = `
+      INSERT INTO logs (user_email, patient_id, date_time, description) 
+      VALUES (?, ?, ? , ?)
+    `;
+      let addlog = await DB.query(sql, [
+        created_by,
+        last_p_ID,
+        nowMyanmar,
+        "New Patient Created",
+      ]);
+      addlog = addlog;
+    }
+
+    return new StatusCode.OK(
+      result,
+      addlog,
+      "New patient registration successful."
+    );
   } catch (error) {
     console.log("error", error);
     return new StatusCode.UNKNOWN(error.message);
@@ -63,10 +87,20 @@ const patientUpdate = async (
   passport,
   gender,
   imageUrl,
+  updated_by,
   id
 ) => {
   try {
-    console.log("Update", { name, dob, nrc, passport, gender, imageUrl, id });
+    console.log("Update", {
+      name,
+      dob,
+      nrc,
+      passport,
+      gender,
+      imageUrl,
+      updated_by,
+      id,
+    });
     const sql = `UPDATE patients SET name=?, dob=? ,nrc=?, passport=?, gender=?, imageUrl=? WHERE id=?`;
     const result = await DB.query(sql, [
       name,
@@ -78,10 +112,21 @@ const patientUpdate = async (
       id,
     ]);
     console.log(result);
+    let addlog;
     if (result.affectedRows == 1) {
-      return new StatusCode.OK(null, "Pateint Data is updated", result);
+      const sql = `
+      INSERT INTO logs (user_email, patient_id, date_time, description) 
+      VALUES (?, ?, ? , ?)
+    `;
+      let addlog = await DB.query(sql, [
+        updated_by,
+        id,
+        nowMyanmar,
+        "Updated Patient.",
+      ]);
+      addlog = addlog;
+      return new StatusCode.UNKNOWN(result, addlog);
     }
-    return new StatusCode.UNKNOWN(result);
   } catch (error) {
     return new StatusCode.UNKNOWN(error.message);
   }
@@ -409,9 +454,7 @@ const overAllPatientData = async (patient_id) => {
                 `;
 
     const result = await DB.query(sql, [patient_id]);
-
     console.log(result);
-
     return new StatusCode.OK(result[0]);
   } catch (error) {
     console.log(error);
