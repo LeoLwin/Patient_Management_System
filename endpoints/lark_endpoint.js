@@ -13,7 +13,7 @@ const allowedEmail = [
   "myo.myat.zaw@team.studioamk.com",
 ];
 
-router.get("/login", (req, res) => {
+router.post("/login", (req, res) => {
   try {
     console.log("Redirect URI:", config.REDIRECT_URI);
     console.log("Lark App ID:", config.Lark_App_ID);
