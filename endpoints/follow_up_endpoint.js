@@ -159,8 +159,10 @@ router.post(
         res.json(addlog);
         return;
       }
-      const message = `New follow_up is created at ${nowMyanmar} time  for patient ${patient_id} at ${location_name}`;
-      const sendMessage = await larkBot(email, JSON.stringify(data));
+      const message = `New follow_up is created at ${nowMyanmar} time  for patient ${patient_id} at ${location_name}. Data : ${JSON.stringify(
+        data
+      )}`;
+      const sendMessage = await larkBot(email, message);
       if (sendMessage.code !== "200") {
         res.json(sendMessage);
         return;
@@ -395,7 +397,10 @@ router.put(
         res.json(addlog);
         return;
       }
-      const sendMessage = await larkBot(email, JSON.stringify(data));
+      const message = `Follow_up  is updated at ${nowMyanmar} time  for patient ${patient_id} at ${location_name}. Data : ${JSON.stringify(
+        data
+      )}`;
+      const sendMessage = await larkBot(email, message);
       if (sendMessage.code !== "200") {
         res.json(sendMessage);
         return;
@@ -422,17 +427,24 @@ router.delete(
     },
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.json(new StatusCode.INVALID_ARGUMENT(errors.errors[0].msg));
-    }
-
-    const { id } = req.params;
-    console.log(id);
-
-    const result = await followUp.followUpDelete(id);
-    res.json(result);
     try {
+      const { id } = req.params;
+      const updated_by = await res.locals.user.id;
+      console.log(id);
+
+      const result = await followUp.followUpDelete(id);
+
+      if (result.code !== "200") {
+        res.json(result);
+        return;
+      }
+      const message = `Follo_up data is deleted at ${nowMyanmar} time  for patient ${id} .`;
+      const sendMessage = await larkBot(email, message);
+      if (sendMessage.code !== "200") {
+        res.json(sendMessage);
+        return;
+      }
+      res.json(result);
     } catch (error) {
       res.json(new StatusCode.UNKNOWN(error.message));
     }
