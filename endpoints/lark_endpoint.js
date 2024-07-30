@@ -40,11 +40,11 @@ router.post("/login", (req, res) => {
   }
 });
 
-router.get("/callback", async (req, res) => {
+router.post("/callback", async (req, res) => {
   console.log("40", config.Lark_App_ID);
   console.log("41", config.Lark_App_Secret);
   try {
-    const code = req.query.code;
+    const code = req.body.code;
     const larkHost = "https://open.larksuite.com";
     const userAccessTokenUrl = larkHost + "/open-apis/authen/v1/access_token";
     const appAccessTokenUrl =
