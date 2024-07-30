@@ -120,7 +120,6 @@ router.post(
 
       const created_by = await res.locals.user.id;
       console.log("116", created_by);
-      const lastID = await followUp.follo_upCountID();
 
       const result = await followUp.followUpCreate(
         patient_id,
@@ -145,6 +144,7 @@ router.post(
         doctor_name: doctor_name,
         doctor_position: doctor_position,
         remark: doctor_position,
+        created_by: created_by,
       };
 
       const description = "New Follow Up is Created!";
@@ -160,7 +160,7 @@ router.post(
         return;
       }
       const message = `New follow_up is created at ${nowMyanmar} time  for patient ${patient_id} at ${location_name}`;
-      const sendMessage = await larkBot(email, message);
+      const sendMessage = await larkBot(email, JSON.stringify(data));
       if (sendMessage.code !== "200") {
         res.json(sendMessage);
         return;
@@ -343,6 +343,8 @@ router.put(
   async (req, res) => {
     try {
       console.log(req.body);
+      const updated_by = await res.locals.user.id;
+      console.log("116", updated_by);
       const {
         patient_id,
         date_time,
@@ -361,11 +363,43 @@ router.put(
         doctor_name,
         doctor_position,
         remark,
+        updated_by,
         null,
         null,
         null,
         id
       );
+
+      if (result.code !== "200") {
+        res.json(result);
+        return;
+      }
+      const data = {
+        patient_id: patient_id,
+        date_time: date_time,
+        category: category,
+        location_name: location_name,
+        doctor_name: doctor_name,
+        doctor_position: doctor_position,
+        remark: doctor_position,
+      };
+
+      const description = `Follow_up is update for patient_id ${patient_id}`;
+      const addlog = await addLog(
+        updated_by,
+        patient_id,
+        description,
+        JSON.stringify(data)
+      );
+      if (addlog.code !== "200") {
+        res.json(addlog);
+        return;
+      }
+      const sendMessage = await larkBot(email, JSON.stringify(data));
+      if (sendMessage.code !== "200") {
+        res.json(sendMessage);
+        return;
+      }
       res.json(result);
     } catch (error) {
       res.json(new StatusCode.UNKNOWN(error.message));

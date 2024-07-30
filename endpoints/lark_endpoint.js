@@ -131,33 +131,33 @@ router.get("/testToken", async (req, res) => {
   }
 });
 
-router.get("/larkBot", async (req, res) => {
-  try {
-    const email = "kaung.htet.lwin@team.studioamk.com";
-    // const email = "phoekaung.3819@gmail.com";
+// router.get("/larkBot", async (req, res) => {
+//   try {
+//     const email = "kaung.htet.lwin@team.studioamk.com";
+//     // const email = "phoekaung.3819@gmail.com";
 
-    const text = "hello hello";
+//     const text = "hello hello";
 
-    // Construct the URL
-    const callUrl = `https://dev.ywar.com/larkBot/sendMessage`;
-    console.log("Call URL:", callUrl);
+//     // Construct the URL
+//     const callUrl = `https://dev.ywar.com/larkBot/sendMessage`;
+//     console.log("Call URL:", callUrl);
 
-    const test = {
-      headers: {
-        Authorization: "Bearer " + config.JWT_For_Lark_Bot, // Ensure JWT_For_Lark_Bot is defined
-        "Content-Type": "application/json",
-      },
-    };
+//     const test = {
+//       headers: {
+//         Authorization: "Bearer " + config.JWT_For_Lark_Bot, // Ensure JWT_For_Lark_Bot is defined
+//         "Content-Type": "application/json",
+//       },
+//     };
 
-    // Make the POST request
-    const response = await axios.post(callUrl, { email, text }, test); // Sending an empty body
+//     // Make the POST request
+//     const response = await axios.post(callUrl, { email, text }, test); // Sending an empty body
 
-    // Log and send the response
-    console.log("Response:", response.data);
-  } catch (error) {
-    console.error("Error occurred:", error);
-    res.json(new StatusCode.UNKNOWN(error.message));
-  }
-});
+//     // Log and send the response
+//     console.log("Response:", response.data);
+//   } catch (error) {
+//     console.error("Error occurred:", error);
+//     res.json(new StatusCode.UNKNOWN(error.message));
+//   }
+// });
 
 module.exports = router;

@@ -154,6 +154,7 @@ const followUpUpdate = async (
   doctor_name,
   doctor_position,
   remark,
+  created_by,
   reminder_3,
   reminder_2,
   reminder_1,
@@ -167,6 +168,7 @@ const followUpUpdate = async (
     doctor_name,
     doctor_position,
     remark,
+    created_by,
     reminder_3,
     reminder_2,
     reminder_1,
@@ -182,10 +184,11 @@ const followUpUpdate = async (
                   location_name=?,
                   doctor_name=?,
                   doctor_position=?, 
-                  remark = ?,  
+                  remark = ?,           
                   reminder_3=?,                  
                   reminder_2 = ?,
-                  reminder_1=?
+                  reminder_1=?,
+                  created_by=?
                 WHERE id=?`;
     const result = await DB.query(sql, [
       patient_id,
@@ -198,6 +201,7 @@ const followUpUpdate = async (
       reminder_3,
       reminder_2,
       reminder_1,
+      created_by,
       id,
     ]);
     if (result.affectedRows == "1") {

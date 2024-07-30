@@ -34,12 +34,11 @@ const validateToken = async (req, res, next) => {
 const admin = async (req, res, next) => {
   try {
     console.log("req.locals :37", res.locals);
-    console.log("req.locals :38", res.locals.user.email);
     const data = await user.userRole(res.locals.user.email);
-    console.log(data.data);
-    console.log("42", data.data.role == "Admin");
-    console.log("43", data.data.role !== "Admin");
-    console.log("44", data.data.role == "Admin");
+
+    if (data.code !== "200") {
+      res.json("Your email does not exist!.");
+    }
     if (data.data.role !== "Admin") {
       console.log("You are not allowed!");
       res.json(new StatusCode.PERMISSION_DENIED("You are not allowed!"));
